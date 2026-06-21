@@ -2214,7 +2214,20 @@
       }
 
       function saveCharacters() {
-        localStorage.setItem(characterStorageKey, JSON.stringify(characters));
+        try {
+          const payload = JSON.stringify(characters);
+          localStorage.setItem(characterStorageKey, payload);
+
+          const saved = localStorage.getItem(characterStorageKey);
+          if (saved !== payload) {
+            throw new Error("Saved character data did not match.");
+          }
+
+          return true;
+        } catch (error) {
+          console.error("Character save failed:", error);
+          return false;
+        }
       }
 
       function loadSelectedCharacterIndex() {
@@ -4375,7 +4388,17 @@
       }
 
       function finishCharacterImport(importedCount = 1) {
-        saveCharacters();
+        const saved = saveCharacters();
+
+        if (!saved) {
+          openModal(
+            "Import Not Saved",
+            `<p>The characters were imported into the page, but the browser could not save them to local storage.</p>
+       <p>This usually happens when the imported file is too large, often because character photos are stored as large image data.</p>
+       <p>Try importing fewer characters at once, or import characters without embedded photos.</p>`,
+          );
+          return;
+        }
 
         filteredIndexes = characters.map((_, i) => i);
         currentIndex = 0;
