@@ -94,13 +94,13 @@
 
       .topbar {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(280px, 1fr) auto;
         gap: 14px;
         align-items: center;
         margin-bottom: 14px;
       }
 
-      .brand h1 {
+      .active-heading h1 {
         margin: 0;
         font-family: Outfit, Inter, sans-serif;
         font-size: clamp(1.7rem, 3vw, 3rem);
@@ -108,10 +108,10 @@
         letter-spacing: 0;
       }
 
-      .brand p {
+      .active-heading p {
         margin: 7px 0 0;
         color: var(--muted);
-        max-width: 720px;
+        max-width: 42ch;
         line-height: 1.45;
       }
 
@@ -224,9 +224,14 @@
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+        grid-template-columns: minmax(360px, 33vw) minmax(0, 1fr);
         gap: 16px;
-        min-height: calc(100vh - 148px);
+        min-height: calc(100vh - 36px);
+        align-items: start;
+      }
+
+      .workspace {
+        min-width: 0;
       }
 
       .hero,
@@ -241,9 +246,9 @@
         position: sticky;
         top: 18px;
         width: 100%;
-        max-width: 360px;
-        justify-self: center;
-        height: max(760px, calc(100vh - 118px));
+        max-width: none;
+        justify-self: stretch;
+        height: calc(100vh - 36px);
         min-height: 0;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
@@ -672,6 +677,7 @@
         min-height: 460px;
         width: 100%;
         overflow: hidden;
+        touch-action: none;
       }
 
       .map-tools {
@@ -704,6 +710,36 @@
         stroke-linecap: round;
         filter: drop-shadow(0 0 7px currentColor);
         opacity: 0.76;
+      }
+
+      .map-line-hit {
+        stroke: transparent;
+        stroke-width: 20;
+        pointer-events: stroke;
+        cursor: help;
+      }
+
+      .relation-line-tooltip {
+        position: absolute;
+        z-index: 8;
+        max-width: 280px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(8, 10, 13, 0.96);
+        color: var(--text);
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.4;
+        box-shadow: var(--shadow);
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(10px, calc(-100% - 10px));
+        transition: opacity 0.12s ease;
+      }
+
+      .relation-line-tooltip.visible {
+        opacity: 1;
       }
 
       .map-node {
@@ -963,6 +999,34 @@
         outline-offset: 3px;
       }
 
+      .settings-list {
+        display: grid;
+        gap: 8px;
+        margin: 12px 0;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 10px;
+      }
+
+      .settings-row label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 800;
+      }
+
+      .settings-row input {
+        accent-color: var(--accent);
+      }
+
       .relation-editor {
         display: grid;
         gap: 10px;
@@ -1005,6 +1069,49 @@
 
       .relation-edit-card.active .relation-edit-fields {
         display: grid;
+      }
+
+      .relation-kind-choices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .relation-kind-choice {
+        position: relative;
+      }
+
+      .relation-kind-choice input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .relation-kind-choice span {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .relation-kind-choice input:checked + span {
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+      }
+
+      .relation-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--relation-color);
+        box-shadow: 0 0 10px color-mix(in srgb, var(--relation-color) 58%, transparent);
       }
 
       .thumbs {
@@ -1067,6 +1174,38 @@
 
       .modal.open {
         display: grid;
+      }
+
+      .decision-dialog {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: none;
+        place-items: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.76);
+      }
+
+      .decision-dialog.open {
+        display: grid;
+      }
+
+      .decision-card {
+        width: min(440px, 100%);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .decision-card h3 {
+        margin: 0 0 8px;
+      }
+
+      .decision-card p {
+        color: var(--muted);
+        line-height: 1.5;
       }
 
       .modal-card {
@@ -1165,33 +1304,6 @@
   </head>
   <body>
     <div class="app">
-      <header class="topbar">
-        <div class="brand">
-          <h1>Character Codex</h1>
-          <p>
-            A visual reference guide for portraits, lore, abilities, outfits,
-            and relationships.
-          </p>
-        </div>
-        <div class="actions">
-          <div class="manage-actions">
-            <button class="btn primary" id="addCharacterBtn">Add</button>
-            <button class="btn" id="editCharacterBtn">Edit</button>
-          </div>
-          <button class="btn" id="allCharactersBtn">Roster</button>
-          <button class="btn" id="relationsBtn">Relations</button>
-        </div>
-      </header>
-
-      <div class="search-row">
-        <input
-          class="searchbar"
-          id="search"
-          placeholder="Search characters, species, fighting styles, outfits, weapons..."
-        />
-        <div class="filters" id="filters"></div>
-      </div>
-
       <main class="layout" id="viewer">
         <aside class="hero">
           <div class="photo-wrap" id="photoWrap"></div>
@@ -1202,11 +1314,33 @@
           </div>
         </aside>
 
-        <section class="codex">
-          <nav class="tabs" id="tabs"></nav>
-          <div id="tabPanels"></div>
-          <div class="thumbs" id="thumbs"></div>
-        </section>
+        <div class="workspace">
+          <header class="topbar">
+            <div class="active-heading">
+              <h1 id="topCharacterName"></h1>
+              <p id="topCharacterShort"></p>
+            </div>
+            <div class="actions">
+              <div class="manage-actions">
+                <button class="btn primary" id="addCharacterBtn">Add</button>
+                <button class="btn" id="editCharacterBtn">Edit</button>
+              </div>
+              <button class="btn" id="allCharactersBtn">Roster</button>
+              <button class="btn" id="relationsBtn">Relations</button>
+              <button class="btn" id="settingsBtn">Settings</button>
+            </div>
+          </header>
+
+          <div class="search-row">
+            <div class="filters" id="filters"></div>
+          </div>
+
+          <section class="codex">
+            <nav class="tabs" id="tabs"></nav>
+            <div id="tabPanels"></div>
+            <div class="thumbs" id="thumbs"></div>
+          </section>
+        </div>
       </main>
     </div>
 
@@ -1220,13 +1354,24 @@
       </div>
     </div>
 
+    <div class="decision-dialog" id="decisionDialog" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">
+      <div class="decision-card">
+        <h3 id="decisionTitle"></h3>
+        <p id="decisionMessage"></p>
+        <div class="form-actions">
+          <button class="btn" id="decisionCancel">Cancel</button>
+          <button class="btn primary" id="decisionConfirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       /*
       HOW TO ADD YOUR OWN CHARACTERS:
       1. Duplicate one character object below.
       2. Change the text values.
       3. Put image files in the same folder as this HTML, or in an images folder.
-         Example: photos: ["images/my-character.png", "images/my-character-alt.jpg"]
+         Example: photos: ["images/my-character.png"]
       4. For relations, use the exact name of another character.
       */
 
@@ -1281,11 +1426,7 @@
           fears: "Losing control of his instincts",
           hobbies: "Knife maintenance, night walks, sketching maps",
           stats: { power: 6, speed: 10, defense: 5, magic: 2, resolve: 8 },
-          photos: [
-            "images/kael-main.png",
-            "images/kael-outfit.png",
-            "images/kael-expression.png",
-          ],
+          photos: [defaultPortraitFor("Kael Nightshade")],
           relations: [
             {
               with: "Mira Solwyn",
@@ -1352,7 +1493,7 @@
           fears: "Failing to save someone",
           hobbies: "Herbalism, sewing charms, journaling",
           stats: { power: 4, speed: 6, defense: 8, magic: 10, resolve: 9 },
-          photos: ["images/mira-main.png", "images/mira-magic.png"],
+          photos: [defaultPortraitFor("Mira Solwyn")],
           relations: [
             {
               with: "Kael Nightshade",
@@ -1419,7 +1560,7 @@
           fears: "Becoming the monster people expect them to be",
           hobbies: "Arm wrestling, repairing weapons, collecting coins",
           stats: { power: 10, speed: 7, defense: 7, magic: 5, resolve: 8 },
-          photos: ["images/riven-main.png", "images/riven-combat.png"],
+          photos: [defaultPortraitFor("Riven Ashlock")],
           relations: [
             {
               with: "Kael Nightshade",
@@ -1442,6 +1583,7 @@
       const tabs = ["Overview", "Appearance", "Combat", "Personality", "Lore", "Relations"];
       const $ = (id) => document.getElementById(id);
       const modal = $("modal");
+      const decisionDialog = $("decisionDialog");
       const characterStorageKey = "characterCodexCharacters";
       const relationPositionStorageKey = "characterCodexRelationPositionsV2";
       const categoryOptions = ["", "One", "None", "Other", "NPC"];
@@ -1467,6 +1609,9 @@
       let relationPositions = loadRelationPositions();
       let activeEditorMode = null;
       let relationMapZoom = 1;
+      let pendingImportCharacters = [];
+      let decisionAction = null;
+      let relationMapResizeObserver = null;
 
       let imageScale = 1;
       let imagePanX = 0;
@@ -1474,6 +1619,8 @@
       const activePointers = new Map();
       let lastPinchDistance = 0;
       let lastDragPoint = null;
+      const mapPointers = new Map();
+      let lastMapPinchDistance = 0;
 
       function loadCharacters() {
         try {
@@ -1481,7 +1628,7 @@
           if (!saved) return structuredClone(defaultCharacters).map(normalizeCharacter);
           const parsed = JSON.parse(saved);
           return Array.isArray(parsed) && parsed.length
-            ? parsed.map(normalizeCharacter)
+            ? restoreDefaultSampleThemes(parsed.map(normalizeCharacter))
             : structuredClone(defaultCharacters).map(normalizeCharacter);
         } catch {
           return structuredClone(defaultCharacters).map(normalizeCharacter);
@@ -1500,6 +1647,21 @@
         }
       }
 
+      function restoreDefaultSampleThemes(list) {
+        const sampleNames = ["Kael Nightshade", "Mira Solwyn", "Riven Ashlock"];
+        const sampleCharacters = sampleNames.map((name) => list.find((character) => character.name === name));
+        if (
+          sampleCharacters.every(Boolean) &&
+          sampleCharacters.every((character) => character.themeName === "Light Blue")
+        ) {
+          sampleCharacters.forEach((character) => {
+            character.themeName = defaultThemeNameFor(character.name);
+            character.theme = themeByName(character.themeName);
+          });
+        }
+        return list;
+      }
+
       function saveRelationPositions() {
         localStorage.setItem(relationPositionStorageKey, JSON.stringify(relationPositions));
       }
@@ -1509,7 +1671,18 @@
         normalized.outfit = { ...blankCharacter().outfit, ...(character.outfit || {}) };
         normalized.stats = { ...blankCharacter().stats, ...(character.stats || {}) };
         normalized.photos = (character.photos || []).filter(Boolean).slice(0, 1);
-        normalized.relations = character.relations || [];
+        const defaultMissingPhoto = {
+          "Kael Nightshade": "images/kael-main.png",
+          "Mira Solwyn": "images/mira-main.png",
+          "Riven Ashlock": "images/riven-main.png",
+        }[character.name];
+        if (defaultMissingPhoto && normalized.photos[0] === defaultMissingPhoto) {
+          normalized.photos = [defaultPortraitFor(character.name)];
+        }
+        normalized.relations = (character.relations || []).map((relation) => ({
+          ...relation,
+          kind: relation.kind || inferRelationKind(relation.type),
+        }));
         normalized.category = categoryOptions.includes(character.category) ? character.category : "";
         if (
           ["Kael Nightshade", "Mira Solwyn", "Riven Ashlock"].includes(character.name) &&
@@ -1518,6 +1691,13 @@
           normalized.category = "";
         }
         normalized.themeName = character.themeName || nearestThemeName(character.theme);
+        if (
+          character.themeName &&
+          character.theme?.accent &&
+          themeByName(character.themeName).accent.toLowerCase() !== String(character.theme.accent).toLowerCase()
+        ) {
+          normalized.themeName = nearestThemeName(character.theme);
+        }
         normalized.theme = themeByName(normalized.themeName);
         return normalized;
       }
@@ -1526,10 +1706,111 @@
         return { ...(themePresets.find((theme) => theme.name === name) || themePresets[4]) };
       }
 
+      function defaultThemeNameFor(name) {
+        return {
+          "Kael Nightshade": "Light Blue",
+          "Mira Solwyn": "Yellow",
+          "Riven Ashlock": "Orange",
+        }[name] || "Light Blue";
+      }
+
+      function defaultPortraitFor(name) {
+        const portrait = {
+          "Kael Nightshade": {
+            initials: "KN",
+            accent: "#7ecbff",
+            deep: "#0e2738",
+            mid: "#1e5874",
+            light: "#d9e5ff",
+            mark: "M 130 350 C 160 270 260 245 300 148 C 346 247 442 268 474 350 Z",
+          },
+          "Mira Solwyn": {
+            initials: "MS",
+            accent: "#f6d65f",
+            deep: "#24371e",
+            mid: "#796330",
+            light: "#fff1a8",
+            mark: "M 128 338 C 184 206 388 206 444 338 C 384 315 188 315 128 338 Z",
+          },
+          "Riven Ashlock": {
+            initials: "RA",
+            accent: "#ff8a42",
+            deep: "#341112",
+            mid: "#7c2a1c",
+            light: "#ffd0a1",
+            mark: "M 132 352 C 158 230 244 220 286 142 C 326 226 424 226 468 352 Z",
+          },
+        }[name] || {
+          initials: initials(name),
+          accent: "#7ecbff",
+          deep: "#101821",
+          mid: "#23475b",
+          light: "#d9e5ff",
+          mark: "M 132 350 C 168 234 404 234 468 350 Z",
+        };
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1067">
+            <defs>
+              <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="${portrait.deep}"/>
+                <stop offset="0.58" stop-color="#090a0d"/>
+                <stop offset="1" stop-color="${portrait.mid}"/>
+              </linearGradient>
+              <radialGradient id="aura" cx="50%" cy="38%" r="48%">
+                <stop offset="0" stop-color="${portrait.accent}" stop-opacity="0.62"/>
+                <stop offset="1" stop-color="${portrait.accent}" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="10" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <rect width="600" height="1067" fill="url(#bg)"/>
+            <rect width="600" height="1067" fill="url(#aura)"/>
+            <g opacity="0.18" stroke="${portrait.light}" stroke-width="1">
+              <path d="M80 0 V1067 M200 0 V1067 M320 0 V1067 M440 0 V1067 M560 0 V1067"/>
+              <path d="M0 130 H600 M0 260 H600 M0 390 H600 M0 520 H600 M0 650 H600 M0 780 H600 M0 910 H600"/>
+            </g>
+            <path d="${portrait.mark}" fill="${portrait.deep}" opacity="0.88"/>
+            <circle cx="300" cy="265" r="112" fill="${portrait.mid}" stroke="${portrait.accent}" stroke-width="7" filter="url(#glow)"/>
+            <path d="M190 760 C208 552 238 430 300 430 C362 430 392 552 410 760 Z" fill="${portrait.mid}" stroke="${portrait.accent}" stroke-width="6"/>
+            <text x="300" y="312" text-anchor="middle" font-family="Outfit, Inter, Arial, sans-serif" font-size="82" font-weight="800" fill="${portrait.light}">${portrait.initials}</text>
+            <path d="M122 836 C210 904 390 904 478 836" fill="none" stroke="${portrait.accent}" stroke-width="5" opacity="0.62"/>
+          </svg>
+        `;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.replace(/\s+/g, " ").trim())}`;
+      }
+
       function nearestThemeName(theme = {}) {
         if (!theme?.accent) return "Light Blue";
-        const match = themePresets.find((preset) => preset.accent.toLowerCase() === String(theme.accent).toLowerCase());
-        return match?.name || "Light Blue";
+        const exact = themePresets.find((preset) => preset.accent.toLowerCase() === String(theme.accent).toLowerCase());
+        if (exact) return exact.name;
+        const source = hexToRgb(theme.accent);
+        if (!source) return "Light Blue";
+        return themePresets
+          .map((preset) => {
+            const target = hexToRgb(preset.accent);
+            return {
+              name: preset.name,
+              distance: target
+                ? Math.hypot(source.r - target.r, source.g - target.g, source.b - target.b)
+                : Infinity,
+            };
+          })
+          .sort((a, b) => a.distance - b.distance)[0]?.name || "Light Blue";
+      }
+
+      function hexToRgb(hex) {
+        const normalized = String(hex || "").trim().replace("#", "");
+        if (!/^[0-9a-f]{6}$/i.test(normalized)) return null;
+        return {
+          r: parseInt(normalized.slice(0, 2), 16),
+          g: parseInt(normalized.slice(2, 4), 16),
+          b: parseInt(normalized.slice(4, 6), 16),
+        };
       }
 
       function safe(value) {
@@ -1587,6 +1868,7 @@
           Species: "DNA",
           Occupation: "Blade",
           Height: "Height",
+          Weight: "Weight",
           Age: "Age",
           Gender: "ID",
           Body: "Build",
@@ -1630,6 +1912,7 @@
           ["Species", character.species],
           ["Occupation", character.occupation],
           ["Height", character.height],
+          ["Weight", character.weight],
           ["Age", character.age],
         ]
           .filter(([, value]) => hasValue(value))
@@ -1723,15 +2006,6 @@
             stage.appendChild(img);
           });
         }
-
-        const overlay = document.createElement("div");
-        overlay.className = "photo-overlay";
-        const shortDescription = shortText(character);
-        overlay.innerHTML = `
-          <h2>${safe(character.name)}</h2>
-          ${hasValue(shortDescription) ? `<div class="hero-short">${htmlEscape(shortDescription)}</div>` : ""}
-        `;
-        wrap.appendChild(overlay);
 
         const controls = document.createElement("div");
         controls.className = "image-controls";
@@ -1930,9 +2204,10 @@
                 <button class="btn icon" type="button" onclick="zoomRelationMap(1)">+</button>
               </div>
               <div class="map-canvas" id="relationMapCanvas">
-                <svg class="map-lines" id="relationLines" aria-hidden="true"></svg>
+                <svg class="map-lines" id="relationLines"></svg>
                 ${characters.map((character) => mapNode(character, character.name === c.name)).join("")}
               </div>
+              <div class="relation-line-tooltip" id="relationLineTooltip" role="tooltip"></div>
             </div>
           </div>
           <br>
@@ -1945,7 +2220,7 @@
                     <div class="avatar" style="background:${characterColor(r.with)}">${initials(r.with)}</div>
                     <div>
                       <b>${safe(c.name)} -> ${safe(r.with)}</b>
-                      <small><span class="relation-type" style="background:${relationColor(r.type)}">${safe(r.type)}</span> ${safe(r.note)}</small>
+                      <small><span class="relation-type" style="background:${relationColor(r.kind || r.type)}">${safe(r.kind || inferRelationKind(r.type))}: ${safe(r.type)}</span> ${safe(r.note)}</small>
                     </div>
                   </div>`,
               )
@@ -1978,13 +2253,17 @@
       }
 
       function relationColor(type = "") {
-        const normalized = type.toLowerCase();
-        if (normalized.includes("trusted")) return "#45c18a";
-        if (normalized.includes("rival")) return "#ff5d68";
-        if (normalized.includes("friend")) return "#5f93ff";
-        if (normalized.includes("enemy")) return "#bc5cff";
-        if (normalized.includes("ally")) return "#52d6a3";
-        return "#f5c96a";
+        const kind = ["Enemy", "Friend", "Other"].includes(type) ? type : inferRelationKind(type);
+        if (kind === "Enemy") return "#ff5d68";
+        if (kind === "Friend") return "#45c18a";
+        return "#5f93ff";
+      }
+
+      function inferRelationKind(type = "") {
+        const normalized = String(type).toLowerCase();
+        if (normalized.includes("enemy") || normalized.includes("rival") || normalized.includes("hostile")) return "Enemy";
+        if (normalized.includes("friend") || normalized.includes("ally") || normalized.includes("trusted")) return "Friend";
+        return "Other";
       }
 
       function mapNode(character, active) {
@@ -1995,7 +2274,7 @@
             class="map-node ${active ? "active" : ""}"
             data-character="${htmlEscape(character.name)}"
             style="left:${position.x}%;top:${position.y}%;background:${color};--node-glow:${color}66"
-            onclick="goToCharacter('${escapeQuotes(character.name)}')"
+            ondblclick="goToCharacter('${escapeQuotes(character.name)}')"
           >
             <span>${initials(character.name)}</span>
             <small>${htmlEscape(character.name.split(" ")[0])}</small>
@@ -2019,26 +2298,54 @@
         const map = $("relationMap");
         const svg = $("relationLines");
         const canvas = $("relationMapCanvas");
+        const tooltip = $("relationLineTooltip");
         if (!map || !svg) return;
         if (canvas) canvas.style.setProperty("--map-zoom", relationMapZoom);
 
         function drawLines() {
-          const mapRect = (canvas || map).getBoundingClientRect();
-          svg.innerHTML = mapRelations(currentCharacter().name)
+          const lineWidth = (canvas || map).clientWidth;
+          const lineHeight = (canvas || map).clientHeight;
+          svg.setAttribute("viewBox", `0 0 ${lineWidth} ${lineHeight}`);
+          svg.innerHTML = mapRelations()
             .map((relation) => {
               const fromNode = map.querySelector(`[data-character="${cssEscape(relation.from)}"]`);
               const toNode = map.querySelector(`[data-character="${cssEscape(relation.with)}"]`);
               if (!fromNode || !toNode) return "";
-              const fromRect = fromNode.getBoundingClientRect();
-              const toRect = toNode.getBoundingClientRect();
-              const x1 = fromRect.left + fromRect.width / 2 - mapRect.left;
-              const y1 = fromRect.top + fromRect.height / 2 - mapRect.top;
-              const x2 = toRect.left + toRect.width / 2 - mapRect.left;
-              const y2 = toRect.top + toRect.height / 2 - mapRect.top;
-              const color = relationColor(relation.type);
-              return `<line class="map-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="color:${color};stroke:${color}"><title>${htmlEscape(relation.from)} -> ${htmlEscape(relation.with)}: ${htmlEscape(relation.type)}</title></line>`;
+              const fromX = parseFloat(fromNode.style.left);
+              const fromY = parseFloat(fromNode.style.top);
+              const toX = parseFloat(toNode.style.left);
+              const toY = parseFloat(toNode.style.top);
+              const x1 = (fromX / 100) * lineWidth;
+              const y1 = (fromY / 100) * lineHeight;
+              const x2 = (toX / 100) * lineWidth;
+              const y2 = (toY / 100) * lineHeight;
+              const kind = relation.kind || inferRelationKind(relation.type);
+              const color = relationColor(kind);
+              const label = `${relation.from} -> ${relation.with}: ${kind} - ${relation.type || "Related"}${relation.note ? ` - ${relation.note}` : ""}`;
+              return `
+                <g>
+                  <line class="map-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="color:${color};stroke:${color}"></line>
+                  <line class="map-line-hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" data-relation-label="${htmlEscape(label)}"></line>
+                </g>`;
             })
             .join("");
+
+          svg.querySelectorAll(".map-line-hit").forEach((line) => {
+            line.addEventListener("pointerenter", () => {
+              if (!tooltip) return;
+              tooltip.textContent = line.dataset.relationLabel;
+              tooltip.classList.add("visible");
+            });
+            line.addEventListener("pointermove", (event) => {
+              if (!tooltip) return;
+              const rect = map.getBoundingClientRect();
+              tooltip.textContent = line.dataset.relationLabel;
+              tooltip.classList.add("visible");
+              tooltip.style.left = `${event.clientX - rect.left}px`;
+              tooltip.style.top = `${event.clientY - rect.top}px`;
+            });
+            line.addEventListener("pointerleave", () => tooltip?.classList.remove("visible"));
+          });
         }
 
         map.querySelectorAll(".map-node").forEach((node) => {
@@ -2057,8 +2364,10 @@
             moved = true;
             const rect = map.getBoundingClientRect();
             const name = node.dataset.character;
-            const x = Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100));
-            const y = Math.max(10, Math.min(90, ((event.clientY - rect.top) / rect.height) * 100));
+            const localX = (event.clientX - rect.left - rect.width / 2) / relationMapZoom + rect.width / 2;
+            const localY = (event.clientY - rect.top - rect.height / 2) / relationMapZoom + rect.height / 2;
+            const x = Math.max(8, Math.min(92, (localX / rect.width) * 100));
+            const y = Math.max(10, Math.min(90, (localY / rect.height) * 100));
             relationPositions[name] = { x, y };
             node.style.left = `${x}%`;
             node.style.top = `${y}%`;
@@ -2083,8 +2392,44 @@
           });
         });
 
+        map.addEventListener("pointerdown", (event) => {
+          if (event.target.closest?.(".map-tools")) return;
+          mapPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          if (mapPointers.size === 2) lastMapPinchDistance = mapPointerDistance();
+        });
+
+        map.addEventListener("pointermove", (event) => {
+          if (!mapPointers.has(event.pointerId)) return;
+          mapPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          if (mapPointers.size >= 2) {
+            event.preventDefault();
+            const nextDistance = mapPointerDistance();
+            if (lastMapPinchDistance) {
+              relationMapZoom = Math.max(0.55, Math.min(2.2, relationMapZoom * (nextDistance / lastMapPinchDistance)));
+              applyRelationMapZoom();
+            }
+            lastMapPinchDistance = nextDistance;
+          }
+        });
+
+        function endMapPointer(event) {
+          mapPointers.delete(event.pointerId);
+          lastMapPinchDistance = mapPointers.size >= 2 ? mapPointerDistance() : 0;
+        }
+
+        map.addEventListener("pointerup", endMapPointer);
+        map.addEventListener("pointercancel", endMapPointer);
+
         drawLines();
-        window.addEventListener("resize", drawLines, { once: true });
+        relationMapResizeObserver?.disconnect();
+        relationMapResizeObserver = new ResizeObserver(drawLines);
+        relationMapResizeObserver.observe(map);
+      }
+
+      function mapPointerDistance() {
+        const points = [...mapPointers.values()];
+        if (points.length < 2) return 0;
+        return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
       }
 
       function applyRelationMapZoom() {
@@ -2120,7 +2465,13 @@
 
       function characterCategoryMatches(character, filter) {
         if (filter === "All") return true;
-        return (character.category || "Other").toLowerCase() === filter.toLowerCase();
+        return (character.category || "").toLowerCase() === filter.toLowerCase();
+      }
+
+      function renderActiveHeading(character) {
+        $("topCharacterName").textContent = safe(character.name);
+        const short = shortText(character);
+        $("topCharacterShort").textContent = hasValue(short) ? short : "";
       }
 
       function renderThumbs() {
@@ -2142,7 +2493,7 @@
       function render() {
         applySearch(false);
         if (!filteredIndexes.length) {
-          $("tabPanels").innerHTML = `<section class="tab-panel active"><p class="empty">No characters match your search.</p></section>`;
+          $("tabPanels").innerHTML = `<section class="tab-panel active"><p class="empty">No characters match this filter.</p></section>`;
           $("thumbs").innerHTML = "";
           return;
         }
@@ -2152,6 +2503,7 @@
         currentPhoto = Math.min(currentPhoto, Math.max((c.photos || []).length - 1, 0));
         setTheme(c);
         renderPhotos(c);
+        renderActiveHeading(c);
         renderFilters();
 
         const prev = characters[filteredIndexes[(currentIndex - 1 + filteredIndexes.length) % filteredIndexes.length]];
@@ -2178,13 +2530,11 @@
       }
 
       function applySearch(reset = true) {
-        const q = $("search").value.toLowerCase().trim();
         filteredIndexes = characters
           .map((c, i) => ({ c, i }))
           .filter(({ c }) => {
-            const matchesSearch = !q || JSON.stringify(c).toLowerCase().includes(q);
             const matchesFilter = characterCategoryMatches(c, activeFilter);
-            return matchesSearch && matchesFilter;
+            return matchesFilter;
           })
           .map((x) => x.i);
         if (reset) {
@@ -2197,6 +2547,35 @@
         $("modalTitle").textContent = title;
         $("modalBody").innerHTML = body;
         modal.classList.add("open");
+      }
+
+      function showDecision(title, message, confirmLabel, action) {
+        $("decisionTitle").textContent = title;
+        $("decisionMessage").textContent = message;
+        $("decisionConfirm").textContent = confirmLabel;
+        decisionAction = action;
+        decisionDialog.classList.add("open");
+        $("decisionConfirm").focus();
+      }
+
+      function closeDecision() {
+        decisionAction = null;
+        decisionDialog.classList.remove("open");
+      }
+
+      function findCharacterByName(name) {
+        const normalized = String(name || "").trim().toLowerCase();
+        return characters.find((character) => character.name.trim().toLowerCase() === normalized);
+      }
+
+      function upsertCharacter(character) {
+        const existing = findCharacterByName(character.name);
+        if (!existing) {
+          characters.push(character);
+          return;
+        }
+        const index = characters.indexOf(existing);
+        characters[index] = { ...character, name: existing.name };
       }
 
       function openRelation(from, to) {
@@ -2231,7 +2610,6 @@
         if (filtered >= 0) currentIndex = filtered;
         else {
           activeFilter = "All";
-          $("search").value = "";
           filteredIndexes = characters.map((_, i) => i);
           currentIndex = absolute;
         }
@@ -2284,6 +2662,157 @@
                 .join("")}</div>`
             : `<p>No relations yet.</p>`,
         );
+      }
+
+      function settingsModal() {
+        pendingImportCharacters = [];
+        openModal(
+          "Settings",
+          `
+            <h4>Export Characters</h4>
+            <div class="settings-list" id="settingsCharacterList">
+              ${characters
+                .map(
+                  (character, index) => `
+                    <div class="settings-row">
+                      <label>
+                        <input type="checkbox" class="export-character-check" value="${index}" />
+                        ${htmlEscape(character.name)}
+                      </label>
+                      <small>${htmlEscape(character.category || "All")}</small>
+                    </div>
+                  `,
+                )
+                .join("")}
+            </div>
+            <div class="form-actions">
+              <div class="form-actions-group">
+                <button class="btn" onclick="setExportChecks(true)">Select All</button>
+                <button class="btn" onclick="setExportChecks(false)">Select None</button>
+              </div>
+              <div class="form-actions-group">
+                <button class="btn primary" onclick="exportSelectedCharacters()">Export Selected</button>
+              </div>
+            </div>
+            <hr>
+            <h4>Import Characters</h4>
+            <div class="form-field wide">
+              <label for="importFile">Import JSON</label>
+              <input id="importFile" type="file" accept="application/json,.json" onchange="prepareImportCharacters()" />
+            </div>
+            <div id="importPreview"><p class="empty">Choose a JSON file to preview its characters.</p></div>
+          `,
+        );
+      }
+
+      function setExportChecks(checked) {
+        document.querySelectorAll(".export-character-check").forEach((input) => {
+          input.checked = checked;
+        });
+      }
+
+      function selectedExportCharacters() {
+        const indexes = [...document.querySelectorAll(".export-character-check:checked")].map((input) => Number(input.value));
+        return indexes.map((index) => characters[index]).filter(Boolean);
+      }
+
+      function exportSelectedCharacters() {
+        const selected = selectedExportCharacters();
+        if (!selected.length) return;
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          characters: selected,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = selected.length === 1 ? `${selected[0].name.replace(/\s+/g, "-").toLowerCase()}.json` : "character-codex-export.json";
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        link.remove();
+      }
+
+      function prepareImportCharacters() {
+        const file = $("importFile")?.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            const incoming = Array.isArray(parsed) ? parsed : parsed.characters;
+            if (!Array.isArray(incoming) || !incoming.length) return;
+            pendingImportCharacters = incoming.map(normalizeCharacter);
+            renderImportPreview();
+          } catch {
+            openModal("Import Failed", "<p>That file could not be read as character codex JSON.</p>");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function renderImportPreview() {
+        const preview = $("importPreview");
+        if (!preview) return;
+        preview.innerHTML = `
+          <div class="settings-list">
+            ${pendingImportCharacters
+              .map((character, index) => {
+                const existing = findCharacterByName(character.name);
+                return `
+                  <div class="settings-row">
+                    <label>
+                      <input type="checkbox" class="import-character-check" value="${index}" />
+                      ${htmlEscape(character.name)}
+                    </label>
+                    <small>${existing ? "Update" : "Add"}</small>
+                  </div>`;
+              })
+              .join("")}
+          </div>
+          <div class="form-actions">
+            <div class="form-actions-group">
+              <button class="btn" onclick="setImportChecks(true)">Select All</button>
+              <button class="btn" onclick="setImportChecks(false)">Select None</button>
+            </div>
+            <button class="btn primary" onclick="importSelectedCharacters()">Import Selected</button>
+          </div>
+        `;
+      }
+
+      function setImportChecks(checked) {
+        document.querySelectorAll(".import-character-check").forEach((input) => {
+          input.checked = checked;
+        });
+      }
+
+      function importSelectedCharacters() {
+        const selected = [...document.querySelectorAll(".import-character-check:checked")]
+          .map((input) => pendingImportCharacters[Number(input.value)])
+          .filter(Boolean);
+        if (!selected.length) return;
+        const updates = selected.filter((character) => findCharacterByName(character.name)).length;
+        const additions = selected.length - updates;
+        const summary = [
+          additions ? `${additions} character${additions === 1 ? "" : "s"} will be added.` : "",
+          updates ? `${updates} same-name character${updates === 1 ? "" : "s"} will be updated.` : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        showDecision("Verify Import", summary, "Import", () => {
+          selected.forEach((character) => upsertCharacter(character));
+          saveCharacters();
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = 0;
+          activeFilter = "All";
+          closeModal();
+          render();
+        });
+      }
+
+      function importCharacters() {
+        prepareImportCharacters();
       }
 
       function blankCharacter() {
@@ -2433,9 +2962,11 @@
         return `
           <div class="relation-editor">
             ${others
-              .map((other) => {
+              .map((other, relationIndex) => {
                 const relation = byName.get(other.name);
                 const active = !!relation;
+                const relationKind = relation?.kind || inferRelationKind(relation?.type);
+                const relationKey = `relation-${relationIndex}`;
                 return `
                   <div class="relation-edit-card ${active ? "active" : ""}" data-relation-target="${htmlEscape(other.name)}">
                     <div class="relation-edit-head">
@@ -2446,8 +2977,22 @@
                       </label>
                     </div>
                     <div class="relation-edit-fields">
-                      ${formInput("Relation Tag", `relationType-${initials(other.name)}`, relation?.type || "", true, false, "text", "Trusted Ally")}
-                      ${formInput("Note", `relationNote-${initials(other.name)}`, relation?.note || "", true, true, "text", "Optional note about this relationship")}
+                      <div class="form-field wide">
+                        <label>Line Color</label>
+                        <div class="relation-kind-choices">
+                          ${["Enemy", "Friend", "Other"]
+                            .map(
+                              (kind) => `
+                                <label class="relation-kind-choice">
+                                  <input type="radio" name="relationKind-${relationKey}" value="${kind}" ${kind === relationKind ? "checked" : ""} />
+                                  <span><i class="relation-dot" style="--relation-color:${relationColor(kind)}"></i>${kind}</span>
+                                </label>`,
+                            )
+                            .join("")}
+                        </div>
+                      </div>
+                      ${formInput("Relation Tag", `relationType-${relationKey}`, relation?.type || "", true, false, "text", "Trusted Ally")}
+                      ${formInput("Note", `relationNote-${relationKey}`, relation?.note || "", true, true, "text", "Optional note about this relationship")}
                     </div>
                   </div>
                 `;
@@ -2604,11 +3149,12 @@
           .map((card) => {
             const enabled = card.querySelector(".relation-toggle")?.checked;
             if (!enabled) return null;
-            const fields = card.querySelectorAll("input:not(.relation-toggle), textarea");
-            const type = fields[0]?.value.trim() || "Related";
-            const note = fields[1]?.value.trim() || "";
+            const kind = card.querySelector('input[type="radio"]:checked')?.value || "Other";
+            const type = card.querySelector('input[id^="relationType-"]')?.value.trim() || "Related";
+            const note = card.querySelector('textarea[id^="relationNote-"], input[id^="relationNote-"]')?.value.trim() || "";
             return {
               with: card.dataset.relationTarget,
+              kind,
               type,
               note,
               history: "",
@@ -2727,34 +3273,52 @@
           relations: collectRelationsFromEditor(),
         };
 
-        if (mode === "edit") {
-          const index = characters.findIndex((c) => c.name === oldName);
-          if (index >= 0) characters[index] = character;
-          if (oldName !== name) {
-            characters.forEach((c) => {
-              (c.relations || []).forEach((relation) => {
-                if (relation.with === oldName) relation.with = name;
+        const commit = () => {
+          if (mode === "edit") {
+            const index = characters.findIndex((c) => c.name === oldName);
+            if (index >= 0) characters[index] = character;
+            if (oldName !== name) {
+              characters.forEach((c) => {
+                (c.relations || []).forEach((relation) => {
+                  if (relation.with === oldName) relation.with = name;
+                });
               });
-            });
-            if (relationPositions[oldName]) {
-              relationPositions[name] = relationPositions[oldName];
-              delete relationPositions[oldName];
-              saveRelationPositions();
+              if (relationPositions[oldName]) {
+                relationPositions[name] = relationPositions[oldName];
+                delete relationPositions[oldName];
+                saveRelationPositions();
+              }
             }
+          } else {
+            upsertCharacter(character);
           }
-        } else {
-          characters.push(character);
+
+          saveCharacters();
+          activeEditorMode = null;
+          closeModal();
+          activeFilter = "All";
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = Math.max(0, characters.findIndex((c) => c.name.toLowerCase() === name.toLowerCase()));
+          currentPhoto = 0;
+          render();
+        };
+
+        if (mode === "add") {
+          const existing = findCharacterByName(name);
+          if (existing) {
+            showDecision(
+              "There's already a character by that name",
+              `Update ${existing.name} with the information in this form?`,
+              "Update",
+              commit,
+            );
+          } else {
+            showDecision("Add Character", `Add ${name} to the roster?`, "Add", commit);
+          }
+          return;
         }
 
-        saveCharacters();
-        activeEditorMode = null;
-        closeModal();
-        activeFilter = "All";
-        $("search").value = "";
-        filteredIndexes = characters.map((_, i) => i);
-        currentIndex = Math.max(0, characters.findIndex((c) => c.name === name));
-        currentPhoto = 0;
-        render();
+        commit();
       }
 
       function deleteCharacterFromEditor(name) {
@@ -2796,7 +3360,6 @@
         currentIndex = Math.min(currentIndex, characters.length - 1);
         currentPhoto = 0;
         activeFilter = "All";
-        $("search").value = "";
         render();
       }
 
@@ -2892,23 +3455,32 @@
         currentPhoto = 0;
         render();
       };
-      $("search").oninput = () => {
-        applySearch(true);
-        render();
-      };
       $("addCharacterBtn").onclick = () => openCharacterForm("add");
       $("editCharacterBtn").onclick = () => openCharacterForm("edit");
       $("allCharactersBtn").onclick = allCharactersModal;
       $("relationsBtn").onclick = () => setTab("Relations");
+      $("settingsBtn").onclick = settingsModal;
       $("closeModal").onclick = closeModal;
+      $("decisionCancel").onclick = closeDecision;
+      $("decisionConfirm").onclick = () => {
+        const action = decisionAction;
+        closeDecision();
+        action?.();
+      };
       modal.onclick = (e) => {
         if (e.target === modal) closeModal();
+      };
+      decisionDialog.onclick = (e) => {
+        if (e.target === decisionDialog) closeDecision();
       };
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") activeEditorMode === "edit" ? switchEditorCharacter(1) : nextCharacter(1);
         if (e.key === "ArrowLeft") activeEditorMode === "edit" ? switchEditorCharacter(-1) : nextCharacter(-1);
-        if (e.key === "Escape") closeModal();
+        if (e.key === "Escape") {
+          if (decisionDialog.classList.contains("open")) closeDecision();
+          else closeModal();
+        }
       });
 
       let touchStartX = 0;
@@ -2951,6 +3523,13 @@
       window.goToCharacter = goToCharacter;
       window.openModal = openModal;
       window.openRelation = openRelation;
+      window.settingsModal = settingsModal;
+      window.setExportChecks = setExportChecks;
+      window.exportSelectedCharacters = exportSelectedCharacters;
+      window.importCharacters = importCharacters;
+      window.prepareImportCharacters = prepareImportCharacters;
+      window.setImportChecks = setImportChecks;
+      window.importSelectedCharacters = importSelectedCharacters;
       window.openCharacterForm = openCharacterForm;
       window.saveCharacterFromForm = saveCharacterFromForm;
       window.confirmDeleteCharacter = confirmDeleteCharacter;
