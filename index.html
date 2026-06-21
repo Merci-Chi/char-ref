@@ -886,6 +886,29 @@
         right: -34px;
       }
 
+      .roster-card {
+        display: grid;
+        gap: 8px;
+      }
+
+      .roster-open {
+        display: grid;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .roster-move-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 0 10px 10px;
+      }
+
       .collection-toolbar {
         display: flex;
         justify-content: space-between;
@@ -3585,7 +3608,6 @@
             <button class="btn primary" type="button" onclick="randomFilteredCharacter()">Random</button>
           </div>
           ${rosterGroupsMarkup()}`;
-        setupRosterReordering();
       }
 
       function rosterGroupsMarkup() {
@@ -3646,16 +3668,29 @@
       function rosterCard(character, absoluteIndex) {
         const photo = character.photos?.[0];
         const color = characterColor(character.name);
+
         return `
-          <button class="mini-card roster-card" type="button" draggable="true" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}" style="--card-color:${color}" onclick="openRosterCharacter(event, ${absoluteIndex})">
-            <span class="roster-portrait">
-              ${photo ? `<img src="${htmlEscape(photo)}" alt="" data-initials="${htmlEscape(initials(character.name))}" onerror="handleRosterImageError(this)">` : `<span class="roster-initials">${htmlEscape(initials(character.name))}</span>`}
-            </span>
-            <span class="roster-card-copy">
-              <b>${htmlEscape(character.name)}</b>
-              <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
-            </span>
-          </button>`;
+            <article class="mini-card roster-card" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}" style="--card-color:${color}">
+              <button class="roster-open" type="button" onclick="goToCharacterByIndex(${absoluteIndex})">
+                <span class="roster-portrait">
+                  ${
+                    photo
+                      ? `<img src="${htmlEscape(photo)}" alt="" data-initials="${htmlEscape(initials(character.name))}" onerror="handleRosterImageError(this)">`
+                      : `<span class="roster-initials">${htmlEscape(initials(character.name))}</span>`
+                  }
+                </span>
+                <span class="roster-card-copy">
+                  <b>${htmlEscape(character.name)}</b>
+                  <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
+                </span>
+              </button>
+
+              <div class="roster-move-actions">
+                <button class="btn" type="button" onclick="moveCharacterByName('${jsString(character.name)}', -1)">↑</button>
+                <button class="btn" type="button" onclick="moveCharacterByName('${jsString(character.name)}', 1)">↓</button>
+              </div>
+            </article>
+          `;
       }
 
       function renderRelationsView() {
@@ -3684,6 +3719,14 @@
               ? `<div class="location-grid">${locations.map((location, index) => locationCard(location, index)).join("")}</div>`
               : `<p class="empty">No locations yet.</p>`
           }`;
+      }
+
+      function jsString(value) {
+        return String(value || "")
+          .replace(/\\/g, "\\\\")
+          .replace(/'/g, "\\'")
+          .replace(/\n/g, "\\n")
+          .replace(/\r/g, "\\r");
       }
 
       function locationCard(location, index) {
@@ -3870,30 +3913,40 @@
         return { targetName: slot.dataset.character, before };
       }
 
-      function reorderCharacter(sourceName, targetName, before) {
-        if (!sourceName || !targetName || sourceName === targetName) return;
-        const source = characters.find(
-          (character) => character.name === sourceName,
+      function moveCharacterByName(name, direction) {
+        const index = characters.findIndex(
+          (character) => character.name === name,
         );
-        const target = characters.find(
-          (character) => character.name === targetName,
-        );
+        if (index < 0) return;
+
+        const character = characters[index];
+        const category = character.category || "";
+
+        const sameCategoryIndexes = characters
+          .map((item, itemIndex) => ({ item, itemIndex }))
+          .filter(({ item }) => (item.category || "") === category)
+          .map(({ itemIndex }) => itemIndex);
+
+        const position = sameCategoryIndexes.indexOf(index);
+        const targetPosition = position + direction;
+
         if (
-          !source ||
-          !target ||
-          (source.category || "") !== (target.category || "")
-        )
+          targetPosition < 0 ||
+          targetPosition >= sameCategoryIndexes.length
+        ) {
           return;
-        const sourceIndex = characters.indexOf(source);
-        characters.splice(sourceIndex, 1);
-        const targetIndex = characters.indexOf(target);
-        characters.splice(targetIndex + (before ? 0 : 1), 0, source);
+        }
+
+        const targetIndex = sameCategoryIndexes[targetPosition];
+
+        characters.splice(index, 1);
+
+        const adjustedTargetIndex =
+          targetIndex > index ? targetIndex - 1 : targetIndex;
+        characters.splice(adjustedTargetIndex, 0, character);
+
         saveCharacters();
-        suppressRosterClick = true;
         render();
-        setTimeout(() => {
-          suppressRosterClick = false;
-        }, 0);
       }
 
       function setupRosterReordering() {
