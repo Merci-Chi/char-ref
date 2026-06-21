@@ -3576,7 +3576,31 @@
       }
 
       function rosterGroupsMarkup() {
+        if (activeFilters.has("All")) {
+          const group = filteredIndexes.map((index) => ({
+            character: characters[index],
+            index,
+          }));
+
+          return `
+      <section class="roster-group" data-category="All">
+        <h3>All</h3>
+        <div class="roster-grid">
+          ${group
+            .map(
+              ({ character, index }) => `
+                <div class="roster-slot" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}">
+                  ${rosterCard(character, index)}
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+      </section>`;
+        }
+
         const categoryOrder = ["", "One", "None", "NPC", "Other"];
+
         return categoryOrder
           .map((category) => {
             const group = filteredIndexes
@@ -3584,14 +3608,24 @@
                 (index) => (characters[index].category || "") === category,
               )
               .map((index) => ({ character: characters[index], index }));
+
             if (!group.length) return "";
+
             return `
-              <section class="roster-group" data-category="${htmlEscape(category)}">
-                <h3>${htmlEscape(category || "-")}</h3>
-                <div class="roster-grid">
-                  ${group.map(({ character, index }) => `<div class="roster-slot" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(category)}">${rosterCard(character, index)}</div>`).join("")}
-                </div>
-              </section>`;
+        <section class="roster-group" data-category="${htmlEscape(category)}">
+          <h3>${htmlEscape(category || "-")}</h3>
+          <div class="roster-grid">
+            ${group
+              .map(
+                ({ character, index }) => `
+                  <div class="roster-slot" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(category)}">
+                    ${rosterCard(character, index)}
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>`;
           })
           .join("");
       }
