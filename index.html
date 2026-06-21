@@ -4240,7 +4240,7 @@
                       <span class="selection-circle" aria-hidden="true"></span>
                       <span>${htmlEscape(character.name)}</span>
                     </label>
-                    <small>${existing ? "Update" : "Add"}</small>
+                    <small>${existing ? (pendingImportCharacters.length === 1 ? "Update" : "Update only if imported alone") : "Add"}</small>
                   </div>`;
               })
               .join("")}
@@ -4259,7 +4259,7 @@
         document
           .querySelectorAll(".import-character-check")
           .forEach((input) => {
-            input.checked = checked;
+            input.checked = checked && !input.disabled;
           });
       }
 
@@ -4270,30 +4270,64 @@
           .map((input) => pendingImportCharacters[Number(input.value)])
           .filter(Boolean);
         if (!selected.length) return;
-        const updates = selected.filter((character) =>
-          findCharacterByName(character.name),
-        ).length;
-        const additions = selected.length - updates;
+
+        if (selected.length === 1) {
+          const character = selected[0];
+          const existing = findCharacterByName(character.name);
+          const action = existing ? "updated" : "added";
+          showDecision(
+            "Verify Import",
+            `${character.name} will be ${action}.`,
+            existing ? "Update" : "Add",
+            () => {
+              upsertCharacter(character);
+              finishCharacterImport();
+            },
+          );
+          return;
+        }
+
+        const occupiedNames = new Set(
+          characters.map((character) => character.name.trim().toLowerCase()),
+        );
+        const additions = [];
+        selected.forEach((character) => {
+          const key = character.name.trim().toLowerCase();
+          if (!key || occupiedNames.has(key)) return;
+          occupiedNames.add(key);
+          additions.push(character);
+        });
+        const skipped = selected.length - additions.length;
         const summary = [
-          additions
-            ? `${additions} character${additions === 1 ? "" : "s"} will be added.`
-            : "",
-          updates
-            ? `${updates} same-name character${updates === 1 ? "" : "s"} will be updated.`
+          additions.length
+            ? `${additions.length} character${additions.length === 1 ? "" : "s"} will be added.`
+            : "No new characters will be added.",
+          skipped
+            ? `${skipped} same-name character${skipped === 1 ? "" : "s"} will be skipped; batch imports never update existing characters.`
             : "",
         ]
           .filter(Boolean)
           .join(" ");
-        showDecision("Verify Import", summary, "Import", () => {
-          selected.forEach((character) => upsertCharacter(character));
-          saveCharacters();
-          filteredIndexes = characters.map((_, i) => i);
-          currentIndex = 0;
-          activeFilters = new Set(["All"]);
-          viewMode = "roster";
-          closeModal();
-          render();
-        });
+        showDecision(
+          "Verify Batch Import",
+          summary,
+          additions.length ? "Add" : "OK",
+          () => {
+            if (!additions.length) return;
+            characters.push(...additions);
+            finishCharacterImport();
+          },
+        );
+      }
+
+      function finishCharacterImport() {
+        saveCharacters();
+        filteredIndexes = characters.map((_, i) => i);
+        currentIndex = 0;
+        activeFilters = new Set(["All"]);
+        viewMode = "roster";
+        closeModal();
+        render();
       }
 
       function importCharacters() {
@@ -4848,7 +4882,7 @@
       function toggleSelectionRow(event, row) {
         if (event.target.closest("input, label, button, a")) return;
         const input = row.querySelector('input[type="checkbox"]');
-        if (!input) return;
+        if (!input || input.disabled) return;
         input.checked = !input.checked;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       }
