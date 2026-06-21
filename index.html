@@ -2660,7 +2660,7 @@
                 ? relations
                     .map(
                       (r) => `
-                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(c.name)}', '${escapeQuotes(r.with)}')">
+                  <div class="relationship-card" data-from="${htmlEscape(c.name)}" data-to="${htmlEscape(r.with)}" onclick="openRelation(this.dataset.from, this.dataset.to)">
                     <div class="avatar" style="background:${characterColor(r.with)}">${initials(r.with)}</div>
                     <div>
                       <b>${safe(c.name)} -> ${safe(r.with)}</b>
@@ -3100,8 +3100,12 @@
         applySearch(false);
         renderFilters();
         const locationsActive = viewMode === "locations";
-        $("addCharacterBtn").textContent = locationsActive ? "Add Location" : "Add";
-        $("editCharacterBtn").textContent = locationsActive ? "Edit Locations" : "Edit";
+        $("addCharacterBtn").textContent = locationsActive
+          ? "Add Location"
+          : "Add";
+        $("editCharacterBtn").textContent = locationsActive
+          ? "Edit Locations"
+          : "Edit";
         $("editCharacterBtn").disabled = locationsActive && !locations.length;
         $("viewer").classList.toggle("collection-view", viewMode !== "detail");
         $("allCharactersBtn").classList.toggle(
@@ -3228,7 +3232,9 @@
         return categoryOrder
           .map((category) => {
             const group = filteredIndexes
-              .filter((index) => (characters[index].category || "") === category)
+              .filter(
+                (index) => (characters[index].category || "") === category,
+              )
               .map((index) => ({ character: characters[index], index }));
             if (!group.length) return "";
             return `
@@ -3666,7 +3672,7 @@
             </div>
             <hr>
             <p><b>History:</b> ${safe(relation?.history || "Add a history field to expand this relationship.")}</p>
-            ${other ? `<p><b>${to}:</b> ${safe(other.description)}</p><button class="btn primary" onclick="goToCharacter('${escapeQuotes(to)}'); closeModal();">Jump to ${to}</button>` : ""}
+            ${other ? `<p><b>${htmlEscape(to)}:</b> ${htmlEscape(safe(other.description))}</p><button class="btn primary" data-character="${htmlEscape(to)}" onclick="goToCharacter(this.dataset.character); closeModal();">Jump to ${htmlEscape(to)}</button>` : ""}
           `,
         );
       }
@@ -3682,7 +3688,12 @@
       }
 
       function goToCharacterByIndex(absolute) {
-        if (!Number.isInteger(absolute) || absolute < 0 || absolute >= characters.length) return;
+        if (
+          !Number.isInteger(absolute) ||
+          absolute < 0 ||
+          absolute >= characters.length
+        )
+          return;
         const filtered = filteredIndexes.indexOf(absolute);
         if (filtered >= 0) currentIndex = filtered;
         else {
@@ -3752,7 +3763,7 @@
             ? `<div class="cards">${rows
                 .map(
                   (r) => `
-                    <div class="relationship-card" onclick="openRelation('${escapeQuotes(r.from)}', '${escapeQuotes(r.with)}')">
+                    <div class="relationship-card" data-from="${htmlEscape(r.from)}" data-to="${htmlEscape(r.with)}" onclick="openRelation(this.dataset.from, this.dataset.to)">
                       <div class="avatar">${initials(r.with)}</div>
                       <div>
                         <b>${r.from} -> ${r.with}</b>
@@ -4267,11 +4278,11 @@
             )}
             <div class="form-actions">
               <div class="form-actions-group">
-                ${editing ? `<button class="btn danger" onclick="deleteCharacterFromEditor('${escapeQuotes(source.name)}')">Delete</button>` : ""}
+                ${editing ? `<button class="btn danger" data-character="${htmlEscape(source.name)}" onclick="deleteCharacterFromEditor(this.dataset.character)">Delete</button>` : ""}
               </div>
               <div class="form-actions-group">
                 <button class="btn" onclick="cancelCharacterEditor()">Cancel</button>
-                <button class="btn primary" onclick="saveCharacterFromForm('${mode}', '${escapeQuotes(source.name)}')">Done</button>
+                <button class="btn primary" data-old-name="${htmlEscape(source.name)}" onclick="saveCharacterFromForm('${mode}', this.dataset.oldName)">Done</button>
               </div>
             </div>
           `,
@@ -4701,9 +4712,13 @@
         randomFilteredCharacter();
       };
       $("addCharacterBtn").onclick = () =>
-        viewMode === "locations" ? openLocationForm() : openCharacterForm("add");
+        viewMode === "locations"
+          ? openLocationForm()
+          : openCharacterForm("add");
       $("editCharacterBtn").onclick = () =>
-        viewMode === "locations" ? openLocationPicker() : openCharacterForm("edit");
+        viewMode === "locations"
+          ? openLocationPicker()
+          : openCharacterForm("edit");
       $("allCharactersBtn").onclick = openRosterView;
       $("relationsBtn").onclick = openRelationsView;
       $("settingsBtn").onclick = settingsModal;
