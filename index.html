@@ -848,42 +848,6 @@
       .roster-slot {
         flex: 0 1 230px;
         min-width: 190px;
-        transition:
-          margin 0.18s ease,
-          transform 0.18s ease;
-      }
-
-      .roster-slot.drop-before {
-        margin-left: 64px;
-      }
-
-      .roster-slot.drop-after {
-        margin-right: 64px;
-      }
-
-      .roster-slot.drop-before::before,
-      .roster-slot.drop-after::after {
-        content: "";
-        position: absolute;
-        top: 8px;
-        bottom: 8px;
-        width: 4px;
-        border-radius: 2px;
-        background: var(--accent);
-        box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
-      }
-
-      .roster-slot.drop-before,
-      .roster-slot.drop-after {
-        position: relative;
-      }
-
-      .roster-slot.drop-before::before {
-        left: -34px;
-      }
-
-      .roster-slot.drop-after::after {
-        right: -34px;
       }
 
       .collection-toolbar {
@@ -3903,11 +3867,73 @@
       }
 
       function clearRosterDropGaps() {
-        document
-          .querySelectorAll(".roster-slot.drop-before, .roster-slot.drop-after")
-          .forEach((slot) => {
-            slot.classList.remove("drop-before", "drop-after");
-          });
+        // Kept as a safe no-op because older drag cleanup code still calls it.
+      }
+
+      function getRosterDropPlacement(slot, clientX, clientY = null) {
+        if (!slot || slot.dataset.character === draggedCharacterName)
+          return null;
+
+        const rect = slot.getBoundingClientRect();
+
+        let before;
+        if (clientY !== null) {
+          const verticalMiddle = rect.top + rect.height / 2;
+          const horizontalMiddle = rect.left + rect.width / 2;
+
+          before =
+            Math.abs(clientY - verticalMiddle) > rect.height * 0.18
+              ? clientY < verticalMiddle
+              : clientX < horizontalMiddle;
+        } else {
+          before = clientX < rect.left + rect.width / 2;
+        }
+
+        return { targetName: slot.dataset.character, before };
+      }
+
+      function getRosterEndPlacement(grid, clientX, clientY) {
+        if (!grid || !draggedCharacterName) return null;
+
+        const slots = [...grid.querySelectorAll(".roster-slot")].filter(
+          (slot) => slot.dataset.character !== draggedCharacterName,
+        );
+
+        if (!slots.length) return null;
+
+        const gridRect = grid.getBoundingClientRect();
+        const firstSlot = slots[0];
+        const lastSlot = slots[slots.length - 1];
+        const firstRect = firstSlot.getBoundingClientRect();
+        const lastRect = lastSlot.getBoundingClientRect();
+
+        const edgePad = 90;
+
+        const nearStart =
+          clientY < firstRect.top + edgePad ||
+          clientX < firstRect.left + edgePad;
+
+        const nearEnd =
+          clientY > lastRect.bottom - edgePad ||
+          clientX > lastRect.right - edgePad ||
+          clientY > gridRect.bottom - edgePad ||
+          clientX > gridRect.right - edgePad;
+
+        if (nearStart) {
+          return {
+            targetName: firstSlot.dataset.character,
+            before: true,
+          };
+        }
+
+        if (nearEnd) {
+          return {
+            targetName: lastSlot.dataset.character,
+            before: false,
+          };
+        }
+
+        return null;
       }
 
       function showRosterDropGap(slot, clientX, clientY = null) {
@@ -3949,6 +3975,9 @@
 
         if (sourceIndex < 0 || targetIndex < 0) return;
 
+        if (before && targetIndex === sourceIndex + 1) return;
+        if (!before && targetIndex === sourceIndex - 1) return;
+
         const [source] = characters.splice(sourceIndex, 1);
 
         let insertIndex = characters.findIndex(
@@ -3961,6 +3990,14 @@
 
         saveCharacters();
         applySearch(false);
+
+        const selectedIndex = filteredIndexes.findIndex(
+          (index) => characters[index]?.name === sourceName,
+        );
+
+        if (selectedIndex >= 0) {
+          currentIndex = selectedIndex;
+        }
 
         suppressRosterClick = true;
         render();
@@ -3979,6 +4016,7 @@
             event.dataTransfer.setData("text/plain", draggedCharacterName);
             requestAnimationFrame(() => card.classList.add("dragging"));
           });
+
           card.addEventListener("dragend", () => {
             card.classList.remove("dragging");
             draggedCharacterName = "";
@@ -3989,22 +4027,53 @@
           });
         });
 
-        document.querySelectorAll(".roster-slot").forEach((slot) => {
-          slot.addEventListener("dragover", (event) => {
-            const gap = showRosterDropGap(slot, event.clientX, event.clientY);
-            if (!gap) return;
+        document.querySelectorAll(".roster-grid").forEach((grid) => {
+          grid.addEventListener("dragover", (event) => {
+            if (!draggedCharacterName) return;
+
+            const placement = getRosterEndPlacement(
+              grid,
+              event.clientX,
+              event.clientY,
+            );
+
+            if (!placement) return;
+
             event.preventDefault();
             event.dataTransfer.dropEffect = "move";
+
+            reorderCharacter(
+              draggedCharacterName,
+              placement.targetName,
+              placement.before,
+            );
           });
+        });
+
+        document.querySelectorAll(".roster-slot").forEach((slot) => {
+          slot.addEventListener("dragover", (event) => {
+            if (!draggedCharacterName) return;
+
+            const placement = getRosterDropPlacement(
+              slot,
+              event.clientX,
+              event.clientY,
+            );
+
+            if (!placement) return;
+
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+
+            reorderCharacter(
+              draggedCharacterName,
+              placement.targetName,
+              placement.before,
+            );
+          });
+
           slot.addEventListener("drop", (event) => {
             event.preventDefault();
-            const gap = showRosterDropGap(slot, event.clientX, event.clientY);
-            if (gap)
-              reorderCharacter(
-                draggedCharacterName,
-                gap.targetName,
-                gap.before,
-              );
           });
         });
 
@@ -4017,12 +4086,13 @@
           let active = false;
           let startX = 0;
           let startY = 0;
-          let pendingGap = null;
 
           card.addEventListener("pointerdown", (event) => {
             if (event.pointerType !== "touch") return;
+
             startX = event.clientX;
             startY = event.clientY;
+
             pressTimer = setTimeout(() => {
               active = true;
               suppressRosterClick = true;
@@ -4034,6 +4104,7 @@
 
           card.addEventListener("pointermove", (event) => {
             if (event.pointerType !== "touch") return;
+
             if (!active) {
               if (
                 Math.hypot(event.clientX - startX, event.clientY - startY) > 10
@@ -4042,15 +4113,31 @@
               }
               return;
             }
+
             event.preventDefault();
-            const target = document
-              .elementFromPoint(event.clientX, event.clientY)
-              ?.closest(".roster-slot");
-            pendingGap = showRosterDropGap(
-              target,
+
+            const element = document.elementFromPoint(
               event.clientX,
               event.clientY,
             );
+
+            const target = element?.closest(".roster-slot");
+            const grid =
+              element?.closest(".roster-grid") ||
+              target?.closest(".roster-grid");
+
+            const placement =
+              getRosterDropPlacement(target, event.clientX, event.clientY) ||
+              getRosterEndPlacement(grid, event.clientX, event.clientY);
+
+            if (placement) {
+              reorderCharacter(
+                draggedCharacterName,
+                placement.targetName,
+                placement.before,
+              );
+            }
+
             const edge = 70;
             if (event.clientY < edge) window.scrollBy(0, -22);
             if (event.clientY > window.innerHeight - edge)
@@ -4059,18 +4146,11 @@
 
           const finish = () => {
             clearTimeout(pressTimer);
-            if (active && pendingGap) {
-              reorderCharacter(
-                draggedCharacterName,
-                pendingGap.targetName,
-                pendingGap.before,
-              );
-            }
             active = false;
-            pendingGap = null;
             draggedCharacterName = "";
             card.classList.remove("dragging");
             clearRosterDropGaps();
+
             setTimeout(() => {
               suppressRosterClick = false;
             }, 0);
