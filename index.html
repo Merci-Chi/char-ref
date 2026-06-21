@@ -1,1 +1,4808 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Character Codex</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap");
 
+      :root {
+        --bg: #080a0d;
+        --surface: rgba(13, 17, 23, 0.78);
+        --surface-strong: rgba(19, 24, 32, 0.94);
+        --line: rgba(255, 255, 255, 0.12);
+        --text: #f6f2ea;
+        --muted: #b7b0a3;
+        --soft: rgba(255, 255, 255, 0.075);
+        --accent: #88d8ff;
+        --accent-2: #dbefff;
+        --accent-3: #2b6e8f;
+        --danger: #ff6c54;
+        --shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        touch-action: pan-x pan-y;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        background:
+          linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.18)),
+          var(--backdrop, linear-gradient(135deg, #101821, #25150f));
+        background-size: cover;
+        background-position: center;
+        filter: blur(30px) saturate(1.15);
+        transform: scale(1.08);
+        opacity: 0.46;
+        z-index: -2;
+      }
+
+      body::after {
+        background:
+          linear-gradient(180deg, rgba(8, 10, 13, 0.1), #080a0d 72%),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 0,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px,
+            transparent 86px
+          );
+        z-index: -1;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      .app {
+        width: min(1500px, 100%);
+        margin: 0 auto;
+        padding: 18px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .active-heading h1 {
+        margin: 0;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(1.7rem, 3vw, 3rem);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .active-heading p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        max-width: 42ch;
+        line-height: 1.45;
+      }
+
+      .actions,
+      .filters,
+      .tabs,
+      .chips,
+      .thumbs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .actions {
+        justify-content: flex-end;
+      }
+
+      .manage-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .btn,
+      .tab,
+      .filter,
+      .thumb {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.065);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease,
+          background 0.16s ease,
+          color 0.16s ease;
+      }
+
+      .btn:hover,
+      .tab:hover,
+      .filter:hover,
+      .thumb:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--accent) 58%, white 12%);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .btn {
+        min-height: 40px;
+        padding: 9px 12px;
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        color: #071016;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        border-color: transparent;
+        box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 34%, transparent);
+      }
+
+      .btn.danger {
+        border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+        color: #ffd7d1;
+      }
+
+      .btn:disabled {
+        opacity: 0.42;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn.icon {
+        width: 42px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        font-size: 1.1rem;
+      }
+
+      .search-row {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .searchbar {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: 10px 13px;
+        outline: none;
+      }
+
+      .searchbar:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
+      }
+
+      .filter {
+        padding: 9px 11px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .filter.active {
+        color: #071016;
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(360px, 33vw) minmax(0, 1fr);
+        gap: 16px;
+        min-height: calc(100vh - 36px);
+        align-items: start;
+      }
+
+      .workspace {
+        min-width: 0;
+      }
+
+      .hero,
+      .codex {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero {
+        position: sticky;
+        top: 18px;
+        width: 100%;
+        max-width: none;
+        justify-self: stretch;
+        height: calc(100vh - 36px);
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        overflow: hidden;
+        border-radius: var(--radius);
+      }
+
+      .photo-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        min-height: 0;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+        background: color-mix(in srgb, var(--accent-3) 55%, #080a0d);
+      }
+
+      .photo-wrap.zoomed {
+        cursor: grabbing;
+      }
+
+      .photo-wrap::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.035),
+          transparent 42%
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .photo-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.78)),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 45%);
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .image-stage {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .photo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        transform-origin: center center;
+        will-change: transform;
+        pointer-events: none;
+      }
+
+      .photo-wrap img.active {
+        display: block;
+      }
+
+      .photo-placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 26px;
+        text-align: center;
+        z-index: 1;
+      }
+
+      .placeholder-mark {
+        width: min(42%, 220px);
+        aspect-ratio: 1;
+        border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.18);
+        display: grid;
+        place-items: center;
+        opacity: 0.82;
+      }
+
+      .placeholder-mark span {
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(2.8rem, 7vw, 5rem);
+        font-weight: 800;
+        color: var(--accent-2);
+        opacity: 0.7;
+      }
+
+      .photo-overlay {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        top: 24px;
+        bottom: auto;
+        z-index: 4;
+      }
+
+      .kicker {
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .photo-overlay h2 {
+        margin: 0 0 8px;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(2.2rem, 5vw, 4.8rem);
+        line-height: 0.9;
+        letter-spacing: 0;
+        text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
+      }
+
+      .hero-short {
+        max-width: 27ch;
+        color: var(--text);
+        font-weight: 800;
+        line-height: 1.35;
+        background: rgba(0, 0, 0, 0.38);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 8px 10px;
+      }
+
+      .photo-tabs,
+      .image-controls {
+        position: absolute;
+        z-index: 5;
+        display: flex;
+        gap: 8px;
+      }
+
+      .photo-tabs {
+        left: 18px;
+        bottom: 18px;
+      }
+
+      .image-controls {
+        top: 14px;
+        right: 14px;
+      }
+
+      .image-controls .btn {
+        background: rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(10px);
+      }
+
+      .dot {
+        width: 38px;
+        height: 3px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.36);
+        cursor: pointer;
+      }
+
+      .dot.active {
+        background: var(--accent);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);
+      }
+
+      .stat-strip {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        background: var(--surface-strong);
+        border-top: 1px solid var(--line);
+      }
+
+      .chip {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .nav-row {
+        width: 100%;
+        max-width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.22);
+      }
+
+      .nav-name {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-row .btn:first-child {
+        text-align: left;
+      }
+
+      .nav-row .btn:last-child {
+        text-align: right;
+      }
+
+      .codex {
+        border-radius: var(--radius);
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .tabs {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .tab {
+        padding: 10px 12px;
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .tab.active {
+        color: #071016;
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      .tab-panel {
+        display: none;
+        padding: 18px;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      .section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .section,
+      details,
+      .relationship-card,
+      .mini-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .section {
+        padding: 16px;
+      }
+
+      .section.wide {
+        grid-column: 1 / -1;
+      }
+
+      .section h3,
+      summary {
+        margin: 0 0 12px;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 0;
+        color: var(--accent);
+      }
+
+      .section p,
+      .section li,
+      .details-body {
+        color: var(--muted);
+        line-height: 1.62;
+      }
+
+      .section p {
+        margin: 0;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .field {
+        min-height: 74px;
+        padding: 12px;
+        border-left: 3px solid
+          color-mix(in srgb, var(--accent) 72%, transparent);
+        background: rgba(255, 255, 255, 0.032);
+      }
+
+      .field b {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--accent);
+        font-size: 0.76rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .field span {
+        color: var(--text);
+        line-height: 1.45;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        padding: 8px 10px;
+        border-radius: var(--radius);
+        background: color-mix(
+          in srgb,
+          var(--accent) 16%,
+          rgba(255, 255, 255, 0.07)
+        );
+        border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+        font-weight: 800;
+      }
+
+      .bars {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 34px;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .bar-row b,
+      .bar-row span {
+        font-size: 0.86rem;
+      }
+
+      .bar-track {
+        height: 10px;
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.24);
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        width: calc(var(--value) * 10%);
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+
+      details {
+        overflow: hidden;
+      }
+
+      details + details {
+        margin-top: 10px;
+      }
+
+      summary {
+        list-style: none;
+        cursor: pointer;
+        margin: 0;
+        padding: 14px 15px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary::after {
+        content: "+";
+        color: var(--accent);
+      }
+
+      details[open] summary::after {
+        content: "-";
+      }
+
+      .details-body {
+        padding: 0 15px 15px;
+      }
+
+      .relationship-graph {
+        min-height: 460px;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.018) 1px,
+            transparent 1px
+          ),
+          rgba(0, 0, 0, 0.18);
+        background-size: 34px 34px;
+      }
+
+      .relationship-graph.large {
+        min-height: calc(100vh - 190px);
+      }
+
+      .relationship-graph.large .map-stage {
+        height: calc(100vh - 190px);
+      }
+
+      .layout.collection-view {
+        grid-template-columns: 1fr;
+      }
+
+      .layout.collection-view .hero {
+        display: none;
+      }
+
+      .roster-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .roster-group {
+        padding: 16px 18px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .roster-group:last-child {
+        border-bottom: 0;
+      }
+
+      .roster-group h3 {
+        margin: 0 0 12px;
+        color: var(--accent);
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1rem;
+      }
+
+      .roster-slot {
+        flex: 0 1 230px;
+        min-width: 190px;
+        transition:
+          margin 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .roster-slot.drop-before {
+        margin-left: 64px;
+      }
+
+      .roster-slot.drop-after {
+        margin-right: 64px;
+      }
+
+      .roster-slot.drop-before::before,
+      .roster-slot.drop-after::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
+        border-radius: 2px;
+        background: var(--accent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+      }
+
+      .roster-slot.drop-before,
+      .roster-slot.drop-after {
+        position: relative;
+      }
+
+      .roster-slot.drop-before::before {
+        left: -34px;
+      }
+
+      .roster-slot.drop-after::after {
+        right: -34px;
+      }
+
+      .collection-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .roster-card {
+        width: 100%;
+        min-height: 230px;
+        padding: 0;
+        overflow: hidden;
+        text-align: left;
+        color: var(--text);
+        touch-action: pan-y;
+      }
+
+      .roster-card.dragging {
+        opacity: 0.45;
+        transform: scale(0.98);
+      }
+
+      .roster-portrait {
+        height: 150px;
+        display: grid;
+        place-items: center;
+        background: color-mix(in srgb, var(--card-color) 24%, #0a0d11);
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+
+      .roster-portrait img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .roster-initials {
+        width: 64px;
+        height: 64px;
+        border: 1px solid color-mix(in srgb, var(--card-color) 55%, white 8%);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: var(--card-color);
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.35rem;
+        font-weight: 800;
+      }
+
+      .roster-card-copy {
+        display: grid;
+        gap: 5px;
+        padding: 12px;
+      }
+
+      .roster-card-copy b {
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.05rem;
+      }
+
+      .roster-card-copy small {
+        color: var(--muted);
+        line-height: 1.35;
+      }
+
+      .location-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+        padding: 18px;
+      }
+
+      .location-card {
+        min-height: 190px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        cursor: default;
+      }
+
+      .location-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .location-card h3 {
+        margin: 0;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.2rem;
+      }
+
+      .location-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+        flex: 1;
+      }
+
+      .location-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .location-tag {
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.06);
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .location-tag.planet {
+        border-color: color-mix(in srgb, #67d98a 48%, var(--line));
+        color: #bff4cd;
+      }
+
+      .location-tag.spaceship {
+        border-color: color-mix(in srgb, #7ecbff 48%, var(--line));
+        color: #cdeaff;
+      }
+
+      .map-stage {
+        position: relative;
+        height: 460px;
+        min-height: 0;
+        width: 100%;
+        overflow: auto;
+        touch-action: none;
+        overscroll-behavior: contain;
+        scrollbar-color: color-mix(in srgb, var(--accent) 50%, transparent)
+          rgba(0, 0, 0, 0.2);
+      }
+
+      .map-tools {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+      }
+
+      .map-world {
+        position: relative;
+        width: 2400px;
+        height: 1600px;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+          );
+        background-size: 48px 48px;
+      }
+
+      .map-canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 2400px;
+        height: 1600px;
+        transform: scale(var(--map-zoom, 1));
+        transform-origin: top left;
+      }
+
+      .map-lines {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .map-line {
+        stroke-width: 3;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 7px currentColor);
+        opacity: 0.76;
+      }
+
+      .map-line-hit {
+        stroke: transparent;
+        stroke-width: 20;
+        pointer-events: stroke;
+        cursor: help;
+      }
+
+      .relation-line-tooltip {
+        position: absolute;
+        z-index: 8;
+        max-width: 280px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(8, 10, 13, 0.96);
+        color: var(--text);
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.4;
+        box-shadow: var(--shadow);
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(10px, calc(-100% - 10px));
+        transition: opacity 0.12s ease;
+      }
+
+      .relation-line-tooltip.visible {
+        opacity: 1;
+      }
+
+      .map-node {
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        border: 2px solid rgba(255, 255, 255, 0.62);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        place-items: center;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 10px;
+        color: #071016;
+        font-family: Outfit, Inter, sans-serif;
+        font-weight: 800;
+        text-align: center;
+        cursor: grab;
+        user-select: none;
+        z-index: 2;
+        box-shadow:
+          0 0 28px var(--node-glow),
+          inset 0 0 22px rgba(255, 255, 255, 0.25);
+        transform: translate(-50%, -50%);
+        touch-action: none;
+      }
+
+      .map-node:active {
+        cursor: grabbing;
+      }
+
+      .map-node.active {
+        outline: 3px solid var(--accent-2);
+        outline-offset: 4px;
+      }
+
+      .map-node small {
+        display: block;
+        max-width: 74px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: Inter, sans-serif;
+        font-size: 0.68rem;
+      }
+
+      .map-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 12px);
+        width: 230px;
+        transform: translateX(-50%);
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(8, 10, 13, 0.94);
+        color: var(--text);
+        font-family: Inter, sans-serif;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.4;
+        box-shadow: var(--shadow);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .map-node:hover .map-tooltip,
+      .map-node:focus-visible .map-tooltip {
+        opacity: 1;
+      }
+
+      .relation-type {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 5px 8px;
+        border-radius: var(--radius);
+        color: #071016;
+        font-weight: 900;
+      }
+
+      .relationship-card,
+      .mini-card {
+        padding: 14px;
+        cursor: pointer;
+      }
+
+      .relationship-card {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+        background: color-mix(
+          in srgb,
+          var(--accent-3) 42%,
+          rgba(255, 255, 255, 0.06)
+        );
+        font-family: Outfit, Inter, sans-serif;
+        font-weight: 800;
+        color: var(--accent-2);
+      }
+
+      .relationship-card b,
+      .mini-card b {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .relationship-card small,
+      .mini-card small {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .form-field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .form-field.wide {
+        grid-column: 1 / -1;
+      }
+
+      .form-field label {
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .form-field input,
+      .form-field textarea,
+      .form-field select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        padding: 9px 10px;
+        outline: none;
+      }
+
+      .form-field.error input {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 24%, transparent);
+      }
+
+      .form-field.error label {
+        color: #ff9a8d;
+      }
+
+      .form-field textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+
+      .form-actions-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .editor-nav {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        position: sticky;
+        top: -18px;
+        z-index: 10;
+        padding: 8px 0;
+        background: var(--surface-strong);
+      }
+
+      .photo-tools {
+        display: grid;
+        gap: 8px;
+      }
+
+      .photo-preview {
+        width: min(180px, 100%);
+        aspect-ratio: 9 / 16;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.05);
+        object-fit: cover;
+        display: none;
+      }
+
+      .photo-preview[src] {
+        display: block;
+      }
+
+      .editor-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 12px;
+        position: sticky;
+        top: 42px;
+        z-index: 9;
+        padding: 8px 0;
+        background: var(--surface-strong);
+      }
+
+      .editor-tab-panel {
+        display: none;
+      }
+
+      .editor-tab-panel.active {
+        display: block;
+      }
+
+      .theme-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .theme-swatch {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        box-shadow:
+          inset 0 0 16px rgba(255, 255, 255, 0.28),
+          0 0 18px rgba(0, 0, 0, 0.24);
+      }
+
+      .theme-swatch.active {
+        outline: 3px solid var(--accent-2);
+        outline-offset: 3px;
+      }
+
+      .settings-list {
+        display: grid;
+        gap: 8px;
+        margin: 12px 0;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 10px;
+      }
+
+      .settings-row label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 800;
+      }
+
+      .settings-row input {
+        accent-color: var(--accent);
+      }
+
+      .relation-editor {
+        display: grid;
+        gap: 10px;
+      }
+
+      .relation-edit-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 12px;
+      }
+
+      .relation-edit-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 900;
+        color: var(--muted);
+      }
+
+      .toggle input {
+        width: 44px;
+        height: 24px;
+        accent-color: var(--accent);
+      }
+
+      .relation-edit-fields {
+        display: none;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .relation-edit-card.active .relation-edit-fields {
+        display: grid;
+      }
+
+      .relation-kind-choices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .relation-kind-choice {
+        position: relative;
+      }
+
+      .relation-kind-choice input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .relation-kind-choice span {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .relation-kind-choice input:checked + span {
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+      }
+
+      .relation-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--relation-color);
+        box-shadow: 0 0 10px
+          color-mix(in srgb, var(--relation-color) 58%, transparent);
+      }
+
+      .thumbs {
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .thumb {
+        width: 82px;
+        min-height: 82px;
+        padding: 7px;
+        display: grid;
+        gap: 5px;
+        justify-items: center;
+        color: var(--muted);
+      }
+
+      .thumb.active {
+        border-color: var(--accent);
+        background: color-mix(
+          in srgb,
+          var(--accent) 15%,
+          rgba(255, 255, 255, 0.07)
+        );
+        color: var(--text);
+      }
+
+      .thumb .avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.82rem;
+      }
+
+      .thumb span {
+        max-width: 100%;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.15;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+
+      .empty {
+        color: var(--muted);
+        padding: 22px;
+        text-align: center;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 30;
+        padding: 18px;
+      }
+
+      .modal.open {
+        display: grid;
+      }
+
+      .decision-dialog {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: none;
+        place-items: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.76);
+      }
+
+      .decision-dialog.open {
+        display: grid;
+      }
+
+      .decision-card {
+        width: min(440px, 100%);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .decision-card h3 {
+        margin: 0 0 8px;
+      }
+
+      .decision-card p {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .modal-card {
+        width: min(760px, 100%);
+        max-height: 86vh;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+
+      .modal h3 {
+        margin: 0;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.55rem;
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 16px 0;
+      }
+
+      @media (max-width: 980px) {
+        .topbar,
+        .search-row,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .actions,
+        .filters {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          position: relative;
+          top: auto;
+          height: 78vh;
+          min-height: 560px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .app {
+          padding: 12px;
+        }
+
+        .section-grid,
+        .field-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          height: 72vh;
+          min-height: 500px;
+        }
+
+        .photo-overlay {
+          left: 12px;
+          right: 12px;
+          top: 18px;
+          bottom: auto;
+        }
+
+        .nav-row {
+          grid-template-columns: 1fr;
+        }
+
+        .graph-inner {
+          grid-template-columns: 1fr;
+        }
+
+        .edge::before,
+        .edge::after {
+          content: "|";
+          display: block;
+          color: var(--line);
+        }
+
+        .relationship-card {
+          grid-template-columns: 48px 1fr;
+        }
+
+        .relationship-graph.large {
+          min-height: 620px;
+        }
+
+        .relationship-graph.large .map-stage {
+          height: 620px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <main class="layout" id="viewer">
+        <aside class="hero">
+          <div class="photo-wrap" id="photoWrap"></div>
+          <div class="nav-row">
+            <button
+              class="btn"
+              id="prevBtn"
+              aria-label="Previous character"
+            ></button>
+            <button class="btn primary" id="randomBtn">Random</button>
+            <button
+              class="btn"
+              id="nextBtn"
+              aria-label="Next character"
+            ></button>
+          </div>
+        </aside>
+
+        <div class="workspace">
+          <header class="topbar">
+            <div class="active-heading">
+              <h1 id="topCharacterName"></h1>
+              <p id="topCharacterShort"></p>
+            </div>
+            <div class="actions">
+              <div class="manage-actions">
+                <button class="btn primary" id="addCharacterBtn">Add</button>
+                <button class="btn" id="editCharacterBtn">Edit</button>
+              </div>
+              <button class="btn" id="allCharactersBtn">Roster</button>
+              <button class="btn" id="relationsBtn">Relations</button>
+              <button class="btn" id="settingsBtn">Settings</button>
+            </div>
+          </header>
+
+          <div class="search-row">
+            <div class="filters" id="filters"></div>
+          </div>
+
+          <section class="codex">
+            <nav class="tabs" id="tabs"></nav>
+            <div id="tabPanels"></div>
+            <div class="thumbs" id="thumbs"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3 id="modalTitle"></h3>
+          <button class="btn" id="closeModal">Close</button>
+        </div>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <div
+      class="decision-dialog"
+      id="decisionDialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="decisionTitle"
+    >
+      <div class="decision-card">
+        <h3 id="decisionTitle"></h3>
+        <p id="decisionMessage"></p>
+        <div class="form-actions">
+          <button class="btn" id="decisionCancel">Cancel</button>
+          <button class="btn primary" id="decisionConfirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /*
+      HOW TO ADD YOUR OWN CHARACTERS:
+      1. Duplicate one character object below.
+      2. Change the text values.
+      3. Put image files in the same folder as this HTML, or in an images folder.
+         Example: photos: ["images/my-character.png"]
+      4. For relations, use the exact name of another character.
+      */
+
+      const defaultCharacters = [
+        {
+          name: "Kael Nightshade",
+          title: "Frost Fang",
+          nicknames: "Kael, Frost Fang",
+          age: "23",
+          category: "",
+          gender: "Male",
+          species: "Human-Wolf Hybrid",
+          height: "6'1\"",
+          bodyType: "Lean, athletic",
+          weight: "Optional",
+          occupation: "Wandering blade-for-hire",
+          eyeColor: "Ice blue",
+          hairColor: "Black with silver tips",
+          hairStyle: "Messy, shoulder-length, partially covering one eye",
+          skinColor: "Pale skin with gray fur on ears and tail",
+          markings: "Scar over left eye; faint silver markings on shoulders",
+          features: "Wolf ears, fluffy tail, sharp canines, narrow pupils",
+          theme: {
+            accent: "#7ecbff",
+            accent2: "#d9e5ff",
+            accent3: "#12364b",
+          },
+          themeName: "Light Blue",
+          outfit: {
+            shirt: "Black hoodie with torn cuffs",
+            pants: "Dark cargo pants with utility straps",
+            shoes: "Heavy combat boots",
+            hat: "None",
+            outerwear: "Dark leather jacket",
+          },
+          accessories:
+            "Silver pendant, fingerless gloves, hidden dagger sheathes",
+          weapons: "Twin daggers named Frost and Fang",
+          shortDescription: "Guarded hybrid blade with a cold stare.",
+          description:
+            "A quiet, intimidating hybrid with sharp eyes and a guarded posture. He looks dangerous at first glance, but his body language softens around people he trusts.",
+          personality:
+            "Protective, sarcastic, observant, loyal, slow to trust.",
+          fightingStyle:
+            "Fast assassin-style combat focused on dodging, mobility, stealth, and precise strikes.",
+          speechStyle:
+            "Relaxed and dry. Uses short sentences, sarcasm, and rarely raises his voice.",
+          strengths: "Speed, stealth, reading opponents, protecting allies",
+          weaknesses: "Poor teamwork with strangers, avoids asking for help",
+          likes: "Cold weather, quiet rooftops, loyal friends",
+          dislikes: "Crowds, betrayal, being touched without warning",
+          fears: "Losing control of his instincts",
+          hobbies: "Knife maintenance, night walks, sketching maps",
+          stats: { power: 6, speed: 10, defense: 5, magic: 2, resolve: 8 },
+          photos: [defaultPortraitFor("Kael Nightshade")],
+          relations: [
+            {
+              with: "Mira Solwyn",
+              type: "Trusted Ally",
+              note: "Mira is one of the few people Kael fully listens to.",
+              history:
+                "Their trust grew during a winter escape where Mira healed Kael after he stayed behind to slow pursuers.",
+            },
+            {
+              with: "Riven Ashlock",
+              type: "Rival",
+              note: "Their fights are intense, but there is respect beneath the hostility.",
+              history:
+                "Kael and Riven test each other whenever tension runs high, turning conflict into a strange form of honesty.",
+            },
+          ],
+        },
+        {
+          name: "Mira Solwyn",
+          title: "Sunthread",
+          nicknames: "Mira, Sunthread",
+          age: "21",
+          category: "",
+          gender: "Female",
+          species: "Elf",
+          height: "5'7\"",
+          bodyType: "Slim, graceful",
+          weight: "Optional",
+          occupation: "Healer and charm-maker",
+          eyeColor: "Amber gold",
+          hairColor: "Warm brown",
+          hairStyle: "Long braid with loose curls around her face",
+          skinColor: "Deep tan with golden undertones",
+          markings: "Small glowing freckles across cheeks and shoulders",
+          features:
+            "Long pointed ears, warm smile, soft golden aura when casting",
+          theme: {
+            accent: "#f5c96a",
+            accent2: "#8fd39a",
+            accent3: "#314421",
+          },
+          themeName: "Yellow",
+          outfit: {
+            shirt: "Cream blouse with embroidered sleeves",
+            pants: "High-waisted brown trousers",
+            shoes: "Soft leather boots",
+            hat: "Wide-brim travel hat with ribbon",
+            outerwear: "Green traveling cloak",
+          },
+          accessories: "Charm bracelet, satchel of herbs, moonstone earrings",
+          weapons: "Light staff; defensive charm seals",
+          shortDescription: "Warm healer with stubborn golden magic.",
+          description:
+            "A bright, calming presence with a practical travel outfit and gentle confidence. She often looks harmless until her magic flares.",
+          personality: "Kind, clever, stubborn, nurturing, quietly brave.",
+          fightingStyle:
+            "Defensive support fighter who uses barriers, healing, misdirection, and light magic.",
+          speechStyle:
+            "Warm and polite, but becomes firm and commanding in emergencies.",
+          strengths: "Healing, emotional intelligence, defensive magic",
+          weaknesses: "Overextends herself, avoids direct violence",
+          likes: "Tea, gardens, handmade gifts",
+          dislikes: "Cruelty, needless fighting, wasting supplies",
+          fears: "Failing to save someone",
+          hobbies: "Herbalism, sewing charms, journaling",
+          stats: { power: 4, speed: 6, defense: 8, magic: 10, resolve: 9 },
+          photos: [defaultPortraitFor("Mira Solwyn")],
+          relations: [
+            {
+              with: "Kael Nightshade",
+              type: "Trusted Ally",
+              note: "She sees through Kael's cold act and treats him gently.",
+              history:
+                "Mira earned Kael's loyalty by giving him space, practical help, and no pity.",
+            },
+            {
+              with: "Riven Ashlock",
+              type: "Uneasy Friend",
+              note: "She believes Riven can change, even when he doubts it.",
+              history:
+                "Their friendship is built from arguments, patch-up work, and Mira refusing to reduce Riven to their worst moments.",
+            },
+          ],
+        },
+        {
+          name: "Riven Ashlock",
+          title: "Ashlock",
+          nicknames: "Riv, Ash",
+          age: "25",
+          category: "",
+          gender: "Nonbinary",
+          species: "Demon-Touched Human",
+          height: "5'11\"",
+          bodyType: "Compact, muscular",
+          weight: "Optional",
+          occupation: "Pit fighter turned mercenary",
+          eyeColor: "Red-orange",
+          hairColor: "White",
+          hairStyle: "Short undercut with messy top",
+          skinColor: "Brown skin with ember-like cracks along arms",
+          markings: "Burn-like glowing lines on forearms and neck",
+          features: "Small black horns, pointed nails, smoke-like shadow aura",
+          theme: {
+            accent: "#ff7849",
+            accent2: "#ff4d6d",
+            accent3: "#4a1b16",
+          },
+          themeName: "Orange",
+          outfit: {
+            shirt: "Sleeveless black top",
+            pants: "Reinforced fighting pants",
+            shoes: "Steel-toed boots",
+            hat: "None",
+            outerwear: "Short red battle coat",
+          },
+          accessories: "Chain belt, ear cuffs, arm wraps",
+          weapons: "Heavy chain blade",
+          shortDescription: "Fiery mercenary with a dangerous grin.",
+          description:
+            "A fierce, sharp-tongued fighter with a bold silhouette and controlled aggression. Their glowing markings make them look like they are burning from within.",
+          personality:
+            "Bold, impatient, loyal once earned, competitive, secretly sentimental.",
+          fightingStyle:
+            "Close-to-mid-range brawler using chain blade swings, grapples, and overwhelming pressure.",
+          speechStyle:
+            "Blunt, teasing, loud when excited. Uses nicknames often.",
+          strengths: "Power, endurance, intimidation, improvisation",
+          weaknesses: "Temper, reckless risks, hates retreating",
+          likes: "Sparring, spicy food, loud music",
+          dislikes: "Cowardice, lectures, being underestimated",
+          fears: "Becoming the monster people expect them to be",
+          hobbies: "Arm wrestling, repairing weapons, collecting coins",
+          stats: { power: 10, speed: 7, defense: 7, magic: 5, resolve: 8 },
+          photos: [defaultPortraitFor("Riven Ashlock")],
+          relations: [
+            {
+              with: "Kael Nightshade",
+              type: "Rival",
+              note: "They challenge each other constantly, sometimes for fun and sometimes not.",
+              history:
+                "The rivalry began in a bad first fight and stayed because neither of them likes backing down.",
+            },
+            {
+              with: "Mira Solwyn",
+              type: "Uneasy Friend",
+              note: "Riven acts annoyed by Mira's kindness but protects her fiercely.",
+              history:
+                "Mira's faith bothers Riven because it asks them to imagine a future that is not just survival.",
+            },
+          ],
+        },
+      ];
+
+      const tabs = [
+        "Overview",
+        "Appearance",
+        "Combat",
+        "Personality",
+        "Lore",
+        "Relations",
+      ];
+      const $ = (id) => document.getElementById(id);
+      const modal = $("modal");
+      const decisionDialog = $("decisionDialog");
+      const characterStorageKey = "characterCodexCharacters";
+      const locationStorageKey = "characterCodexLocations";
+      const relationPositionStorageKey = "characterCodexRelationPositionsV2";
+      const categoryOptions = ["", "One", "None", "NPC", "Other"];
+      const themePresets = [
+        {
+          name: "Red",
+          accent: "#ff5d68",
+          accent2: "#ffd0d5",
+          accent3: "#4a1119",
+        },
+        {
+          name: "Orange",
+          accent: "#ff8a42",
+          accent2: "#ffd0a1",
+          accent3: "#47220f",
+        },
+        {
+          name: "Yellow",
+          accent: "#f6d65f",
+          accent2: "#fff1a8",
+          accent3: "#3c3514",
+        },
+        {
+          name: "Green",
+          accent: "#67d98a",
+          accent2: "#c6f6d2",
+          accent3: "#173d28",
+        },
+        {
+          name: "Light Blue",
+          accent: "#7ecbff",
+          accent2: "#d9e5ff",
+          accent3: "#12364b",
+        },
+        {
+          name: "Blue",
+          accent: "#5f93ff",
+          accent2: "#cbd8ff",
+          accent3: "#14275a",
+        },
+        {
+          name: "Purple",
+          accent: "#b17cff",
+          accent2: "#e4d1ff",
+          accent3: "#2c1b4c",
+        },
+        {
+          name: "Pink",
+          accent: "#ff85c7",
+          accent2: "#ffd6eb",
+          accent3: "#4a1836",
+        },
+        {
+          name: "White",
+          accent: "#f4f1e8",
+          accent2: "#ffffff",
+          accent3: "#383936",
+        },
+        {
+          name: "Light Brown",
+          accent: "#caa06a",
+          accent2: "#ead8bd",
+          accent3: "#3a281c",
+        },
+      ];
+
+      let characters = loadCharacters();
+      let locations = loadLocations();
+      let currentIndex = 0;
+      let currentPhoto = 0;
+      let currentTab = "Overview";
+      let activeFilters = new Set(["All"]);
+      let filteredIndexes = characters.map((_, i) => i);
+      let viewMode = "detail";
+      let relationPositions = loadRelationPositions();
+      let activeEditorMode = null;
+      let relationMapZoom = 1;
+      let pendingImportCharacters = [];
+      let decisionAction = null;
+      let relationMapResizeObserver = null;
+
+      let imageScale = 1;
+      let imagePanX = 0;
+      let imagePanY = 0;
+      const activePointers = new Map();
+      let lastPinchDistance = 0;
+      let lastDragPoint = null;
+      const mapPointers = new Map();
+      let lastMapPinchDistance = 0;
+      let lastMapPinchMidpoint = null;
+
+      function loadCharacters() {
+        try {
+          const saved = localStorage.getItem("characterCodexCharacters");
+          if (!saved)
+            return structuredClone(defaultCharacters).map(normalizeCharacter);
+          const parsed = JSON.parse(saved);
+          return Array.isArray(parsed) && parsed.length
+            ? restoreDefaultSampleThemes(parsed.map(normalizeCharacter))
+            : structuredClone(defaultCharacters).map(normalizeCharacter);
+        } catch {
+          return structuredClone(defaultCharacters).map(normalizeCharacter);
+        }
+      }
+
+      function saveCharacters() {
+        localStorage.setItem(characterStorageKey, JSON.stringify(characters));
+      }
+
+      function loadLocations() {
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem(locationStorageKey) || "[]",
+          );
+          return Array.isArray(saved)
+            ? saved
+                .map((location) => ({
+                  name: String(location.name || "").trim(),
+                  description: String(location.description || "").trim(),
+                  planet: String(location.planet || "").trim(),
+                  spaceship: String(location.spaceship || "").trim(),
+                }))
+                .filter((location) => location.name)
+            : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveLocations() {
+        localStorage.setItem(locationStorageKey, JSON.stringify(locations));
+      }
+
+      function loadRelationPositions() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("characterCodexRelationPositionsV2") || "{}",
+          );
+        } catch {
+          return {};
+        }
+      }
+
+      function restoreDefaultSampleThemes(list) {
+        const sampleNames = ["Kael Nightshade", "Mira Solwyn", "Riven Ashlock"];
+        const sampleCharacters = sampleNames.map((name) =>
+          list.find((character) => character.name === name),
+        );
+        if (
+          sampleCharacters.every(Boolean) &&
+          sampleCharacters.every(
+            (character) => character.themeName === "Light Blue",
+          )
+        ) {
+          sampleCharacters.forEach((character) => {
+            character.themeName = defaultThemeNameFor(character.name);
+            character.theme = themeByName(character.themeName);
+          });
+        }
+        return list;
+      }
+
+      function saveRelationPositions() {
+        localStorage.setItem(
+          relationPositionStorageKey,
+          JSON.stringify(relationPositions),
+        );
+      }
+
+      function normalizeCharacter(character) {
+        const normalized = { ...blankCharacter(), ...character };
+        normalized.outfit = {
+          ...blankCharacter().outfit,
+          ...(character.outfit || {}),
+        };
+        normalized.stats = {
+          ...blankCharacter().stats,
+          ...(character.stats || {}),
+        };
+        normalized.photos = (character.photos || [])
+          .filter(Boolean)
+          .slice(0, 1);
+        const defaultMissingPhoto = {
+          "Kael Nightshade": "images/kael-main.png",
+          "Mira Solwyn": "images/mira-main.png",
+          "Riven Ashlock": "images/riven-main.png",
+        }[character.name];
+        if (
+          defaultMissingPhoto &&
+          normalized.photos[0] === defaultMissingPhoto
+        ) {
+          normalized.photos = [defaultPortraitFor(character.name)];
+        }
+        normalized.relations = (character.relations || []).map((relation) => ({
+          ...relation,
+          kind: relation.kind || inferRelationKind(relation.type),
+        }));
+        normalized.category = categoryOptions.includes(character.category)
+          ? character.category
+          : "";
+        if (
+          ["Kael Nightshade", "Mira Solwyn", "Riven Ashlock"].includes(
+            character.name,
+          ) &&
+          character.category === "Other"
+        ) {
+          normalized.category = "";
+        }
+        normalized.themeName =
+          character.themeName || nearestThemeName(character.theme);
+        if (
+          character.themeName &&
+          character.theme?.accent &&
+          themeByName(character.themeName).accent.toLowerCase() !==
+            String(character.theme.accent).toLowerCase()
+        ) {
+          normalized.themeName = nearestThemeName(character.theme);
+        }
+        normalized.theme = themeByName(normalized.themeName);
+        return normalized;
+      }
+
+      function themeByName(name) {
+        return {
+          ...(themePresets.find((theme) => theme.name === name) ||
+            themePresets[4]),
+        };
+      }
+
+      function defaultThemeNameFor(name) {
+        return (
+          {
+            "Kael Nightshade": "Light Blue",
+            "Mira Solwyn": "Yellow",
+            "Riven Ashlock": "Orange",
+          }[name] || "Light Blue"
+        );
+      }
+
+      function defaultPortraitFor(name) {
+        const portrait = {
+          "Kael Nightshade": {
+            initials: "KN",
+            accent: "#7ecbff",
+            deep: "#0e2738",
+            mid: "#1e5874",
+            light: "#d9e5ff",
+            mark: "M 130 350 C 160 270 260 245 300 148 C 346 247 442 268 474 350 Z",
+          },
+          "Mira Solwyn": {
+            initials: "MS",
+            accent: "#f6d65f",
+            deep: "#24371e",
+            mid: "#796330",
+            light: "#fff1a8",
+            mark: "M 128 338 C 184 206 388 206 444 338 C 384 315 188 315 128 338 Z",
+          },
+          "Riven Ashlock": {
+            initials: "RA",
+            accent: "#ff8a42",
+            deep: "#341112",
+            mid: "#7c2a1c",
+            light: "#ffd0a1",
+            mark: "M 132 352 C 158 230 244 220 286 142 C 326 226 424 226 468 352 Z",
+          },
+        }[name] || {
+          initials: initials(name),
+          accent: "#7ecbff",
+          deep: "#101821",
+          mid: "#23475b",
+          light: "#d9e5ff",
+          mark: "M 132 350 C 168 234 404 234 468 350 Z",
+        };
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1067">
+            <defs>
+              <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="${portrait.deep}"/>
+                <stop offset="0.58" stop-color="#090a0d"/>
+                <stop offset="1" stop-color="${portrait.mid}"/>
+              </linearGradient>
+              <radialGradient id="aura" cx="50%" cy="38%" r="48%">
+                <stop offset="0" stop-color="${portrait.accent}" stop-opacity="0.62"/>
+                <stop offset="1" stop-color="${portrait.accent}" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="10" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <rect width="600" height="1067" fill="url(#bg)"/>
+            <rect width="600" height="1067" fill="url(#aura)"/>
+            <g opacity="0.18" stroke="${portrait.light}" stroke-width="1">
+              <path d="M80 0 V1067 M200 0 V1067 M320 0 V1067 M440 0 V1067 M560 0 V1067"/>
+              <path d="M0 130 H600 M0 260 H600 M0 390 H600 M0 520 H600 M0 650 H600 M0 780 H600 M0 910 H600"/>
+            </g>
+            <path d="${portrait.mark}" fill="${portrait.deep}" opacity="0.88"/>
+            <circle cx="300" cy="265" r="112" fill="${portrait.mid}" stroke="${portrait.accent}" stroke-width="7" filter="url(#glow)"/>
+            <path d="M190 760 C208 552 238 430 300 430 C362 430 392 552 410 760 Z" fill="${portrait.mid}" stroke="${portrait.accent}" stroke-width="6"/>
+            <text x="300" y="312" text-anchor="middle" font-family="Outfit, Inter, Arial, sans-serif" font-size="82" font-weight="800" fill="${portrait.light}">${portrait.initials}</text>
+            <path d="M122 836 C210 904 390 904 478 836" fill="none" stroke="${portrait.accent}" stroke-width="5" opacity="0.62"/>
+          </svg>
+        `;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.replace(/\s+/g, " ").trim())}`;
+      }
+
+      function nearestThemeName(theme = {}) {
+        if (!theme?.accent) return "Light Blue";
+        const exact = themePresets.find(
+          (preset) =>
+            preset.accent.toLowerCase() === String(theme.accent).toLowerCase(),
+        );
+        if (exact) return exact.name;
+        const source = hexToRgb(theme.accent);
+        if (!source) return "Light Blue";
+        return (
+          themePresets
+            .map((preset) => {
+              const target = hexToRgb(preset.accent);
+              return {
+                name: preset.name,
+                distance: target
+                  ? Math.hypot(
+                      source.r - target.r,
+                      source.g - target.g,
+                      source.b - target.b,
+                    )
+                  : Infinity,
+              };
+            })
+            .sort((a, b) => a.distance - b.distance)[0]?.name || "Light Blue"
+        );
+      }
+
+      function hexToRgb(hex) {
+        const normalized = String(hex || "")
+          .trim()
+          .replace("#", "");
+        if (!/^[0-9a-f]{6}$/i.test(normalized)) return null;
+        return {
+          r: parseInt(normalized.slice(0, 2), 16),
+          g: parseInt(normalized.slice(2, 4), 16),
+          b: parseInt(normalized.slice(4, 6), 16),
+        };
+      }
+
+      function safe(value) {
+        return hasValue(value) ? String(value).trim() : "-";
+      }
+
+      function hasValue(value) {
+        const normalized = String(value ?? "").trim();
+        return (
+          normalized !== "" &&
+          normalized !== "-" &&
+          normalized.toLowerCase() !== "optional"
+        );
+      }
+
+      function shortText(character) {
+        if (hasValue(character.shortDescription))
+          return character.shortDescription;
+        if (!hasValue(character.description)) return "";
+        const firstSentence = String(character.description).split(
+          /(?<=[.!?])\s+/,
+        )[0];
+        return firstSentence.length > 92
+          ? `${firstSentence.slice(0, 89).trim()}...`
+          : firstSentence;
+      }
+
+      function htmlEscape(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formValue(value) {
+        return htmlEscape(value === "Optional" ? "" : value || "");
+      }
+
+      function currentCharacter() {
+        return characters[filteredIndexes[currentIndex]] || characters[0];
+      }
+
+      function initials(name) {
+        return safe(name)
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+      }
+
+      function splitList(value) {
+        if (!hasValue(value)) return [];
+        return String(value)
+          .split(",")
+          .map((item) => item.trim().replace(/\.$/, ""))
+          .filter(Boolean);
+      }
+
+      function iconFor(label) {
+        const icons = {
+          Species: "DNA",
+          Occupation: "Blade",
+          Height: "Height",
+          Weight: "Weight",
+          Age: "Age",
+          Gender: "ID",
+          Body: "Build",
+        };
+        return icons[label] || "Info";
+      }
+
+      function escapeQuotes(str) {
+        return String(str ?? "")
+          .replace(/\\/g, "\\\\")
+          .replace(/'/g, "&#39;")
+          .replace(/\n/g, " ");
+      }
+
+      function setTheme(character) {
+        const theme = character.themeName
+          ? themeByName(character.themeName)
+          : character.theme || {};
+        document.documentElement.style.setProperty(
+          "--accent",
+          theme.accent || "#88d8ff",
+        );
+        document.documentElement.style.setProperty(
+          "--accent-2",
+          theme.accent2 || "#dbefff",
+        );
+        document.documentElement.style.setProperty(
+          "--accent-3",
+          theme.accent3 || "#2b6e8f",
+        );
+      }
+
+      function setBackdrop(src, character) {
+        if (src) {
+          document.body.style.setProperty("--backdrop", `url("${src}")`);
+          return;
+        }
+        const theme = character.themeName
+          ? themeByName(character.themeName)
+          : character.theme || {};
+        document.body.style.setProperty(
+          "--backdrop",
+          `linear-gradient(135deg, ${theme.accent3 || "#14202b"}, #080a0d 62%, ${theme.accent || "#88d8ff"})`,
+        );
+      }
+
+      function field(label, value) {
+        return `<div class="field"><b>${label}</b><span>${htmlEscape(safe(value))}</span></div>`;
+      }
+
+      function chips(character) {
+        return [
+          ["Species", character.species],
+          ["Occupation", character.occupation],
+          ["Height", character.height],
+          ["Weight", character.weight],
+          ["Age", character.age],
+        ]
+          .filter(([, value]) => hasValue(value))
+          .map(
+            ([label, value]) =>
+              `<span class="chip">${iconFor(label)} ${safe(value)}</span>`,
+          )
+          .join("");
+      }
+
+      function clampImagePan() {
+        const wrap = $("photoWrap");
+        const maxX = (wrap.clientWidth * Math.max(imageScale - 1, 0)) / 2;
+        const maxY = (wrap.clientHeight * Math.max(imageScale - 1, 0)) / 2;
+        imagePanX = Math.max(-maxX, Math.min(maxX, imagePanX));
+        imagePanY = Math.max(-maxY, Math.min(maxY, imagePanY));
+      }
+
+      function applyImageTransform() {
+        clampImagePan();
+        const img = document.querySelector("#photoWrap img.active");
+        if (!img) return;
+        img.style.transform = `translate(${imagePanX}px, ${imagePanY}px) scale(${imageScale})`;
+        $("photoWrap").classList.toggle("zoomed", imageScale > 1.01);
+      }
+
+      function resetImageZoom() {
+        imageScale = 1;
+        imagePanX = 0;
+        imagePanY = 0;
+        activePointers.clear();
+        lastPinchDistance = 0;
+        lastDragPoint = null;
+        applyImageTransform();
+      }
+
+      function zoomImageBy(multiplier, centerX = 0, centerY = 0) {
+        const oldScale = imageScale;
+        const nextScale = Math.max(1, Math.min(5, imageScale * multiplier));
+        if (nextScale === oldScale) return;
+        imageScale = nextScale;
+        if (imageScale <= 1.01) {
+          imageScale = 1;
+          imagePanX = 0;
+          imagePanY = 0;
+        } else {
+          imagePanX = centerX - (centerX - imagePanX) * (imageScale / oldScale);
+          imagePanY = centerY - (centerY - imagePanY) * (imageScale / oldScale);
+        }
+        applyImageTransform();
+      }
+
+      function distanceBetweenPointers() {
+        const pts = [...activePointers.values()];
+        if (pts.length < 2) return 0;
+        return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      }
+
+      function midpointBetweenPointers() {
+        const pts = [...activePointers.values()];
+        return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+      }
+
+      function renderPhotos(character) {
+        const wrap = $("photoWrap");
+        wrap.innerHTML = "";
+        resetImageZoom();
+        currentPhoto = 0;
+
+        const stage = document.createElement("div");
+        stage.className = "image-stage";
+        wrap.appendChild(stage);
+
+        const photos = (character.photos || []).slice(0, 1);
+        let activeSrc = photos[currentPhoto] || "";
+        setBackdrop(activeSrc, character);
+
+        if (!photos.length) {
+          stage.innerHTML = placeholder(character);
+        } else {
+          photos.forEach((src, i) => {
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = `${character.name} reference ${i + 1}`;
+            img.className = i === currentPhoto ? "active" : "";
+            img.onload = () => {
+              if (i === currentPhoto) setBackdrop(src, character);
+            };
+            img.onerror = () => {
+              if (i !== currentPhoto) return;
+              setBackdrop("", character);
+              stage.innerHTML = placeholder(character);
+            };
+            stage.appendChild(img);
+          });
+        }
+
+        const controls = document.createElement("div");
+        controls.className = "image-controls";
+        controls.innerHTML = `<button class="btn icon" type="button" id="zoomOutBtn" title="Zoom out">-</button><button class="btn" type="button" id="zoomResetBtn">Reset</button><button class="btn icon" type="button" id="zoomInBtn" title="Zoom in">+</button>`;
+        wrap.appendChild(controls);
+        $("zoomOutBtn").onclick = (e) => {
+          e.stopPropagation();
+          zoomImageBy(0.85);
+        };
+        $("zoomInBtn").onclick = (e) => {
+          e.stopPropagation();
+          zoomImageBy(1.18);
+        };
+        $("zoomResetBtn").onclick = (e) => {
+          e.stopPropagation();
+          resetImageZoom();
+        };
+
+        const photoTabs = document.createElement("div");
+        photoTabs.className = "photo-tabs";
+        photoTabs.innerHTML = `<span class="dot active" aria-hidden="true"></span><span class="dot active" aria-hidden="true"></span>`;
+        wrap.appendChild(photoTabs);
+      }
+
+      function placeholder(character) {
+        return `
+          <div class="photo-placeholder">
+            <div class="placeholder-mark"><span>${initials(character.name)}</span></div>
+          </div>
+        `;
+      }
+
+      function renderTabs() {
+        $("tabs").innerHTML = tabs
+          .map(
+            (tab) =>
+              `<button class="tab ${tab === currentTab ? "active" : ""}" onclick="setTab('${tab}')">${tab}</button>`,
+          )
+          .join("");
+      }
+
+      function renderPanels(character) {
+        const panels = {
+          Overview: overviewPanel(character),
+          Appearance: appearancePanel(character),
+          Combat: combatPanel(character),
+          Personality: personalityPanel(character),
+          Lore: lorePanel(character),
+          Relations: relationsPanel(character),
+        };
+
+        $("tabPanels").innerHTML = tabs
+          .map(
+            (tab) =>
+              `<section class="tab-panel ${tab === currentTab ? "active" : ""}" data-tab="${tab}">${panels[tab]}</section>`,
+          )
+          .join("");
+      }
+
+      function sectionBlock(title, body, wide = false) {
+        return `<div class="section ${wide ? "wide" : ""}"><h3>${title}</h3>${hasValue(body) ? body : "<p>-</p>"}</div>`;
+      }
+
+      function fieldGrid(items) {
+        const html = items
+          .map(([label, value]) => field(label, value))
+          .join("");
+        return `<div class="field-grid">${html}</div>`;
+      }
+
+      function detailsBlock(title, body, open = true) {
+        return `<details ${open ? "open" : ""}><summary>${title}</summary><div class="details-body">${hasValue(body) ? body : "-"}</div></details>`;
+      }
+
+      function overviewPanel(c) {
+        const identity = fieldGrid([
+          ["Name", c.name],
+          ["Title", c.title || c.nicknames],
+          ["Species", c.species],
+          ["Occupation", c.occupation],
+          ["Age", c.age],
+          ["Gender", c.gender],
+          ["Height", c.height],
+          ["Weight", c.weight],
+        ]);
+        const tags = splitList(c.personality);
+        return `
+          <div class="section-grid">
+            ${sectionBlock("Short Description", hasValue(shortText(c)) ? `<p>${htmlEscape(shortText(c))}</p>` : "", true)}
+            ${sectionBlock("Description", hasValue(c.description) ? `<p>${htmlEscape(c.description)}</p>` : "", true)}
+            ${sectionBlock("Identity", identity)}
+            ${sectionBlock("At a Glance", `<div class="tag-cloud">${tags.length ? tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("") : `<span class="tag">-</span>`}</div>`)}
+          </div>
+        `;
+      }
+
+      function appearancePanel(c) {
+        const physical = fieldGrid([
+          ["Eye Color", c.eyeColor],
+          ["Hair Color", c.hairColor],
+          ["Hair Style", c.hairStyle],
+          ["Skin / Fur / Scale Color", c.skinColor],
+          ["Markings", c.markings],
+          ["Features", c.features],
+        ]);
+        const gear = fieldGrid([
+          ["Shirt / Top", c.outfit?.shirt],
+          ["Pants / Bottoms", c.outfit?.pants],
+          ["Shoes", c.outfit?.shoes],
+          ["Hat / Headwear", c.outfit?.hat],
+          ["Outerwear", c.outfit?.outerwear],
+          ["Accessories", c.accessories],
+        ]);
+        return `
+          ${detailsBlock("Physical Appearance", physical)}
+          ${detailsBlock("Outfit and Gear", gear)}
+        `;
+      }
+
+      function combatPanel(c) {
+        const stats = c.stats || {};
+        const statEntries = [
+          "power",
+          "speed",
+          "defense",
+          "magic",
+          "resolve",
+        ].map((key) => [key, hasValue(stats[key]) ? stats[key] : "-"]);
+        const arsenal = fieldGrid([
+          ["Weapons", c.weapons],
+          ["Strengths", c.strengths],
+          ["Weaknesses", c.weaknesses],
+        ]);
+        return `
+          <div class="section-grid">
+            ${sectionBlock("Combat Style", hasValue(c.fightingStyle) ? `<p>${htmlEscape(c.fightingStyle)}</p>` : "", true)}
+            <div class="section">
+              <h3>RPG Profile</h3>
+              <div class="bars">
+                ${statEntries
+                  .map(
+                    ([label, value]) => `
+                    <div class="bar-row">
+                      <b>${label[0].toUpperCase() + label.slice(1)}</b>
+                      <div class="bar-track"><div class="bar-fill" style="--value:${Number(value) || 0}"></div></div>
+                      <span>${hasValue(value) ? `${value}/10` : "-"}</span>
+                    </div>`,
+                  )
+                  .join("")}
+              </div>
+            </div>
+            ${sectionBlock("Arsenal", arsenal)}
+          </div>
+        `;
+      }
+
+      function personalityPanel(c) {
+        const tags = splitList(c.personality);
+        const innerLife = fieldGrid([
+          ["Likes", c.likes],
+          ["Dislikes", c.dislikes],
+          ["Fears", c.fears],
+          ["Hobbies", c.hobbies],
+        ]);
+        return `
+          <div class="section-grid">
+            ${sectionBlock("Personality Tags", `<div class="tag-cloud">${tags.length ? tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("") : `<span class="tag">-</span>`}</div>`, true)}
+            ${sectionBlock("Voice", hasValue(c.speechStyle) ? `<p>${htmlEscape(c.speechStyle)}</p>` : "")}
+            ${sectionBlock("Inner Life", innerLife)}
+          </div>
+        `;
+      }
+
+      function lorePanel(c) {
+        const motivation = [
+          ["Strengths", c.strengths],
+          ["Weaknesses", c.weaknesses],
+          ["Fear", c.fears],
+        ]
+          .map(
+            ([label, value]) =>
+              `<p><b>${label}:</b> ${htmlEscape(safe(value))}</p>`,
+          )
+          .join("");
+        return `
+          ${detailsBlock("Lore Summary", htmlEscape(safe(c.description)))}
+          ${detailsBlock("Motivation and Conflict", motivation)}
+        `;
+      }
+
+      function relationMapMarkup(activeName = null, large = false) {
+        return `
+          <div class="section relationship-graph ${large ? "large" : ""}">
+            <div class="map-tools">
+              <button class="btn icon" type="button" onclick="zoomRelationMap(-1)" title="Zoom out">-</button>
+              <button class="btn" type="button" onclick="resetRelationMapZoom()">Reset</button>
+              <button class="btn icon" type="button" onclick="zoomRelationMap(1)" title="Zoom in">+</button>
+            </div>
+            <div class="map-stage" id="relationMap">
+              <div class="map-world" id="relationMapWorld">
+                <div class="map-canvas" id="relationMapCanvas">
+                  <svg class="map-lines" id="relationLines"></svg>
+                  ${characters.map((character) => mapNode(character, character.name === activeName)).join("")}
+                </div>
+              </div>
+              <div class="relation-line-tooltip" id="relationLineTooltip" role="tooltip"></div>
+            </div>
+          </div>`;
+      }
+
+      function relationsPanel(c) {
+        const relations = c.relations || [];
+        if (!characters.length)
+          return `<p class="empty">No characters listed yet.</p>`;
+        return `
+          ${relationMapMarkup(c.name)}
+          <br>
+          <div class="cards">
+            ${
+              relations.length
+                ? relations
+                    .map(
+                      (r) => `
+                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(c.name)}', '${escapeQuotes(r.with)}')">
+                    <div class="avatar" style="background:${characterColor(r.with)}">${initials(r.with)}</div>
+                    <div>
+                      <b>${safe(c.name)} -> ${safe(r.with)}</b>
+                      <small><span class="relation-type" style="background:${relationColor(r.kind || r.type)}">${safe(r.kind || inferRelationKind(r.type))}: ${safe(r.type)}</span> ${safe(r.note)}</small>
+                    </div>
+                  </div>`,
+                    )
+                    .join("")
+                : `<p class="empty">No relations for this character yet.</p>`
+            }
+          </div>
+        `;
+      }
+
+      function allRelations() {
+        return characters.flatMap((c) =>
+          (c.relations || []).map((r) => ({ from: c.name, ...r })),
+        );
+      }
+
+      function mapRelations(activeName = null) {
+        const seen = new Set();
+        return allRelations().filter((relation) => {
+          if (
+            activeName &&
+            relation.from !== activeName &&
+            relation.with !== activeName
+          )
+            return false;
+          const key = [relation.from, relation.with].sort().join("::");
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      function characterColor(name) {
+        const character = characters.find((c) => c.name === name);
+        return character?.themeName
+          ? themeByName(character.themeName).accent
+          : character?.theme?.accent || "#8fdcff";
+      }
+
+      function relationColor(type = "") {
+        const kind = ["Enemy", "Friend", "Other"].includes(type)
+          ? type
+          : inferRelationKind(type);
+        if (kind === "Enemy") return "#ff5d68";
+        if (kind === "Friend") return "#45c18a";
+        return "#5f93ff";
+      }
+
+      function inferRelationKind(type = "") {
+        const normalized = String(type).toLowerCase();
+        if (
+          normalized.includes("enemy") ||
+          normalized.includes("rival") ||
+          normalized.includes("hostile")
+        )
+          return "Enemy";
+        if (
+          normalized.includes("friend") ||
+          normalized.includes("ally") ||
+          normalized.includes("trusted")
+        )
+          return "Friend";
+        return "Other";
+      }
+
+      function mapNode(character, active) {
+        const color = characterColor(character.name);
+        const position = getNodePosition(character.name);
+        return `
+          <button
+            class="map-node ${active ? "active" : ""}"
+            data-character="${htmlEscape(character.name)}"
+            style="left:${position.x}%;top:${position.y}%;background:${color};--node-glow:${color}66"
+            ondblclick="goToCharacter(this.dataset.character)"
+          >
+            <span>${initials(character.name)}</span>
+            <small>${htmlEscape(character.name.split(" ")[0])}</small>
+            <span class="map-tooltip"><b>${htmlEscape(character.name)}</b><br>${htmlEscape(shortText(character))}</span>
+          </button>
+        `;
+      }
+
+      function getNodePosition(name) {
+        if (relationPositions[name]) return relationPositions[name];
+        const index = characters.findIndex((c) => c.name === name);
+        const count = Math.max(characters.length, 1);
+        const angle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
+        return {
+          x: 50 + Math.cos(angle) * 30,
+          y: 50 + Math.sin(angle) * 30,
+        };
+      }
+
+      function setupRelationMap() {
+        const map = $("relationMap");
+        const svg = $("relationLines");
+        const canvas = $("relationMapCanvas");
+        const tooltip = $("relationLineTooltip");
+        if (!map || !svg) return;
+        applyRelationMapZoom();
+
+        function drawLines() {
+          const lineWidth = (canvas || map).clientWidth;
+          const lineHeight = (canvas || map).clientHeight;
+          svg.setAttribute("viewBox", `0 0 ${lineWidth} ${lineHeight}`);
+          svg.innerHTML = mapRelations()
+            .map((relation) => {
+              const fromNode = map.querySelector(
+                `[data-character="${cssEscape(relation.from)}"]`,
+              );
+              const toNode = map.querySelector(
+                `[data-character="${cssEscape(relation.with)}"]`,
+              );
+              if (!fromNode || !toNode) return "";
+              const fromX = parseFloat(fromNode.style.left);
+              const fromY = parseFloat(fromNode.style.top);
+              const toX = parseFloat(toNode.style.left);
+              const toY = parseFloat(toNode.style.top);
+              const x1 = (fromX / 100) * lineWidth;
+              const y1 = (fromY / 100) * lineHeight;
+              const x2 = (toX / 100) * lineWidth;
+              const y2 = (toY / 100) * lineHeight;
+              const kind = relation.kind || inferRelationKind(relation.type);
+              const color = relationColor(kind);
+              const label = `${relation.from} -> ${relation.with}: ${kind} - ${relation.type || "Related"}${relation.note ? ` - ${relation.note}` : ""}`;
+              return `
+                <g>
+                  <line class="map-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="color:${color};stroke:${color}"></line>
+                  <line class="map-line-hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" data-relation-label="${htmlEscape(label)}"></line>
+                </g>`;
+            })
+            .join("");
+
+          svg.querySelectorAll(".map-line-hit").forEach((line) => {
+            line.addEventListener("pointerenter", () => {
+              if (!tooltip) return;
+              tooltip.textContent = line.dataset.relationLabel;
+              tooltip.classList.add("visible");
+            });
+            line.addEventListener("pointermove", (event) => {
+              if (!tooltip) return;
+              const rect = map.getBoundingClientRect();
+              tooltip.textContent = line.dataset.relationLabel;
+              tooltip.classList.add("visible");
+              tooltip.style.left = `${event.clientX - rect.left + map.scrollLeft}px`;
+              tooltip.style.top = `${event.clientY - rect.top + map.scrollTop}px`;
+            });
+            line.addEventListener("pointerleave", () =>
+              tooltip?.classList.remove("visible"),
+            );
+          });
+        }
+
+        map.querySelectorAll(".map-node").forEach((node) => {
+          let dragging = false;
+          let moved = false;
+          let lastClientX = 0;
+          let lastClientY = 0;
+          let edgeScrollX = 0;
+          let edgeScrollY = 0;
+          let autoScrollFrame = null;
+
+          function updateNodePosition(clientX, clientY) {
+            const rect = map.getBoundingClientRect();
+            const name = node.dataset.character;
+            const localX =
+              (clientX - rect.left + map.scrollLeft - canvas.offsetLeft) /
+              relationMapZoom;
+            const localY =
+              (clientY - rect.top + map.scrollTop - canvas.offsetTop) /
+              relationMapZoom;
+            const x = Math.max(
+              2,
+              Math.min(98, (localX / canvas.clientWidth) * 100),
+            );
+            const y = Math.max(
+              3,
+              Math.min(97, (localY / canvas.clientHeight) * 100),
+            );
+            relationPositions[name] = { x, y };
+            node.style.left = `${x}%`;
+            node.style.top = `${y}%`;
+            drawLines();
+          }
+
+          function updateEdgeScroll(clientX, clientY) {
+            const rect = map.getBoundingClientRect();
+            const edge = 72;
+            const speed = 24;
+            edgeScrollX =
+              clientX < rect.left + edge
+                ? -speed * (1 - Math.max(0, clientX - rect.left) / edge)
+                : clientX > rect.right - edge
+                  ? speed * (1 - Math.max(0, rect.right - clientX) / edge)
+                  : 0;
+            edgeScrollY =
+              clientY < rect.top + edge
+                ? -speed * (1 - Math.max(0, clientY - rect.top) / edge)
+                : clientY > rect.bottom - edge
+                  ? speed * (1 - Math.max(0, rect.bottom - clientY) / edge)
+                  : 0;
+            if ((edgeScrollX || edgeScrollY) && !autoScrollFrame) {
+              autoScrollFrame = requestAnimationFrame(autoScroll);
+            }
+          }
+
+          function autoScroll() {
+            autoScrollFrame = null;
+            if (
+              !dragging ||
+              mapPointers.size >= 2 ||
+              (!edgeScrollX && !edgeScrollY)
+            )
+              return;
+            const oldLeft = map.scrollLeft;
+            const oldTop = map.scrollTop;
+            map.scrollLeft += edgeScrollX;
+            map.scrollTop += edgeScrollY;
+            if (map.scrollLeft !== oldLeft || map.scrollTop !== oldTop) {
+              updateNodePosition(lastClientX, lastClientY);
+            }
+            autoScrollFrame = requestAnimationFrame(autoScroll);
+          }
+
+          node.addEventListener("pointerdown", (event) => {
+            dragging = true;
+            moved = false;
+            node.setPointerCapture(event.pointerId);
+          });
+
+          node.addEventListener("pointermove", (event) => {
+            if (!dragging || mapPointers.size >= 2) return;
+            event.preventDefault();
+            moved = true;
+            lastClientX = event.clientX;
+            lastClientY = event.clientY;
+            updateEdgeScroll(lastClientX, lastClientY);
+            updateNodePosition(lastClientX, lastClientY);
+          });
+
+          function finishDrag(event) {
+            if (!dragging) return;
+            dragging = false;
+            edgeScrollX = 0;
+            edgeScrollY = 0;
+            if (autoScrollFrame) cancelAnimationFrame(autoScrollFrame);
+            autoScrollFrame = null;
+            saveRelationPositions();
+            event.stopPropagation();
+          }
+
+          node.addEventListener("pointerup", finishDrag);
+          node.addEventListener("pointercancel", finishDrag);
+          node.addEventListener("click", (event) => {
+            if (!moved) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moved = false;
+          });
+        });
+
+        map.addEventListener("pointerdown", (event) => {
+          mapPointers.set(event.pointerId, {
+            x: event.clientX,
+            y: event.clientY,
+          });
+          if (mapPointers.size === 2) {
+            lastMapPinchDistance = mapPointerDistance();
+            lastMapPinchMidpoint = mapPointerMidpoint();
+          }
+        });
+
+        map.addEventListener("pointermove", (event) => {
+          if (!mapPointers.has(event.pointerId)) return;
+          mapPointers.set(event.pointerId, {
+            x: event.clientX,
+            y: event.clientY,
+          });
+          if (mapPointers.size >= 2) {
+            event.preventDefault();
+            const nextDistance = mapPointerDistance();
+            if (lastMapPinchDistance) {
+              const midpoint = mapPointerMidpoint();
+              setRelationMapZoom(
+                relationMapZoom * (nextDistance / lastMapPinchDistance),
+                midpoint.x,
+                midpoint.y,
+              );
+              lastMapPinchMidpoint = midpoint;
+            }
+            lastMapPinchDistance = nextDistance;
+          }
+        });
+
+        function endMapPointer(event) {
+          mapPointers.delete(event.pointerId);
+          lastMapPinchDistance =
+            mapPointers.size >= 2 ? mapPointerDistance() : 0;
+          lastMapPinchMidpoint =
+            mapPointers.size >= 2 ? mapPointerMidpoint() : null;
+        }
+
+        map.addEventListener("pointerup", endMapPointer);
+        map.addEventListener("pointercancel", endMapPointer);
+
+        drawLines();
+        relationMapResizeObserver?.disconnect();
+        relationMapResizeObserver = null;
+        requestAnimationFrame(() => centerRelationMap());
+      }
+
+      function mapPointerDistance() {
+        const points = [...mapPointers.values()];
+        if (points.length < 2) return 0;
+        return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+      }
+
+      function mapPointerMidpoint() {
+        const points = [...mapPointers.values()];
+        if (points.length < 2) return { x: 0, y: 0 };
+        return {
+          x: (points[0].x + points[1].x) / 2,
+          y: (points[0].y + points[1].y) / 2,
+        };
+      }
+
+      function applyRelationMapZoom() {
+        const canvas = $("relationMapCanvas");
+        const world = $("relationMapWorld");
+        const map = $("relationMap");
+        if (!canvas || !world || !map) return;
+        const scaledWidth = 2400 * relationMapZoom;
+        const scaledHeight = 1600 * relationMapZoom;
+        const worldWidth = Math.max(map.clientWidth, scaledWidth);
+        const worldHeight = Math.max(map.clientHeight, scaledHeight);
+        canvas.style.setProperty("--map-zoom", relationMapZoom);
+        canvas.style.left = `${Math.max(0, (worldWidth - scaledWidth) / 2)}px`;
+        canvas.style.top = `${Math.max(0, (worldHeight - scaledHeight) / 2)}px`;
+        world.style.width = `${worldWidth}px`;
+        world.style.height = `${worldHeight}px`;
+        world.style.backgroundSize = `${48 * relationMapZoom}px ${48 * relationMapZoom}px`;
+      }
+
+      function zoomRelationMap(direction) {
+        const multiplier = direction > 0 ? 1.25 : 0.8;
+        setRelationMapZoom(relationMapZoom * multiplier);
+      }
+
+      function resetRelationMapZoom() {
+        setRelationMapZoom(1);
+        requestAnimationFrame(() => centerRelationMap());
+      }
+
+      function setRelationMapZoom(nextZoom, clientX = null, clientY = null) {
+        const map = $("relationMap");
+        if (!map) return;
+        const oldZoom = relationMapZoom;
+        const rect = map.getBoundingClientRect();
+        const localX = clientX == null ? rect.width / 2 : clientX - rect.left;
+        const localY = clientY == null ? rect.height / 2 : clientY - rect.top;
+        const oldCanvas = $("relationMapCanvas");
+        const worldX =
+          (map.scrollLeft + localX - oldCanvas.offsetLeft) / oldZoom;
+        const worldY = (map.scrollTop + localY - oldCanvas.offsetTop) / oldZoom;
+        relationMapZoom = Math.max(0.18, Math.min(3.5, nextZoom));
+        applyRelationMapZoom();
+        map.scrollLeft = Math.max(
+          0,
+          worldX * relationMapZoom + oldCanvas.offsetLeft - localX,
+        );
+        map.scrollTop = Math.max(
+          0,
+          worldY * relationMapZoom + oldCanvas.offsetTop - localY,
+        );
+      }
+
+      function centerRelationMap() {
+        const map = $("relationMap");
+        if (!map) return;
+        map.scrollLeft = Math.max(0, (map.scrollWidth - map.clientWidth) / 2);
+        map.scrollTop = Math.max(0, (map.scrollHeight - map.clientHeight) / 2);
+      }
+
+      function cssEscape(value) {
+        if (window.CSS?.escape) return CSS.escape(value);
+        return String(value).replace(/"/g, '\\"');
+      }
+
+      function renderFilters() {
+        const categories = ["All", "One", "None", "NPC", "Other", "Locations"];
+        $("filters").innerHTML = categories
+          .map((category) => {
+            const active =
+              category === "Locations"
+                ? viewMode === "locations"
+                : viewMode !== "locations" && activeFilters.has(category);
+            return `<button class="filter ${active ? "active" : ""}" aria-pressed="${active}" onclick="setFilter('${escapeQuotes(category)}')">${category}</button>`;
+          })
+          .join("");
+      }
+
+      function characterMatchesActiveFilters(character) {
+        if (activeFilters.has("All")) return true;
+        return [...activeFilters].some(
+          (filter) =>
+            (character.category || "").toLowerCase() === filter.toLowerCase(),
+        );
+      }
+
+      function renderActiveHeading(character) {
+        $("topCharacterName").textContent = safe(character.name);
+        const short = shortText(character);
+        $("topCharacterShort").textContent = safe(short);
+      }
+
+      function renderThumbs() {
+        $("thumbs").innerHTML = characters
+          .map((c, absoluteIndex) => {
+            const filteredIndex = filteredIndexes.indexOf(absoluteIndex);
+            const active = filteredIndex === currentIndex;
+            const disabled = filteredIndex < 0;
+            return `
+              <button class="thumb ${active ? "active" : ""}" ${disabled ? "style='opacity:.38'" : ""} onclick="goToCharacterByIndex(${absoluteIndex})">
+                <span class="avatar">${initials(c.name)}</span>
+                <span>${htmlEscape(c.name.split(" ")[0])}</span>
+              </button>
+            `;
+          })
+          .join("");
+      }
+
+      function render() {
+        applySearch(false);
+        renderFilters();
+        const locationsActive = viewMode === "locations";
+        $("addCharacterBtn").textContent = locationsActive ? "Add Location" : "Add";
+        $("editCharacterBtn").textContent = locationsActive ? "Edit Locations" : "Edit";
+        $("editCharacterBtn").disabled = locationsActive && !locations.length;
+        $("viewer").classList.toggle("collection-view", viewMode !== "detail");
+        $("allCharactersBtn").classList.toggle(
+          "primary",
+          viewMode === "roster",
+        );
+        $("relationsBtn").classList.toggle("primary", viewMode === "relations");
+
+        if (viewMode === "locations") {
+          renderLocationsView();
+          return;
+        }
+
+        if (viewMode === "roster") {
+          renderRosterView();
+          return;
+        }
+
+        if (viewMode === "relations") {
+          renderRelationsView();
+          return;
+        }
+
+        if (!filteredIndexes.length) {
+          $("tabPanels").innerHTML =
+            `<section class="tab-panel active"><p class="empty">No characters match this filter.</p></section>`;
+          $("thumbs").innerHTML = "";
+          return;
+        }
+
+        currentIndex = Math.min(currentIndex, filteredIndexes.length - 1);
+        const c = currentCharacter();
+        currentPhoto = Math.min(
+          currentPhoto,
+          Math.max((c.photos || []).length - 1, 0),
+        );
+        setTheme(c);
+        renderPhotos(c);
+        renderActiveHeading(c);
+        const prev =
+          characters[
+            filteredIndexes[
+              (currentIndex - 1 + filteredIndexes.length) %
+                filteredIndexes.length
+            ]
+          ];
+        const next =
+          characters[
+            filteredIndexes[(currentIndex + 1) % filteredIndexes.length]
+          ];
+        $("prevBtn").innerHTML =
+          `<span class="nav-name">&larr; ${safe(prev?.name).split(" ")[0]}</span>`;
+        $("nextBtn").innerHTML =
+          `<span class="nav-name">${safe(next?.name).split(" ")[0]} &rarr;</span>`;
+
+        renderTabs();
+        renderPanels(c);
+        if (currentTab === "Relations") setupRelationMap();
+        renderThumbs();
+      }
+
+      function setTab(tab) {
+        viewMode = "detail";
+        currentTab = tab;
+        render();
+      }
+
+      function setFilter(filter) {
+        if (filter === "Locations") {
+          viewMode = "locations";
+          currentPhoto = 0;
+          render();
+          return;
+        }
+        if (filter === "All") {
+          activeFilters = new Set(["All"]);
+        } else {
+          if (activeFilters.has("All")) activeFilters.clear();
+          if (activeFilters.has(filter)) activeFilters.delete(filter);
+          else activeFilters.add(filter);
+        }
+        viewMode = "roster";
+        currentIndex = 0;
+        currentPhoto = 0;
+        render();
+      }
+
+      function applySearch(reset = true) {
+        filteredIndexes = characters
+          .map((c, i) => ({ c, i }))
+          .filter(({ c }) => {
+            return characterMatchesActiveFilters(c);
+          })
+          .map((x) => x.i);
+        if (reset) {
+          currentIndex = 0;
+          currentPhoto = 0;
+        }
+      }
+
+      function renderRosterView() {
+        $("topCharacterName").textContent = "Character Roster";
+        $("topCharacterShort").textContent = activeFilters.has("All")
+          ? "All characters"
+          : [...activeFilters].join(", ") || "No categories selected";
+        $("tabs").innerHTML = "";
+        $("thumbs").innerHTML = "";
+        if (!filteredIndexes.length) {
+          $("tabPanels").innerHTML =
+            `<p class="empty">No characters match this filter.</p>`;
+          return;
+        }
+        $("tabPanels").innerHTML = `
+          <div class="collection-toolbar">
+            <span>${filteredIndexes.length} character${filteredIndexes.length === 1 ? "" : "s"}</span>
+            <button class="btn primary" type="button" onclick="randomFilteredCharacter()">Random</button>
+          </div>
+          ${rosterGroupsMarkup()}`;
+        setupRosterReordering();
+      }
+
+      function rosterGroupsMarkup() {
+        const categoryOrder = ["", "One", "None", "NPC", "Other"];
+        return categoryOrder
+          .map((category) => {
+            const group = filteredIndexes
+              .filter((index) => (characters[index].category || "") === category)
+              .map((index) => ({ character: characters[index], index }));
+            if (!group.length) return "";
+            return `
+              <section class="roster-group" data-category="${htmlEscape(category)}">
+                <h3>${htmlEscape(category || "-")}</h3>
+                <div class="roster-grid">
+                  ${group.map(({ character, index }) => `<div class="roster-slot" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(category)}">${rosterCard(character, index)}</div>`).join("")}
+                </div>
+              </section>`;
+          })
+          .join("");
+      }
+
+      function rosterCard(character, absoluteIndex) {
+        const photo = character.photos?.[0];
+        const color = characterColor(character.name);
+        return `
+          <button class="mini-card roster-card" type="button" draggable="true" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}" style="--card-color:${color}" onclick="openRosterCharacter(event, ${absoluteIndex})">
+            <span class="roster-portrait">
+              ${photo ? `<img src="${htmlEscape(photo)}" alt="" data-initials="${htmlEscape(initials(character.name))}" onerror="handleRosterImageError(this)">` : `<span class="roster-initials">${htmlEscape(initials(character.name))}</span>`}
+            </span>
+            <span class="roster-card-copy">
+              <b>${htmlEscape(character.name)}</b>
+              <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
+            </span>
+          </button>`;
+      }
+
+      function renderRelationsView() {
+        $("topCharacterName").textContent = "Relations Map";
+        $("topCharacterShort").textContent = "All character connections";
+        $("tabs").innerHTML = "";
+        $("thumbs").innerHTML = "";
+        $("tabPanels").innerHTML = characters.length
+          ? relationMapMarkup(null, true)
+          : `<p class="empty">No characters listed yet.</p>`;
+        if (characters.length) setupRelationMap();
+      }
+
+      function renderLocationsView() {
+        $("topCharacterName").textContent = "Locations";
+        $("topCharacterShort").textContent = "Planets, spaceships, and places";
+        $("tabs").innerHTML = "";
+        $("thumbs").innerHTML = "";
+        $("tabPanels").innerHTML = `
+          <div class="collection-toolbar">
+            <span>${locations.length} location${locations.length === 1 ? "" : "s"}</span>
+            <button class="btn primary" type="button" onclick="openLocationForm()">Add Location</button>
+          </div>
+          ${
+            locations.length
+              ? `<div class="location-grid">${locations.map((location, index) => locationCard(location, index)).join("")}</div>`
+              : `<p class="empty">No locations yet.</p>`
+          }`;
+      }
+
+      function locationCard(location, index) {
+        const tags = [
+          hasValue(location.planet)
+            ? `<span class="location-tag planet">Planet: ${htmlEscape(location.planet)}</span>`
+            : "",
+          hasValue(location.spaceship)
+            ? `<span class="location-tag spaceship">Spaceship: ${htmlEscape(location.spaceship)}</span>`
+            : "",
+        ].filter(Boolean);
+        return `
+          <article class="mini-card location-card">
+            <div class="location-card-head">
+              <h3>${htmlEscape(location.name)}</h3>
+              <button class="btn" type="button" onclick="openLocationForm(${index})">Edit</button>
+            </div>
+            <p>${htmlEscape(safe(location.description))}</p>
+            <div class="location-tags">${tags.length ? tags.join("") : `<span class="location-tag">-</span>`}</div>
+          </article>`;
+      }
+
+      function openLocationForm(index = -1) {
+        const editing = index >= 0 && locations[index];
+        const location = editing
+          ? locations[index]
+          : { name: "", description: "", planet: "", spaceship: "" };
+        openModal(
+          editing ? `Edit ${location.name}` : "Add Location",
+          `
+            <div class="form-grid">
+              ${formInput("Name", "locationName", location.name, true)}
+              ${formInput("Description", "locationDescription", location.description, true, true)}
+              ${formInput("Planet Tag", "locationPlanet", location.planet, false, false, "text", "Planet name")}
+              ${formInput("Spaceship Tag", "locationSpaceship", location.spaceship, false, false, "text", "Spaceship name")}
+            </div>
+            <div class="form-actions">
+              <div class="form-actions-group">
+                ${editing ? `<button class="btn danger" type="button" onclick="requestDeleteLocation(${index})">Delete</button>` : ""}
+              </div>
+              <div class="form-actions-group">
+                <button class="btn" type="button" onclick="closeModal()">Cancel</button>
+                <button class="btn primary" type="button" onclick="saveLocationForm(${index})">Done</button>
+              </div>
+            </div>`,
+        );
+      }
+
+      function openLocationPicker() {
+        if (!locations.length) {
+          openLocationForm();
+          return;
+        }
+        if (locations.length === 1) {
+          openLocationForm(0);
+          return;
+        }
+        openModal(
+          "Edit Location",
+          `<div class="cards">${locations
+            .map(
+              (location, index) => `
+                <button class="mini-card" type="button" onclick="openLocationForm(${index})">
+                  <b>${htmlEscape(location.name)}</b>
+                  <small>${htmlEscape(safe(location.planet || location.spaceship))}</small>
+                </button>`,
+            )
+            .join("")}</div>`,
+        );
+      }
+
+      function saveLocationForm(index = -1) {
+        const editing = index >= 0 && Boolean(locations[index]);
+        const nameInput = $("locationName");
+        const name = value("locationName");
+        const field = nameInput?.closest(".form-field");
+        field?.classList.toggle("error", !name);
+        if (!name) {
+          nameInput?.focus();
+          return;
+        }
+        const location = {
+          name,
+          description: value("locationDescription"),
+          planet: value("locationPlanet"),
+          spaceship: value("locationSpaceship"),
+        };
+        const existingIndex = locations.findIndex(
+          (item, itemIndex) =>
+            itemIndex !== index &&
+            item.name.toLowerCase() === name.toLowerCase(),
+        );
+        const commit = () => {
+          if (existingIndex >= 0) {
+            locations[existingIndex] = location;
+            if (editing) locations.splice(index, 1);
+          } else if (editing) {
+            locations[index] = location;
+          } else {
+            locations.push(location);
+          }
+          saveLocations();
+          closeModal();
+          viewMode = "locations";
+          render();
+        };
+        if (existingIndex >= 0) {
+          showDecision(
+            "There's already a location by that name",
+            `Update ${locations[existingIndex].name} with this information?`,
+            "Update",
+            commit,
+          );
+          return;
+        }
+        showDecision(
+          editing ? "Update Location" : "Add Location",
+          `${editing ? "Update" : "Add"} ${name}?`,
+          editing ? "Update" : "Add",
+          commit,
+        );
+      }
+
+      function requestDeleteLocation(index) {
+        const location = locations[index];
+        if (!location) return;
+        showDecision(
+          "Delete Location",
+          `Delete ${location.name}?`,
+          "Delete",
+          () => {
+            locations.splice(index, 1);
+            saveLocations();
+            closeModal();
+            viewMode = "locations";
+            render();
+          },
+        );
+      }
+
+      function handleRosterImageError(image) {
+        const fallback = document.createElement("span");
+        fallback.className = "roster-initials";
+        fallback.textContent = image.dataset.initials || "-";
+        image.replaceWith(fallback);
+      }
+
+      let draggedCharacterName = "";
+      let suppressRosterClick = false;
+
+      function openRosterCharacter(event, absoluteIndex) {
+        if (suppressRosterClick) {
+          event.preventDefault();
+          return;
+        }
+        goToCharacterByIndex(absoluteIndex);
+      }
+
+      function clearRosterDropGaps() {
+        document
+          .querySelectorAll(".roster-slot.drop-before, .roster-slot.drop-after")
+          .forEach((slot) => {
+            slot.classList.remove("drop-before", "drop-after");
+          });
+      }
+
+      function showRosterDropGap(slot, clientX) {
+        clearRosterDropGaps();
+        if (!slot || slot.dataset.character === draggedCharacterName)
+          return null;
+        const source = characters.find(
+          (character) => character.name === draggedCharacterName,
+        );
+        if (
+          !source ||
+          (source.category || "") !== (slot.dataset.category || "")
+        )
+          return null;
+        const before =
+          clientX <
+          slot.getBoundingClientRect().left +
+            slot.getBoundingClientRect().width / 2;
+        slot.classList.add(before ? "drop-before" : "drop-after");
+        return { targetName: slot.dataset.character, before };
+      }
+
+      function reorderCharacter(sourceName, targetName, before) {
+        if (!sourceName || !targetName || sourceName === targetName) return;
+        const source = characters.find(
+          (character) => character.name === sourceName,
+        );
+        const target = characters.find(
+          (character) => character.name === targetName,
+        );
+        if (
+          !source ||
+          !target ||
+          (source.category || "") !== (target.category || "")
+        )
+          return;
+        const sourceIndex = characters.indexOf(source);
+        characters.splice(sourceIndex, 1);
+        const targetIndex = characters.indexOf(target);
+        characters.splice(targetIndex + (before ? 0 : 1), 0, source);
+        saveCharacters();
+        suppressRosterClick = true;
+        render();
+        setTimeout(() => {
+          suppressRosterClick = false;
+        }, 0);
+      }
+
+      function setupRosterReordering() {
+        document.querySelectorAll(".roster-card").forEach((card) => {
+          card.addEventListener("dragstart", (event) => {
+            draggedCharacterName = card.dataset.character;
+            suppressRosterClick = true;
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", draggedCharacterName);
+            requestAnimationFrame(() => card.classList.add("dragging"));
+          });
+          card.addEventListener("dragend", () => {
+            card.classList.remove("dragging");
+            draggedCharacterName = "";
+            clearRosterDropGaps();
+            setTimeout(() => {
+              suppressRosterClick = false;
+            }, 0);
+          });
+        });
+
+        document.querySelectorAll(".roster-slot").forEach((slot) => {
+          slot.addEventListener("dragover", (event) => {
+            const gap = showRosterDropGap(slot, event.clientX);
+            if (!gap) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+          });
+          slot.addEventListener("drop", (event) => {
+            event.preventDefault();
+            const gap = showRosterDropGap(slot, event.clientX);
+            if (gap)
+              reorderCharacter(
+                draggedCharacterName,
+                gap.targetName,
+                gap.before,
+              );
+          });
+        });
+
+        setupTouchRosterReordering();
+      }
+
+      function setupTouchRosterReordering() {
+        document.querySelectorAll(".roster-card").forEach((card) => {
+          let pressTimer = null;
+          let active = false;
+          let startX = 0;
+          let startY = 0;
+          let pendingGap = null;
+
+          card.addEventListener("pointerdown", (event) => {
+            if (event.pointerType !== "touch") return;
+            startX = event.clientX;
+            startY = event.clientY;
+            pressTimer = setTimeout(() => {
+              active = true;
+              suppressRosterClick = true;
+              draggedCharacterName = card.dataset.character;
+              card.classList.add("dragging");
+              card.setPointerCapture(event.pointerId);
+            }, 300);
+          });
+
+          card.addEventListener("pointermove", (event) => {
+            if (event.pointerType !== "touch") return;
+            if (!active) {
+              if (
+                Math.hypot(event.clientX - startX, event.clientY - startY) > 10
+              ) {
+                clearTimeout(pressTimer);
+              }
+              return;
+            }
+            event.preventDefault();
+            const target = document
+              .elementFromPoint(event.clientX, event.clientY)
+              ?.closest(".roster-slot");
+            pendingGap = showRosterDropGap(target, event.clientX);
+            const edge = 70;
+            if (event.clientY < edge) window.scrollBy(0, -22);
+            if (event.clientY > window.innerHeight - edge)
+              window.scrollBy(0, 22);
+          });
+
+          const finish = () => {
+            clearTimeout(pressTimer);
+            if (active && pendingGap) {
+              reorderCharacter(
+                draggedCharacterName,
+                pendingGap.targetName,
+                pendingGap.before,
+              );
+            }
+            active = false;
+            pendingGap = null;
+            draggedCharacterName = "";
+            card.classList.remove("dragging");
+            clearRosterDropGaps();
+            setTimeout(() => {
+              suppressRosterClick = false;
+            }, 0);
+          };
+
+          card.addEventListener("pointerup", finish);
+          card.addEventListener("pointercancel", finish);
+        });
+      }
+
+      function randomFilteredCharacter() {
+        if (!filteredIndexes.length) return;
+        currentIndex = Math.floor(Math.random() * filteredIndexes.length);
+        viewMode = "detail";
+        currentTab = "Overview";
+        currentPhoto = 0;
+        render();
+      }
+
+      function openModal(title, body) {
+        $("modalTitle").textContent = title;
+        $("modalBody").innerHTML = body;
+        modal.classList.add("open");
+      }
+
+      function showDecision(title, message, confirmLabel, action) {
+        $("decisionTitle").textContent = title;
+        $("decisionMessage").textContent = message;
+        $("decisionConfirm").textContent = confirmLabel;
+        decisionAction = action;
+        decisionDialog.classList.add("open");
+        $("decisionConfirm").focus();
+      }
+
+      function closeDecision() {
+        decisionAction = null;
+        decisionDialog.classList.remove("open");
+      }
+
+      function findCharacterByName(name) {
+        const normalized = String(name || "")
+          .trim()
+          .toLowerCase();
+        return characters.find(
+          (character) => character.name.trim().toLowerCase() === normalized,
+        );
+      }
+
+      function upsertCharacter(character) {
+        const existing = findCharacterByName(character.name);
+        if (!existing) {
+          characters.push(character);
+          return;
+        }
+        const index = characters.indexOf(existing);
+        characters[index] = { ...character, name: existing.name };
+      }
+
+      function openRelation(from, to) {
+        const c = characters.find((x) => x.name === from);
+        const relation = c?.relations?.find((r) => r.with === to);
+        const other = characters.find((x) => x.name === to);
+        openModal(
+          `${from} -> ${to}`,
+          `
+            <div class="relationship-card" style="cursor:default">
+              <div class="avatar">${initials(to)}</div>
+              <div>
+                <b>${safe(relation?.type)}</b>
+                <small>${safe(relation?.note)}</small>
+              </div>
+            </div>
+            <hr>
+            <p><b>History:</b> ${safe(relation?.history || "Add a history field to expand this relationship.")}</p>
+            ${other ? `<p><b>${to}:</b> ${safe(other.description)}</p><button class="btn primary" onclick="goToCharacter('${escapeQuotes(to)}'); closeModal();">Jump to ${to}</button>` : ""}
+          `,
+        );
+      }
+
+      function closeModal() {
+        activeEditorMode = null;
+        modal.classList.remove("open");
+      }
+
+      function goToCharacter(name) {
+        const absolute = characters.findIndex((c) => c.name === name);
+        goToCharacterByIndex(absolute);
+      }
+
+      function goToCharacterByIndex(absolute) {
+        if (!Number.isInteger(absolute) || absolute < 0 || absolute >= characters.length) return;
+        const filtered = filteredIndexes.indexOf(absolute);
+        if (filtered >= 0) currentIndex = filtered;
+        else {
+          activeFilters = new Set(["All"]);
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = absolute;
+        }
+        viewMode = "detail";
+        currentTab = "Overview";
+        currentPhoto = 0;
+        renderFilters();
+        render();
+      }
+
+      function nextCharacter(step = 1) {
+        if (!filteredIndexes.length) return;
+        if (viewMode !== "detail") {
+          currentIndex = step > 0 ? 0 : filteredIndexes.length - 1;
+          viewMode = "detail";
+          currentTab = "Overview";
+          currentPhoto = 0;
+          render();
+          return;
+        }
+        currentIndex =
+          (currentIndex + step + filteredIndexes.length) %
+          filteredIndexes.length;
+        currentPhoto = 0;
+        render();
+      }
+
+      function allCharactersModal() {
+        openModal(
+          "Character Roster",
+          `<div class="cards">${characters
+            .map(
+              (c, index) => `
+                <div class="mini-card" onclick="goToCharacterByIndex(${index}); closeModal();">
+                  <b>${c.name}</b>
+                  <small>${safe(c.species)} / ${safe(c.occupation)}</small>
+                </div>`,
+            )
+            .join("")}</div>`,
+        );
+      }
+
+      function openRosterView() {
+        activeFilters = new Set(["All"]);
+        viewMode = "roster";
+        currentIndex = 0;
+        render();
+      }
+
+      function openRelationsView() {
+        viewMode = "relations";
+        relationMapZoom = 1;
+        render();
+      }
+
+      function relationsModal() {
+        const rows = characters.flatMap((c) =>
+          (c.relations || []).map((r) => ({ from: c.name, ...r })),
+        );
+        openModal(
+          "Relations",
+          rows.length
+            ? `<div class="cards">${rows
+                .map(
+                  (r) => `
+                    <div class="relationship-card" onclick="openRelation('${escapeQuotes(r.from)}', '${escapeQuotes(r.with)}')">
+                      <div class="avatar">${initials(r.with)}</div>
+                      <div>
+                        <b>${r.from} -> ${r.with}</b>
+                        <small>${safe(r.type)}. ${safe(r.note)}</small>
+                      </div>
+                    </div>`,
+                )
+                .join("")}</div>`
+            : `<p>No relations yet.</p>`,
+        );
+      }
+
+      function settingsModal() {
+        pendingImportCharacters = [];
+        openModal(
+          "Settings",
+          `
+            <h4>Export Characters</h4>
+            <div class="settings-list" id="settingsCharacterList">
+              ${characters
+                .map(
+                  (character, index) => `
+                    <div class="settings-row">
+                      <label>
+                        <input type="checkbox" class="export-character-check" value="${index}" />
+                        ${htmlEscape(character.name)}
+                      </label>
+                      <small>${htmlEscape(character.category || "All")}</small>
+                    </div>
+                  `,
+                )
+                .join("")}
+            </div>
+            <div class="form-actions">
+              <div class="form-actions-group">
+                <button class="btn" onclick="setExportChecks(true)">Select All</button>
+                <button class="btn" onclick="setExportChecks(false)">Select None</button>
+              </div>
+              <div class="form-actions-group">
+                <button class="btn primary" onclick="exportSelectedCharacters()">Export Selected</button>
+              </div>
+            </div>
+            <hr>
+            <h4>Import Characters</h4>
+            <div class="form-field wide">
+              <label for="importFile">Import JSON</label>
+              <input id="importFile" type="file" accept="application/json,.json" onchange="prepareImportCharacters()" />
+            </div>
+            <div id="importPreview"><p class="empty">Choose a JSON file to preview its characters.</p></div>
+          `,
+        );
+      }
+
+      function setExportChecks(checked) {
+        document
+          .querySelectorAll(".export-character-check")
+          .forEach((input) => {
+            input.checked = checked;
+          });
+      }
+
+      function selectedExportCharacters() {
+        const indexes = [
+          ...document.querySelectorAll(".export-character-check:checked"),
+        ].map((input) => Number(input.value));
+        return indexes.map((index) => characters[index]).filter(Boolean);
+      }
+
+      function exportSelectedCharacters() {
+        const selected = selectedExportCharacters();
+        if (!selected.length) return;
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          characters: selected,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: "application/json",
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download =
+          selected.length === 1
+            ? `${selected[0].name.replace(/\s+/g, "-").toLowerCase()}.json`
+            : "character-codex-export.json";
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        link.remove();
+      }
+
+      function prepareImportCharacters() {
+        const file = $("importFile")?.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            const incoming = Array.isArray(parsed) ? parsed : parsed.characters;
+            if (!Array.isArray(incoming) || !incoming.length) return;
+            pendingImportCharacters = incoming.map(normalizeCharacter);
+            renderImportPreview();
+          } catch {
+            openModal(
+              "Import Failed",
+              "<p>That file could not be read as character codex JSON.</p>",
+            );
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function renderImportPreview() {
+        const preview = $("importPreview");
+        if (!preview) return;
+        preview.innerHTML = `
+          <div class="settings-list">
+            ${pendingImportCharacters
+              .map((character, index) => {
+                const existing = findCharacterByName(character.name);
+                return `
+                  <div class="settings-row">
+                    <label>
+                      <input type="checkbox" class="import-character-check" value="${index}" />
+                      ${htmlEscape(character.name)}
+                    </label>
+                    <small>${existing ? "Update" : "Add"}</small>
+                  </div>`;
+              })
+              .join("")}
+          </div>
+          <div class="form-actions">
+            <div class="form-actions-group">
+              <button class="btn" onclick="setImportChecks(true)">Select All</button>
+              <button class="btn" onclick="setImportChecks(false)">Select None</button>
+            </div>
+            <button class="btn primary" onclick="importSelectedCharacters()">Import Selected</button>
+          </div>
+        `;
+      }
+
+      function setImportChecks(checked) {
+        document
+          .querySelectorAll(".import-character-check")
+          .forEach((input) => {
+            input.checked = checked;
+          });
+      }
+
+      function importSelectedCharacters() {
+        const selected = [
+          ...document.querySelectorAll(".import-character-check:checked"),
+        ]
+          .map((input) => pendingImportCharacters[Number(input.value)])
+          .filter(Boolean);
+        if (!selected.length) return;
+        const updates = selected.filter((character) =>
+          findCharacterByName(character.name),
+        ).length;
+        const additions = selected.length - updates;
+        const summary = [
+          additions
+            ? `${additions} character${additions === 1 ? "" : "s"} will be added.`
+            : "",
+          updates
+            ? `${updates} same-name character${updates === 1 ? "" : "s"} will be updated.`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        showDecision("Verify Import", summary, "Import", () => {
+          selected.forEach((character) => upsertCharacter(character));
+          saveCharacters();
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = 0;
+          activeFilters = new Set(["All"]);
+          viewMode = "roster";
+          closeModal();
+          render();
+        });
+      }
+
+      function importCharacters() {
+        prepareImportCharacters();
+      }
+
+      function blankCharacter() {
+        return {
+          name: "New Character",
+          title: "",
+          nicknames: "",
+          age: "",
+          category: "",
+          gender: "",
+          species: "Human",
+          height: "",
+          bodyType: "",
+          weight: "",
+          occupation: "",
+          eyeColor: "",
+          hairColor: "",
+          hairStyle: "",
+          skinColor: "",
+          markings: "",
+          features: "",
+          theme: {
+            accent: "#7ecbff",
+            accent2: "#d9e5ff",
+            accent3: "#12364b",
+          },
+          themeName: "Light Blue",
+          outfit: {
+            shirt: "",
+            pants: "",
+            shoes: "",
+            hat: "",
+            outerwear: "",
+          },
+          accessories: "",
+          weapons: "",
+          shortDescription: "",
+          description: "",
+          personality: "",
+          fightingStyle: "",
+          speechStyle: "",
+          strengths: "",
+          weaknesses: "",
+          likes: "",
+          dislikes: "",
+          fears: "",
+          hobbies: "",
+          stats: { power: 5, speed: 5, defense: 5, magic: 5, resolve: 5 },
+          photos: [],
+          relations: [],
+        };
+      }
+
+      function formInput(
+        label,
+        id,
+        value,
+        wide = false,
+        multiline = false,
+        type = "text",
+        placeholder = "",
+      ) {
+        const control = multiline
+          ? `<textarea id="${id}" placeholder="${htmlEscape(placeholder)}">${formValue(value)}</textarea>`
+          : `<input id="${id}" type="${type}" value="${formValue(value)}" placeholder="${htmlEscape(placeholder)}" />`;
+        return `
+          <div class="form-field ${wide ? "wide" : ""}">
+            <label for="${id}">${label}</label>
+            ${control}
+          </div>
+        `;
+      }
+
+      function formSelect(label, id, value, options, wide = false) {
+        return `
+          <div class="form-field ${wide ? "wide" : ""}">
+            <label for="${id}">${label}</label>
+            <select id="${id}">
+              ${options.map((option) => `<option value="${htmlEscape(option)}" ${String(value ?? "") === String(option) ? "selected" : ""}>${htmlEscape(option)}</option>`).join("")}
+            </select>
+          </div>
+        `;
+      }
+
+      function statSelect(label, id, value) {
+        return formSelect(label, id, hasValue(value) ? value : "-", [
+          "-",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+        ]);
+      }
+
+      function categorySelect(value) {
+        return `
+          <div class="form-field">
+            <label for="charCategory">Category</label>
+            <select id="charCategory">
+              <option value="" ${!value ? "selected" : ""}>-</option>
+              ${categoryOptions
+                .filter(Boolean)
+                .map(
+                  (option) =>
+                    `<option value="${option}" ${value === option ? "selected" : ""}>${option}</option>`,
+                )
+                .join("")}
+            </select>
+          </div>
+        `;
+      }
+
+      function themeEditor(source) {
+        const selected = source.themeName || nearestThemeName(source.theme);
+        return `
+          <div class="form-field wide">
+            <label>Color Theme</label>
+            <input type="hidden" id="charThemeName" value="${htmlEscape(selected)}" />
+            <div class="theme-swatches">
+              ${themePresets
+                .map(
+                  (theme) => `
+                    <button
+                      type="button"
+                      class="theme-swatch ${theme.name === selected ? "active" : ""}"
+                      title="${htmlEscape(theme.name)}"
+                      aria-label="${htmlEscape(theme.name)}"
+                      style="background: radial-gradient(circle at 30% 25%, ${theme.accent2}, ${theme.accent} 48%, ${theme.accent3});"
+                      onclick="selectTheme('${escapeQuotes(theme.name)}')"
+                    ></button>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function editorTabs() {
+        return `
+          <div class="editor-tabs">
+            ${tabs
+              .map(
+                (tab, index) =>
+                  `<button type="button" class="tab ${index === 0 ? "active" : ""}" onclick="setEditorTab('${tab}')">${tab}</button>`,
+              )
+              .join("")}
+          </div>
+        `;
+      }
+
+      function editorPanel(name, body, active = false) {
+        return `<section class="editor-tab-panel ${active ? "active" : ""}" data-editor-tab="${name}"><div class="form-grid">${body}</div></section>`;
+      }
+
+      function relationsToText(character) {
+        return (character.relations || [])
+          .map((r) =>
+            [r.with, r.type, r.note, r.history]
+              .map((part) => part || "")
+              .join(" | "),
+          )
+          .join("\n");
+      }
+
+      function relationEditor(source) {
+        const relations = source.relations || [];
+        const byName = new Map(
+          relations.map((relation) => [relation.with, relation]),
+        );
+        const others = characters.filter(
+          (character) => character.name !== source.name,
+        );
+        if (!others.length)
+          return `<p class="empty">Add another character to create relations.</p>`;
+        return `
+          <div class="relation-editor">
+            ${others
+              .map((other, relationIndex) => {
+                const relation = byName.get(other.name);
+                const active = !!relation;
+                const relationKind =
+                  relation?.kind || inferRelationKind(relation?.type);
+                const relationKey = `relation-${relationIndex}`;
+                return `
+                  <div class="relation-edit-card ${active ? "active" : ""}" data-relation-target="${htmlEscape(other.name)}">
+                    <div class="relation-edit-head">
+                      <b>${htmlEscape(other.name)}</b>
+                      <label class="toggle">
+                        <input type="checkbox" class="relation-toggle" ${active ? "checked" : ""} onchange="toggleRelationEditor(this)" />
+                        Relation
+                      </label>
+                    </div>
+                    <div class="relation-edit-fields">
+                      <div class="form-field wide">
+                        <label>Line Color</label>
+                        <div class="relation-kind-choices">
+                          ${["Enemy", "Friend", "Other"]
+                            .map(
+                              (kind) => `
+                                <label class="relation-kind-choice">
+                                  <input type="radio" name="relationKind-${relationKey}" value="${kind}" ${kind === relationKind ? "checked" : ""} />
+                                  <span><i class="relation-dot" style="--relation-color:${relationColor(kind)}"></i>${kind}</span>
+                                </label>`,
+                            )
+                            .join("")}
+                        </div>
+                      </div>
+                      ${formInput("Relation Tag", `relationType-${relationKey}`, relation?.type || "", true, false, "text", "Trusted Ally")}
+                      ${formInput("Note", `relationNote-${relationKey}`, relation?.note || "", true, true, "text", "Optional note about this relationship")}
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      }
+
+      function openCharacterForm(mode) {
+        const editing = mode === "edit";
+        const source = editing ? currentCharacter() : blankCharacter();
+        const title = editing ? `Edit ${source.name}` : "Add Character";
+        activeEditorMode = mode;
+        openModal(
+          title,
+          `
+            ${
+              editing
+                ? `<div class="editor-nav">
+                    <button class="btn" onclick="switchEditorCharacter(-1)">&larr; Previous</button>
+                    <b>${htmlEscape(source.name)}</b>
+                    <button class="btn" onclick="switchEditorCharacter(1)">Next &rarr;</button>
+                  </div>`
+                : ""
+            }
+            ${editorTabs()}
+            ${editorPanel(
+              "Overview",
+              `
+                ${formInput("Name", "charName", source.name, false)}
+                <div class="form-field wide">
+                  <label for="charPhotoFile">Photo</label>
+                  <div class="photo-tools">
+                    <img class="photo-preview" id="photoPreview" ${source.photos?.[0] ? `src="${htmlEscape(source.photos[0])}"` : ""} alt="" />
+                    <input id="charPhotoFile" type="file" accept="image/*" onchange="addPhotoFile(this)" />
+                    <input id="charPhotos" placeholder="images/character-main.png" value="${formValue((source.photos || []).slice(0, 1).join(""))}" />
+                  </div>
+                </div>
+                ${categorySelect(source.category || "")}
+                ${themeEditor(source)}
+                ${formInput("Title", "charTitle", source.title)}
+                ${formInput("Nicknames", "charNicknames", source.nicknames)}
+                ${formInput("Species", "charSpecies", source.species)}
+                ${formInput("Occupation", "charOccupation", source.occupation)}
+                ${formInput("Gender", "charGender", source.gender)}
+                ${formInput("Age", "charAge", source.age)}
+                ${formInput("Height", "charHeight", source.height)}
+                ${formInput("Weight", "charWeight", source.weight)}
+                ${formInput("Short Description", "charShortDescription", source.shortDescription, true, false, "text", "Quiet wolf-hybrid blade-for-hire.")}
+              `,
+              true,
+            )}
+            ${editorPanel(
+              "Appearance",
+              `
+                ${formInput("Body Type", "charBodyType", source.bodyType)}
+                ${formInput("Eyes", "charEyeColor", source.eyeColor)}
+                ${formInput("Hair Color", "charHairColor", source.hairColor)}
+                ${formInput("Hair Style", "charHairStyle", source.hairStyle, true)}
+                ${formInput("Skin / Fur / Scale", "charSkinColor", source.skinColor, true)}
+                ${formInput("Markings", "charMarkings", source.markings, true)}
+                ${formInput("Features", "charFeatures", source.features, true)}
+                ${formInput("Shirt / Top", "charShirt", source.outfit?.shirt)}
+                ${formInput("Pants / Bottoms", "charPants", source.outfit?.pants)}
+                ${formInput("Shoes", "charShoes", source.outfit?.shoes)}
+                ${formInput("Hat", "charHat", source.outfit?.hat)}
+                ${formInput("Outerwear", "charOuterwear", source.outfit?.outerwear, true)}
+                ${formInput("Accessories", "charAccessories", source.accessories, true)}
+              `,
+            )}
+            ${editorPanel(
+              "Combat",
+              `
+                ${statSelect("Power", "statPower", source.stats?.power)}
+                ${statSelect("Speed", "statSpeed", source.stats?.speed)}
+                ${statSelect("Defense", "statDefense", source.stats?.defense)}
+                ${statSelect("Magic", "statMagic", source.stats?.magic)}
+                ${statSelect("Resolve", "statResolve", source.stats?.resolve)}
+                ${formInput("Fighting Style", "charFightingStyle", source.fightingStyle, true, true, "text", "Fast, defensive, reckless, tactical...")}
+                ${formInput("Weapons", "charWeapons", source.weapons, true)}
+                ${formInput("Strengths", "charStrengths", source.strengths, true)}
+                ${formInput("Weaknesses", "charWeaknesses", source.weaknesses, true)}
+              `,
+            )}
+            ${editorPanel(
+              "Personality",
+              `
+                ${formInput("Personality Tags", "charPersonality", source.personality, true, false, "text", "Red, Blue, Orange, Yellow")}
+                ${formInput("Speech Style", "charSpeechStyle", source.speechStyle, true, true, "text", "Short, formal, sarcastic, soft-spoken...")}
+                ${formInput("Likes", "charLikes", source.likes)}
+                ${formInput("Dislikes", "charDislikes", source.dislikes)}
+                ${formInput("Fears", "charFears", source.fears)}
+                ${formInput("Hobbies", "charHobbies", source.hobbies)}
+              `,
+            )}
+            ${editorPanel(
+              "Lore",
+              `
+                ${formInput("Description", "charDescription", source.description, true, true, "text", "Longer character description.")}
+              `,
+            )}
+            ${editorPanel(
+              "Relations",
+              `
+                <div class="form-field wide">
+                  <label>Relations</label>
+                  ${relationEditor(source)}
+                </div>
+              `,
+            )}
+            <div class="form-actions">
+              <div class="form-actions-group">
+                ${editing ? `<button class="btn danger" onclick="deleteCharacterFromEditor('${escapeQuotes(source.name)}')">Delete</button>` : ""}
+              </div>
+              <div class="form-actions-group">
+                <button class="btn" onclick="cancelCharacterEditor()">Cancel</button>
+                <button class="btn primary" onclick="saveCharacterFromForm('${mode}', '${escapeQuotes(source.name)}')">Done</button>
+              </div>
+            </div>
+          `,
+        );
+      }
+
+      function value(id) {
+        return $(id)?.value.trim() || "";
+      }
+
+      function statValue(id) {
+        const raw = value(id);
+        if (raw === "-") return "-";
+        return Math.max(0, Math.min(10, Number(raw) || 0));
+      }
+
+      function parseRelations(text) {
+        return text
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            const [withName, type, note, history] = line
+              .split("|")
+              .map((part) => part.trim());
+            return {
+              with: withName || "",
+              type: type || "Related",
+              note: note || "",
+              history: history || "",
+            };
+          })
+          .filter((relation) => relation.with);
+      }
+
+      function collectRelationsFromEditor() {
+        return [...document.querySelectorAll(".relation-edit-card")]
+          .map((card) => {
+            const enabled = card.querySelector(".relation-toggle")?.checked;
+            if (!enabled) return null;
+            const kind =
+              card.querySelector('input[type="radio"]:checked')?.value ||
+              "Other";
+            const type =
+              card.querySelector('input[id^="relationType-"]')?.value.trim() ||
+              "Related";
+            const note =
+              card
+                .querySelector(
+                  'textarea[id^="relationNote-"], input[id^="relationNote-"]',
+                )
+                ?.value.trim() || "";
+            return {
+              with: card.dataset.relationTarget,
+              kind,
+              type,
+              note,
+              history: "",
+            };
+          })
+          .filter(Boolean);
+      }
+
+      function validateCharacterForm() {
+        const input = $("charName");
+        const field = input?.closest(".form-field");
+        field?.classList.remove("error");
+        if (value("charName")) return true;
+        field?.classList.add("error");
+        input?.scrollIntoView({ behavior: "smooth", block: "center" });
+        input?.focus();
+        return false;
+      }
+
+      function toggleRelationEditor(input) {
+        input
+          .closest(".relation-edit-card")
+          ?.classList.toggle("active", input.checked);
+      }
+
+      function setEditorTab(tab) {
+        document.querySelectorAll(".editor-tabs .tab").forEach((button) => {
+          button.classList.toggle("active", button.textContent.trim() === tab);
+        });
+        document.querySelectorAll(".editor-tab-panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.editorTab === tab);
+        });
+      }
+
+      function selectTheme(name) {
+        const selected = themeByName(name);
+        $("charThemeName").value = selected.name;
+        document.querySelectorAll(".theme-swatch").forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.getAttribute("aria-label") === selected.name,
+          );
+        });
+      }
+
+      function addPhotoFile(input) {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const photos = $("charPhotos");
+          photos.value = reader.result;
+          const preview = $("photoPreview");
+          if (preview) preview.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function cancelCharacterEditor() {
+        activeEditorMode = null;
+        closeModal();
+      }
+
+      function switchEditorCharacter(step) {
+        if (activeEditorMode !== "edit") return;
+        nextCharacter(step);
+        openCharacterForm("edit");
+      }
+
+      function saveCharacterFromForm(mode, oldName) {
+        if (!validateCharacterForm()) return;
+        const name = value("charName");
+        const character = {
+          name,
+          title: value("charTitle"),
+          nicknames: value("charNicknames"),
+          age: value("charAge"),
+          category: value("charCategory"),
+          gender: value("charGender"),
+          species: value("charSpecies") || "Unknown",
+          height: value("charHeight"),
+          bodyType: value("charBodyType"),
+          weight: value("charWeight"),
+          occupation: value("charOccupation"),
+          eyeColor: value("charEyeColor"),
+          hairColor: value("charHairColor"),
+          hairStyle: value("charHairStyle"),
+          skinColor: value("charSkinColor"),
+          markings: value("charMarkings"),
+          features: value("charFeatures"),
+          themeName: value("charThemeName") || "Light Blue",
+          theme: themeByName(value("charThemeName") || "Light Blue"),
+          outfit: {
+            shirt: value("charShirt"),
+            pants: value("charPants"),
+            shoes: value("charShoes"),
+            hat: value("charHat"),
+            outerwear: value("charOuterwear"),
+          },
+          accessories: value("charAccessories"),
+          weapons: value("charWeapons"),
+          shortDescription: value("charShortDescription"),
+          description: value("charDescription"),
+          personality: value("charPersonality"),
+          fightingStyle: value("charFightingStyle"),
+          speechStyle: value("charSpeechStyle"),
+          strengths: value("charStrengths"),
+          weaknesses: value("charWeaknesses"),
+          likes: value("charLikes"),
+          dislikes: value("charDislikes"),
+          fears: value("charFears"),
+          hobbies: value("charHobbies"),
+          stats: {
+            power: statValue("statPower"),
+            speed: statValue("statSpeed"),
+            defense: statValue("statDefense"),
+            magic: statValue("statMagic"),
+            resolve: statValue("statResolve"),
+          },
+          photos: value("charPhotos") ? [value("charPhotos")] : [],
+          relations: collectRelationsFromEditor(),
+        };
+
+        const commit = () => {
+          if (mode === "edit") {
+            const index = characters.findIndex((c) => c.name === oldName);
+            if (index >= 0) characters[index] = character;
+            if (oldName !== name) {
+              characters.forEach((c) => {
+                (c.relations || []).forEach((relation) => {
+                  if (relation.with === oldName) relation.with = name;
+                });
+              });
+              if (relationPositions[oldName]) {
+                relationPositions[name] = relationPositions[oldName];
+                delete relationPositions[oldName];
+                saveRelationPositions();
+              }
+            }
+          } else {
+            upsertCharacter(character);
+          }
+
+          saveCharacters();
+          activeEditorMode = null;
+          closeModal();
+          activeFilters = new Set(["All"]);
+          viewMode = "detail";
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = Math.max(
+            0,
+            characters.findIndex(
+              (c) => c.name.toLowerCase() === name.toLowerCase(),
+            ),
+          );
+          currentPhoto = 0;
+          render();
+        };
+
+        if (mode === "add") {
+          const existing = findCharacterByName(name);
+          if (existing) {
+            showDecision(
+              "There's already a character by that name",
+              `Update ${existing.name} with the information in this form?`,
+              "Update",
+              commit,
+            );
+          } else {
+            showDecision(
+              "Add Character",
+              `Add ${name} to the roster?`,
+              "Add",
+              commit,
+            );
+          }
+          return;
+        }
+
+        commit();
+      }
+
+      function deleteCharacterFromEditor(name) {
+        if (characters.length <= 1) {
+          openModal(
+            "Cannot Delete",
+            "<p>Keep at least one character in the codex.</p>",
+          );
+          return;
+        }
+        requestDeleteCharacter(name);
+      }
+
+      function deleteCurrentCharacter() {
+        if (characters.length <= 1) {
+          openModal(
+            "Cannot Delete",
+            "<p>Keep at least one character in the codex.</p>",
+          );
+          return;
+        }
+        const character = currentCharacter();
+        requestDeleteCharacter(character.name);
+      }
+
+      function requestDeleteCharacter(name) {
+        const character = characters.find((item) => item.name === name);
+        if (!character) return;
+        showDecision(
+          "Delete Character",
+          `Delete ${character.name}? This also removes every relation that points to them.`,
+          "Delete",
+          () => confirmDeleteCharacter(character.name),
+        );
+      }
+
+      function confirmDeleteCharacter(name) {
+        characters = characters.filter((c) => c.name !== name);
+        characters.forEach((c) => {
+          c.relations = (c.relations || []).filter(
+            (relation) => relation.with !== name,
+          );
+        });
+        delete relationPositions[name];
+        saveCharacters();
+        saveRelationPositions();
+        activeEditorMode = null;
+        closeModal();
+        currentIndex = Math.min(currentIndex, characters.length - 1);
+        currentPhoto = 0;
+        activeFilters = new Set(["All"]);
+        viewMode = "roster";
+        render();
+      }
+
+      function editHelpModal() {
+        openModal(
+          "Edit Guide",
+          `
+            <details open><summary>Add characters</summary><div class="details-body">Find <b>const characters = [</b> in the HTML. Duplicate a character block, then change the values.</div></details><br>
+            <details open><summary>Add photos</summary><div class="details-body">Put image files next to this HTML or inside an <b>images</b> folder. Then edit the character's <b>photos</b> list, like <code>["images/name-main.png"]</code>.</div></details><br>
+            <details open><summary>Change colors</summary><div class="details-body">Edit each character's <b>theme</b> values for accent, secondary accent, and dark backdrop color.</div></details><br>
+            <details><summary>Add relations</summary><div class="details-body">Inside a character, edit <b>relations</b>. Use <b>with</b>, <b>type</b>, <b>note</b>, and optional <b>history</b>.</div></details>
+          `,
+        );
+      }
+
+      function setupImageGestures() {
+        const wrap = $("photoWrap");
+
+        wrap.addEventListener("pointerdown", (e) => {
+          if (e.target.closest?.(".photo-tabs, .image-controls")) return;
+          wrap.setPointerCapture(e.pointerId);
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size === 2) {
+            lastPinchDistance = distanceBetweenPointers();
+            lastDragPoint = null;
+          } else if (imageScale > 1.01) {
+            lastDragPoint = { x: e.clientX, y: e.clientY };
+          }
+        });
+
+        wrap.addEventListener("pointermove", (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size >= 2) {
+            e.preventDefault();
+            const nextDistance = distanceBetweenPointers();
+            if (lastPinchDistance) {
+              const mid = midpointBetweenPointers();
+              const rect = wrap.getBoundingClientRect();
+              zoomImageBy(
+                nextDistance / lastPinchDistance,
+                mid.x - rect.left - rect.width / 2,
+                mid.y - rect.top - rect.height / 2,
+              );
+            }
+            lastPinchDistance = nextDistance;
+            return;
+          }
+
+          if (imageScale > 1.01 && lastDragPoint) {
+            e.preventDefault();
+            imagePanX += e.clientX - lastDragPoint.x;
+            imagePanY += e.clientY - lastDragPoint.y;
+            lastDragPoint = { x: e.clientX, y: e.clientY };
+            applyImageTransform();
+          }
+        });
+
+        function endPointer(e) {
+          activePointers.delete(e.pointerId);
+          lastPinchDistance =
+            activePointers.size >= 2 ? distanceBetweenPointers() : 0;
+          lastDragPoint = null;
+        }
+
+        wrap.addEventListener("pointerup", endPointer);
+        wrap.addEventListener("pointercancel", endPointer);
+        wrap.addEventListener("lostpointercapture", endPointer);
+
+        wrap.addEventListener(
+          "wheel",
+          (e) => {
+            if (!e.ctrlKey && !e.metaKey) return;
+            e.preventDefault();
+            const rect = wrap.getBoundingClientRect();
+            const centerX = e.clientX - rect.left - rect.width / 2;
+            const centerY = e.clientY - rect.top - rect.height / 2;
+            zoomImageBy(e.deltaY < 0 ? 1.12 : 0.88, centerX, centerY);
+          },
+          { passive: false },
+        );
+      }
+
+      function disablePageZoom() {
+        ["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => {
+          document.addEventListener(
+            eventName,
+            (event) => event.preventDefault(),
+            { passive: false },
+          );
+        });
+        document.addEventListener(
+          "wheel",
+          (event) => {
+            if (event.ctrlKey || event.metaKey) event.preventDefault();
+          },
+          { passive: false, capture: true },
+        );
+        document.addEventListener(
+          "touchmove",
+          (event) => {
+            if (
+              event.touches.length > 1 &&
+              !event.target.closest?.("#relationMap")
+            ) {
+              event.preventDefault();
+            }
+          },
+          { passive: false, capture: true },
+        );
+        document.addEventListener(
+          "keydown",
+          (event) => {
+            if (
+              (event.ctrlKey || event.metaKey) &&
+              ["+", "-", "=", "0"].includes(event.key)
+            ) {
+              event.preventDefault();
+            }
+          },
+          { capture: true },
+        );
+      }
+
+      disablePageZoom();
+      setupImageGestures();
+      renderFilters();
+
+      $("prevBtn").onclick = () =>
+        activeEditorMode === "edit"
+          ? switchEditorCharacter(-1)
+          : nextCharacter(-1);
+      $("nextBtn").onclick = () =>
+        activeEditorMode === "edit"
+          ? switchEditorCharacter(1)
+          : nextCharacter(1);
+      $("randomBtn").onclick = () => {
+        randomFilteredCharacter();
+      };
+      $("addCharacterBtn").onclick = () =>
+        viewMode === "locations" ? openLocationForm() : openCharacterForm("add");
+      $("editCharacterBtn").onclick = () =>
+        viewMode === "locations" ? openLocationPicker() : openCharacterForm("edit");
+      $("allCharactersBtn").onclick = openRosterView;
+      $("relationsBtn").onclick = openRelationsView;
+      $("settingsBtn").onclick = settingsModal;
+      $("closeModal").onclick = closeModal;
+      $("decisionCancel").onclick = closeDecision;
+      $("decisionConfirm").onclick = () => {
+        const action = decisionAction;
+        closeDecision();
+        action?.();
+      };
+      modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+      };
+      decisionDialog.onclick = (e) => {
+        if (e.target === decisionDialog) closeDecision();
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight")
+          activeEditorMode === "edit"
+            ? switchEditorCharacter(1)
+            : nextCharacter(1);
+        if (e.key === "ArrowLeft")
+          activeEditorMode === "edit"
+            ? switchEditorCharacter(-1)
+            : nextCharacter(-1);
+        if (e.key === "Escape") {
+          if (decisionDialog.classList.contains("open")) closeDecision();
+          else closeModal();
+        }
+      });
+
+      let touchStartX = 0;
+      document.addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        },
+        { passive: true },
+      );
+      document.addEventListener(
+        "touchend",
+        (e) => {
+          const diff = e.changedTouches[0].screenX - touchStartX;
+          if (Math.abs(diff) > 70) nextCharacter(diff < 0 ? 1 : -1);
+        },
+        { passive: true },
+      );
+
+      let wheelCooldown = false;
+      document.addEventListener(
+        "wheel",
+        (e) => {
+          if (e.target.closest?.("#photoWrap")) return;
+          if (
+            Math.abs(e.deltaX) > Math.abs(e.deltaY) &&
+            Math.abs(e.deltaX) > 40 &&
+            !wheelCooldown
+          ) {
+            nextCharacter(e.deltaX > 0 ? 1 : -1);
+            wheelCooldown = true;
+            setTimeout(() => (wheelCooldown = false), 550);
+          }
+        },
+        { passive: true },
+      );
+
+      window.setTab = setTab;
+      window.setFilter = setFilter;
+      window.goToCharacter = goToCharacter;
+      window.goToCharacterByIndex = goToCharacterByIndex;
+      window.openModal = openModal;
+      window.openRelation = openRelation;
+      window.settingsModal = settingsModal;
+      window.setExportChecks = setExportChecks;
+      window.exportSelectedCharacters = exportSelectedCharacters;
+      window.importCharacters = importCharacters;
+      window.prepareImportCharacters = prepareImportCharacters;
+      window.setImportChecks = setImportChecks;
+      window.importSelectedCharacters = importSelectedCharacters;
+      window.openCharacterForm = openCharacterForm;
+      window.saveCharacterFromForm = saveCharacterFromForm;
+      window.confirmDeleteCharacter = confirmDeleteCharacter;
+      window.deleteCharacterFromEditor = deleteCharacterFromEditor;
+      window.switchEditorCharacter = switchEditorCharacter;
+      window.cancelCharacterEditor = cancelCharacterEditor;
+      window.toggleRelationEditor = toggleRelationEditor;
+      window.setEditorTab = setEditorTab;
+      window.selectTheme = selectTheme;
+      window.addPhotoFile = addPhotoFile;
+      window.zoomRelationMap = zoomRelationMap;
+      window.resetRelationMapZoom = resetRelationMapZoom;
+      window.openLocationForm = openLocationForm;
+      window.openLocationPicker = openLocationPicker;
+      window.saveLocationForm = saveLocationForm;
+      window.requestDeleteLocation = requestDeleteLocation;
+      window.closeModal = closeModal;
+
+      render();
+    </script>
+  </body>
+</html>
