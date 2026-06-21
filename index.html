@@ -76,7 +76,9 @@
       }
 
       button,
-      input {
+      input,
+      textarea,
+      select {
         font: inherit;
       }
 
@@ -127,6 +129,13 @@
         justify-content: flex-end;
       }
 
+      .manage-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+
       .btn,
       .tab,
       .filter,
@@ -161,6 +170,12 @@
         color: #071016;
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
         border-color: transparent;
+        box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 34%, transparent);
+      }
+
+      .btn.danger {
+        border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+        color: #ffd7d1;
       }
 
       .btn.icon {
@@ -209,7 +224,7 @@
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(420px, 0.88fr) minmax(0, 1.12fr);
+        grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
         gap: 16px;
         min-height: calc(100vh - 148px);
       }
@@ -225,9 +240,13 @@
       .hero {
         position: sticky;
         top: 18px;
-        height: max(560px, calc(100vh - 174px));
+        width: 100%;
+        max-width: 360px;
+        justify-self: center;
+        height: max(690px, calc(100vh - 150px));
         min-height: 0;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr) auto auto;
         overflow: hidden;
         border-radius: var(--radius);
@@ -235,6 +254,8 @@
 
       .photo-wrap {
         position: relative;
+        width: 100%;
+        max-width: 100%;
         min-height: 0;
         overflow: hidden;
         display: grid;
@@ -249,6 +270,17 @@
 
       .photo-wrap.zoomed {
         cursor: grabbing;
+      }
+
+      .photo-wrap::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at center, color-mix(in srgb, var(--accent) 28%, transparent), transparent 68%),
+          radial-gradient(circle at 72% 18%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 42%);
+        pointer-events: none;
+        z-index: 1;
       }
 
       .photo-wrap::after {
@@ -340,6 +372,7 @@
         font-size: clamp(2.6rem, 5.8vw, 5.8rem);
         line-height: 0.86;
         letter-spacing: 0;
+        text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
       }
 
       .subtitle {
@@ -390,9 +423,12 @@
 
       .dot.active {
         background: var(--accent);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);
       }
 
       .stat-strip {
+        width: 100%;
+        max-width: 100%;
         padding: 12px;
         background: var(--surface-strong);
         border-top: 1px solid var(--line);
@@ -412,6 +448,8 @@
       }
 
       .nav-row {
+        width: 100%;
+        max-width: 100%;
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         gap: 10px;
@@ -481,7 +519,7 @@
       .mini-card {
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.055);
+        background: rgba(255, 255, 255, 0.04);
       }
 
       .section {
@@ -498,6 +536,7 @@
         font-family: Outfit, Inter, sans-serif;
         font-size: 1.1rem;
         letter-spacing: 0;
+        color: var(--accent);
       }
 
       .section p,
@@ -520,8 +559,8 @@
       .field {
         min-height: 74px;
         padding: 12px;
-        border-left: 2px solid color-mix(in srgb, var(--accent) 72%, transparent);
-        background: rgba(0, 0, 0, 0.18);
+        border-left: 3px solid color-mix(in srgb, var(--accent) 72%, transparent);
+        background: rgba(255, 255, 255, 0.032);
       }
 
       .field b {
@@ -619,44 +658,119 @@
       }
 
       .relationship-graph {
-        min-height: 260px;
-        display: grid;
-        place-items: center;
-        padding: 16px;
+        min-height: 460px;
+        padding: 0;
         position: relative;
+        overflow: hidden;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          rgba(0, 0, 0, 0.18);
+        background-size: 34px 34px;
       }
 
-      .graph-inner {
-        width: min(620px, 100%);
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-        align-items: center;
+      .map-stage {
+        position: relative;
+        min-height: 460px;
+        width: 100%;
+        overflow: hidden;
       }
 
-      .node,
-      .edge {
-        text-align: center;
+      .map-lines {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
       }
 
-      .node {
-        min-height: 88px;
-        display: grid;
+      .map-line {
+        stroke-width: 3;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 7px currentColor);
+        opacity: 0.76;
+      }
+
+      .map-node {
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        border: 2px solid rgba(255, 255, 255, 0.62);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
         place-items: center;
-        padding: 12px;
-        border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
-        background: rgba(0, 0, 0, 0.22);
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 10px;
+        color: #071016;
         font-family: Outfit, Inter, sans-serif;
         font-weight: 800;
+        text-align: center;
+        cursor: grab;
+        user-select: none;
+        z-index: 2;
+        box-shadow:
+          0 0 28px var(--node-glow),
+          inset 0 0 22px rgba(255, 255, 255, 0.25);
+        transform: translate(-50%, -50%);
+        touch-action: none;
       }
 
-      .node.active {
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      .map-node:active {
+        cursor: grabbing;
+      }
+
+      .map-node.active {
+        outline: 3px solid var(--accent-2);
+        outline-offset: 4px;
+      }
+
+      .map-node small {
+        display: block;
+        max-width: 74px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: Inter, sans-serif;
+        font-size: 0.68rem;
+      }
+
+      .map-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 12px);
+        width: 230px;
+        transform: translateX(-50%);
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(8, 10, 13, 0.94);
+        color: var(--text);
+        font-family: Inter, sans-serif;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.4;
+        box-shadow: var(--shadow);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .map-node:hover .map-tooltip,
+      .map-node:focus-visible .map-tooltip {
+        opacity: 1;
+      }
+
+      .relation-type {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 5px 8px;
+        border-radius: var(--radius);
         color: #071016;
-      }
-
-      .edge {
-        color: var(--accent);
         font-weight: 900;
       }
 
@@ -695,6 +809,127 @@
       .mini-card small {
         color: var(--muted);
         line-height: 1.45;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .form-field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .form-field.wide {
+        grid-column: 1 / -1;
+      }
+
+      .form-field label {
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .form-field input,
+      .form-field textarea,
+      .form-field select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        padding: 9px 10px;
+        outline: none;
+      }
+
+      .form-field.error input {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 24%, transparent);
+      }
+
+      .form-field.error label {
+        color: #ff9a8d;
+      }
+
+      .form-field textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+
+      .form-actions-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .editor-nav {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .photo-tools {
+        display: grid;
+        gap: 8px;
+      }
+
+      .relation-editor {
+        display: grid;
+        gap: 10px;
+      }
+
+      .relation-edit-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 12px;
+      }
+
+      .relation-edit-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 900;
+        color: var(--muted);
+      }
+
+      .toggle input {
+        width: 44px;
+        height: 24px;
+        accent-color: var(--accent);
+      }
+
+      .relation-edit-fields {
+        display: none;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .relation-edit-card.active .relation-edit-fields {
+        display: grid;
       }
 
       .thumbs {
@@ -863,9 +1098,11 @@
           </p>
         </div>
         <div class="actions">
+          <div class="manage-actions">
+            <button class="btn primary" id="addCharacterBtn">Add</button>
+            <button class="btn" id="editCharacterBtn">Edit</button>
+          </div>
           <button class="btn" id="allCharactersBtn">Roster</button>
-          <button class="btn" id="relationsBtn">Relations</button>
-          <button class="btn primary" id="editHelpBtn">Edit Guide</button>
         </div>
       </header>
 
@@ -919,12 +1156,13 @@
       4. For relations, use the exact name of another character.
       */
 
-      const characters = [
+      const defaultCharacters = [
         {
           name: "Kael Nightshade",
           title: "Frost Fang",
           nicknames: "Kael, Frost Fang",
           age: "23",
+          category: "Other",
           gender: "Male",
           species: "Human-Wolf Hybrid",
           height: "6'1\"",
@@ -938,8 +1176,8 @@
           markings: "Scar over left eye; faint silver markings on shoulders",
           features: "Wolf ears, fluffy tail, sharp canines, narrow pupils",
           theme: {
-            accent: "#8fdcff",
-            accent2: "#e7f7ff",
+            accent: "#7ecbff",
+            accent2: "#d9e5ff",
             accent3: "#12364b",
           },
           outfit: {
@@ -994,6 +1232,7 @@
           title: "Sunthread",
           nicknames: "Mira, Sunthread",
           age: "21",
+          category: "Other",
           gender: "Female",
           species: "Elf",
           height: "5'7\"",
@@ -1008,8 +1247,8 @@
           features:
             "Long pointed ears, warm smile, soft golden aura when casting",
           theme: {
-            accent: "#f2d26b",
-            accent2: "#b8e06a",
+            accent: "#f5c96a",
+            accent2: "#8fd39a",
             accent3: "#314421",
           },
           outfit: {
@@ -1058,6 +1297,7 @@
           title: "Ashlock",
           nicknames: "Riv, Ash",
           age: "25",
+          category: "Other",
           gender: "Nonbinary",
           species: "Demon-Touched Human",
           height: "5'11\"",
@@ -1071,8 +1311,8 @@
           markings: "Burn-like glowing lines on forearms and neck",
           features: "Small black horns, pointed nails, smoke-like shadow aura",
           theme: {
-            accent: "#ff7058",
-            accent2: "#ffc15e",
+            accent: "#ff7849",
+            accent2: "#ff4d6d",
             accent3: "#4a1b16",
           },
           outfit: {
@@ -1119,11 +1359,15 @@
         },
       ];
 
+      let characters = loadCharacters();
+
       let currentIndex = 0;
       let currentPhoto = 0;
       let currentTab = "Overview";
       let activeFilter = "All";
       let filteredIndexes = characters.map((_, i) => i);
+      let relationPositions = loadRelationPositions();
+      let activeEditorMode = null;
 
       let imageScale = 1;
       let imagePanX = 0;
@@ -1135,9 +1379,55 @@
       const tabs = ["Overview", "Appearance", "Combat", "Personality", "Lore", "Relations"];
       const $ = (id) => document.getElementById(id);
       const modal = $("modal");
+      const characterStorageKey = "characterCodexCharacters";
+      const relationPositionStorageKey = "characterCodexRelationPositionsV2";
+
+      function loadCharacters() {
+        try {
+          const saved = localStorage.getItem("characterCodexCharacters");
+          if (!saved) return structuredClone(defaultCharacters);
+          const parsed = JSON.parse(saved);
+          return Array.isArray(parsed) && parsed.length ? parsed : structuredClone(defaultCharacters);
+        } catch {
+          return structuredClone(defaultCharacters);
+        }
+      }
+
+      function saveCharacters() {
+        localStorage.setItem(characterStorageKey, JSON.stringify(characters));
+      }
+
+      function loadRelationPositions() {
+        try {
+          return JSON.parse(localStorage.getItem("characterCodexRelationPositionsV2") || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function saveRelationPositions() {
+        localStorage.setItem(relationPositionStorageKey, JSON.stringify(relationPositions));
+      }
 
       function safe(value) {
         return value && String(value).trim() ? value : "-";
+      }
+
+      function hasValue(value) {
+        return value !== undefined && value !== null && String(value).trim() !== "" && String(value).trim() !== "-";
+      }
+
+      function htmlEscape(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formValue(value) {
+        return htmlEscape(value === "Optional" ? "" : value || "");
       }
 
       function currentCharacter() {
@@ -1154,7 +1444,8 @@
       }
 
       function splitList(value) {
-        return safe(value)
+        if (!hasValue(value)) return [];
+        return String(value)
           .split(",")
           .map((item) => item.trim().replace(/\.$/, ""))
           .filter(Boolean);
@@ -1164,7 +1455,7 @@
         const icons = {
           Species: "DNA",
           Occupation: "Blade",
-          Height: "Ruler",
+          Height: "Height",
           Age: "Age",
           Gender: "ID",
           Body: "Build",
@@ -1199,6 +1490,7 @@
       }
 
       function field(label, value) {
+        if (!hasValue(value)) return "";
         return `<div class="field"><b>${label}</b><span>${safe(value)}</span></div>`;
       }
 
@@ -1209,6 +1501,7 @@
           ["Height", character.height],
           ["Age", character.age],
         ]
+          .filter(([, value]) => hasValue(value))
           .map(([label, value]) => `<span class="chip">${iconFor(label)} ${safe(value)}</span>`)
           .join("");
       }
@@ -1301,14 +1594,12 @@
 
         const overlay = document.createElement("div");
         overlay.className = "photo-overlay";
+        const kickerParts = [character.title, character.occupation].filter(hasValue);
+        const subtitleParts = [character.species, character.gender, character.height].filter(hasValue);
         overlay.innerHTML = `
-          <div class="kicker">${safe(character.title)} / ${safe(character.occupation)}</div>
+          ${kickerParts.length ? `<div class="kicker">${kickerParts.map(htmlEscape).join(" / ")}</div>` : ""}
           <h2>${safe(character.name)}</h2>
-          <div class="subtitle">
-            <span>${safe(character.species)}</span>
-            <span>${safe(character.gender)}</span>
-            <span>${safe(character.height)}</span>
-          </div>
+          ${subtitleParts.length ? `<div class="subtitle">${subtitleParts.map((part) => `<span>${htmlEscape(part)}</span>`).join("")}</div>` : ""}
         `;
         wrap.appendChild(overlay);
 
@@ -1381,187 +1672,294 @@
           .join("");
       }
 
+      function sectionBlock(title, body, wide = false) {
+        if (!hasValue(body)) return "";
+        return `<div class="section ${wide ? "wide" : ""}"><h3>${title}</h3>${body}</div>`;
+      }
+
+      function fieldGrid(items) {
+        const html = items.map(([label, value]) => field(label, value)).filter(Boolean).join("");
+        return html ? `<div class="field-grid">${html}</div>` : "";
+      }
+
+      function detailsBlock(title, body, open = true) {
+        if (!hasValue(body)) return "";
+        return `<details ${open ? "open" : ""}><summary>${title}</summary><div class="details-body">${body}</div></details>`;
+      }
+
       function overviewPanel(c) {
+        const identity = fieldGrid([
+          ["Name", c.name],
+          ["Title", c.title || c.nicknames],
+          ["Species", c.species],
+          ["Occupation", c.occupation],
+          ["Age", c.age],
+          ["Gender", c.gender],
+        ]);
+        const tags = splitList(c.personality);
         return `
           <div class="section-grid">
-            <div class="section wide">
-              <h3>Codex Entry</h3>
-              <p>${safe(c.description)}</p>
-            </div>
-            <div class="section">
-              <h3>Identity</h3>
-              <div class="field-grid">
-                ${field("Name", c.name)}
-                ${field("Title", c.title || c.nicknames)}
-                ${field("Species", c.species)}
-                ${field("Occupation", c.occupation)}
-                ${field("Age", c.age)}
-                ${field("Gender", c.gender)}
-              </div>
-            </div>
-            <div class="section">
-              <h3>At a Glance</h3>
-              <div class="tag-cloud">
-                ${splitList(c.personality).map((tag) => `<span class="tag">${tag}</span>`).join("")}
-              </div>
-            </div>
+            ${sectionBlock("Codex Entry", hasValue(c.description) ? `<p>${htmlEscape(c.description)}</p>` : "", true)}
+            ${sectionBlock("Identity", identity)}
+            ${sectionBlock("At a Glance", tags.length ? `<div class="tag-cloud">${tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("")}</div>` : "")}
           </div>
         `;
       }
 
       function appearancePanel(c) {
+        const physical = fieldGrid([
+          ["Eye Color", c.eyeColor],
+          ["Hair Color", c.hairColor],
+          ["Hair Style", c.hairStyle],
+          ["Skin / Fur / Scale Color", c.skinColor],
+          ["Markings", c.markings],
+          ["Features", c.features],
+        ]);
+        const gear = fieldGrid([
+          ["Shirt / Top", c.outfit?.shirt],
+          ["Pants / Bottoms", c.outfit?.pants],
+          ["Shoes", c.outfit?.shoes],
+          ["Hat / Headwear", c.outfit?.hat],
+          ["Outerwear", c.outfit?.outerwear],
+          ["Accessories", c.accessories],
+        ]);
         return `
-          <details open>
-            <summary>Physical Appearance</summary>
-            <div class="details-body">
-              <div class="field-grid">
-                ${field("Eye Color", c.eyeColor)}
-                ${field("Hair Color", c.hairColor)}
-                ${field("Hair Style", c.hairStyle)}
-                ${field("Skin / Fur / Scale Color", c.skinColor)}
-                ${field("Markings", c.markings)}
-                ${field("Features", c.features)}
-              </div>
-            </div>
-          </details>
-          <details open>
-            <summary>Outfit and Gear</summary>
-            <div class="details-body">
-              <div class="field-grid">
-                ${field("Shirt / Top", c.outfit?.shirt)}
-                ${field("Pants / Bottoms", c.outfit?.pants)}
-                ${field("Shoes", c.outfit?.shoes)}
-                ${field("Hat / Headwear", c.outfit?.hat)}
-                ${field("Outerwear", c.outfit?.outerwear)}
-                ${field("Accessories", c.accessories)}
-              </div>
-            </div>
-          </details>
+          ${detailsBlock("Physical Appearance", physical)}
+          ${detailsBlock("Outfit and Gear", gear)}
+          ${!physical && !gear ? `<p class="empty">No appearance details yet.</p>` : ""}
         `;
       }
 
       function combatPanel(c) {
         const stats = c.stats || {};
+        const statEntries = ["power", "speed", "defense", "magic", "resolve"]
+          .map((key) => [key, hasValue(stats[key]) ? stats[key] : "-"]);
+        const arsenal = fieldGrid([
+          ["Weapons", c.weapons],
+          ["Strengths", c.strengths],
+          ["Weaknesses", c.weaknesses],
+        ]);
         return `
           <div class="section-grid">
-            <div class="section wide">
-              <h3>Combat Style</h3>
-              <p>${safe(c.fightingStyle)}</p>
-            </div>
+            ${sectionBlock("Combat Style", hasValue(c.fightingStyle) ? `<p>${htmlEscape(c.fightingStyle)}</p>` : "", true)}
             <div class="section">
               <h3>RPG Profile</h3>
               <div class="bars">
-                ${Object.entries(stats)
+                ${statEntries
                   .map(
                     ([label, value]) => `
                     <div class="bar-row">
                       <b>${label[0].toUpperCase() + label.slice(1)}</b>
-                      <div class="bar-track"><div class="bar-fill" style="--value:${value}"></div></div>
+                      <div class="bar-track"><div class="bar-fill" style="--value:${Number(value) || 0}"></div></div>
                       <span>${value}/10</span>
                     </div>`,
                   )
                   .join("")}
               </div>
             </div>
-            <div class="section">
-              <h3>Arsenal</h3>
-              <div class="field-grid">
-                ${field("Weapons", c.weapons)}
-                ${field("Strengths", c.strengths)}
-                ${field("Weaknesses", c.weaknesses)}
-              </div>
-            </div>
+            ${sectionBlock("Arsenal", arsenal)}
           </div>
         `;
       }
 
       function personalityPanel(c) {
+        const tags = splitList(c.personality);
+        const innerLife = fieldGrid([
+          ["Likes", c.likes],
+          ["Dislikes", c.dislikes],
+          ["Fears", c.fears],
+          ["Hobbies", c.hobbies],
+        ]);
         return `
           <div class="section-grid">
-            <div class="section wide">
-              <h3>Personality Tags</h3>
-              <div class="tag-cloud">
-                ${splitList(c.personality).map((tag) => `<span class="tag">${tag}</span>`).join("")}
-              </div>
-            </div>
-            <div class="section">
-              <h3>Voice</h3>
-              <p>${safe(c.speechStyle)}</p>
-            </div>
-            <div class="section">
-              <h3>Inner Life</h3>
-              <div class="field-grid">
-                ${field("Likes", c.likes)}
-                ${field("Dislikes", c.dislikes)}
-                ${field("Fears", c.fears)}
-                ${field("Hobbies", c.hobbies)}
-              </div>
-            </div>
+            ${sectionBlock("Personality Tags", tags.length ? `<div class="tag-cloud">${tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("")}</div>` : "", true)}
+            ${sectionBlock("Voice", hasValue(c.speechStyle) ? `<p>${htmlEscape(c.speechStyle)}</p>` : "")}
+            ${sectionBlock("Inner Life", innerLife)}
+            ${!tags.length && !hasValue(c.speechStyle) && !innerLife ? `<p class="empty">No personality details yet.</p>` : ""}
           </div>
         `;
       }
 
       function lorePanel(c) {
+        const motivation = [
+          ["Strengths", c.strengths],
+          ["Weaknesses", c.weaknesses],
+          ["Fear", c.fears],
+        ]
+          .filter(([, value]) => hasValue(value))
+          .map(([label, value]) => `<p><b>${label}:</b> ${htmlEscape(value)}</p>`)
+          .join("");
         return `
-          <details open>
-            <summary>Lore Summary</summary>
-            <div class="details-body">${safe(c.description)}</div>
-          </details>
-          <details open>
-            <summary>Motivation and Conflict</summary>
-            <div class="details-body">
-              <p><b>Strengths:</b> ${safe(c.strengths)}</p>
-              <p><b>Weaknesses:</b> ${safe(c.weaknesses)}</p>
-              <p><b>Fear:</b> ${safe(c.fears)}</p>
-            </div>
-          </details>
-          <details>
-            <summary>Reference Notes</summary>
-            <div class="details-body">
-              Keep visual notes, timeline beats, outfit variants, and future story hooks here as the roster grows.
-            </div>
-          </details>
+          ${detailsBlock("Lore Summary", hasValue(c.description) ? htmlEscape(c.description) : "")}
+          ${detailsBlock("Motivation and Conflict", motivation)}
+          ${!hasValue(c.description) && !motivation ? `<p class="empty">No lore details yet.</p>` : ""}
         `;
       }
 
       function relationsPanel(c) {
-        const relations = c.relations || [];
-        if (!relations.length) return `<p class="empty">No relations listed yet.</p>`;
+        const relations = allRelations();
+        if (!characters.length) return `<p class="empty">No characters listed yet.</p>`;
         return `
           <div class="section relationship-graph">
-            <div class="graph-inner">
-              ${relations
-                .map(
-                  (r) => `
-                  <div class="node">${safe(r.with)}</div>
-                  <div class="edge">${safe(r.type)}</div>
-                  <div class="node active">${safe(c.name)}</div>`,
-                )
-                .join("")}
+            <div class="map-stage" id="relationMap">
+              <svg class="map-lines" id="relationLines" aria-hidden="true"></svg>
+              ${characters.map((character) => mapNode(character, character.name === c.name)).join("")}
             </div>
           </div>
           <br>
           <div class="cards">
             ${relations
-              .map((r) => {
-                const other = characters.find((x) => x.name === r.with);
-                return `
-                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(c.name)}', '${escapeQuotes(r.with)}')">
-                    <div class="avatar">${initials(r.with)}</div>
+              .map(
+                (r) => `
+                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(r.from)}', '${escapeQuotes(r.with)}')">
+                    <div class="avatar" style="background:${characterColor(r.with)}">${initials(r.with)}</div>
                     <div>
-                      <b>${safe(r.with)} / ${safe(r.type)}</b>
-                      <small>${safe(r.note)}</small>
+                      <b>${safe(r.from)} -> ${safe(r.with)}</b>
+                      <small><span class="relation-type" style="background:${relationColor(r.type)}">${safe(r.type)}</span> ${safe(r.note)}</small>
                     </div>
-                  </div>
-                `;
-              })
+                  </div>`,
+              )
               .join("")}
           </div>
         `;
       }
 
+      function allRelations() {
+        return characters.flatMap((c) =>
+          (c.relations || []).map((r) => ({ from: c.name, ...r })),
+        );
+      }
+
+      function mapRelations() {
+        const seen = new Set();
+        return allRelations().filter((relation) => {
+          const key = [relation.from, relation.with].sort().join("::");
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      function characterColor(name) {
+        const character = characters.find((c) => c.name === name);
+        return character?.theme?.accent || "#8fdcff";
+      }
+
+      function relationColor(type = "") {
+        const normalized = type.toLowerCase();
+        if (normalized.includes("trusted")) return "#45c18a";
+        if (normalized.includes("rival")) return "#ff5d68";
+        if (normalized.includes("friend")) return "#5f93ff";
+        if (normalized.includes("enemy")) return "#bc5cff";
+        if (normalized.includes("ally")) return "#52d6a3";
+        return "#f5c96a";
+      }
+
+      function mapNode(character, active) {
+        const color = characterColor(character.name);
+        const position = getNodePosition(character.name);
+        return `
+          <button
+            class="map-node ${active ? "active" : ""}"
+            data-character="${htmlEscape(character.name)}"
+            style="left:${position.x}%;top:${position.y}%;background:${color};--node-glow:${color}66"
+            onclick="goToCharacter('${escapeQuotes(character.name)}')"
+          >
+            <span>${initials(character.name)}</span>
+            <small>${htmlEscape(character.name.split(" ")[0])}</small>
+            <span class="map-tooltip"><b>${htmlEscape(character.name)}</b><br>${htmlEscape(character.description)}</span>
+          </button>
+        `;
+      }
+
+      function getNodePosition(name) {
+        if (relationPositions[name]) return relationPositions[name];
+        const index = characters.findIndex((c) => c.name === name);
+        const count = Math.max(characters.length, 1);
+        const angle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
+        return {
+          x: 50 + Math.cos(angle) * 30,
+          y: 50 + Math.sin(angle) * 30,
+        };
+      }
+
+      function setupRelationMap() {
+        const map = $("relationMap");
+        const svg = $("relationLines");
+        if (!map || !svg) return;
+
+        function drawLines() {
+          const mapRect = map.getBoundingClientRect();
+          svg.innerHTML = mapRelations()
+            .map((relation) => {
+              const fromNode = map.querySelector(`[data-character="${cssEscape(relation.from)}"]`);
+              const toNode = map.querySelector(`[data-character="${cssEscape(relation.with)}"]`);
+              if (!fromNode || !toNode) return "";
+              const fromRect = fromNode.getBoundingClientRect();
+              const toRect = toNode.getBoundingClientRect();
+              const x1 = fromRect.left + fromRect.width / 2 - mapRect.left;
+              const y1 = fromRect.top + fromRect.height / 2 - mapRect.top;
+              const x2 = toRect.left + toRect.width / 2 - mapRect.left;
+              const y2 = toRect.top + toRect.height / 2 - mapRect.top;
+              const color = relationColor(relation.type);
+              return `<line class="map-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="color:${color};stroke:${color}"><title>${htmlEscape(relation.from)} -> ${htmlEscape(relation.with)}: ${htmlEscape(relation.type)}</title></line>`;
+            })
+            .join("");
+        }
+
+        map.querySelectorAll(".map-node").forEach((node) => {
+          let dragging = false;
+          let moved = false;
+
+          node.addEventListener("pointerdown", (event) => {
+            dragging = true;
+            moved = false;
+            node.setPointerCapture(event.pointerId);
+          });
+
+          node.addEventListener("pointermove", (event) => {
+            if (!dragging) return;
+            event.preventDefault();
+            moved = true;
+            const rect = map.getBoundingClientRect();
+            const name = node.dataset.character;
+            const x = Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100));
+            const y = Math.max(10, Math.min(90, ((event.clientY - rect.top) / rect.height) * 100));
+            relationPositions[name] = { x, y };
+            node.style.left = `${x}%`;
+            node.style.top = `${y}%`;
+            drawLines();
+            saveRelationPositions();
+          });
+
+          function finishDrag(event) {
+            if (!dragging) return;
+            dragging = false;
+            saveRelationPositions();
+            event.stopPropagation();
+          }
+
+          node.addEventListener("pointerup", finishDrag);
+          node.addEventListener("pointercancel", finishDrag);
+          node.addEventListener("click", (event) => {
+            if (!moved) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moved = false;
+          });
+        });
+
+        drawLines();
+        window.addEventListener("resize", drawLines, { once: true });
+      }
+
+      function cssEscape(value) {
+        if (window.CSS?.escape) return CSS.escape(value);
+        return String(value).replace(/"/g, '\\"');
+      }
+
       function renderFilters() {
-        const categories = ["All", "Humans", "Elves", "Hybrids", "Demons"];
+        const categories = ["All", "One", "None", "Other", "NPC"];
         $("filters").innerHTML = categories
           .map(
             (category) =>
@@ -1571,13 +1969,8 @@
       }
 
       function characterCategoryMatches(character, filter) {
-        const species = character.species.toLowerCase();
         if (filter === "All") return true;
-        if (filter === "Humans") return species.includes("human");
-        if (filter === "Elves") return species.includes("elf");
-        if (filter === "Hybrids") return species.includes("hybrid");
-        if (filter === "Demons") return species.includes("demon");
-        return true;
+        return (character.category || "Other").toLowerCase() === filter.toLowerCase();
       }
 
       function renderThumbs() {
@@ -1610,7 +2003,9 @@
         currentPhoto = Math.min(currentPhoto, Math.max((c.photos || []).length - 1, 0));
         setTheme(c);
         renderPhotos(c);
-        $("statChips").innerHTML = chips(c);
+        const chipHtml = chips(c);
+        $("statChips").innerHTML = chipHtml;
+        $("statChips").closest(".stat-strip").style.display = chipHtml ? "" : "none";
         renderFilters();
 
         const prev = characters[filteredIndexes[(currentIndex - 1 + filteredIndexes.length) % filteredIndexes.length]];
@@ -1620,6 +2015,7 @@
 
         renderTabs();
         renderPanels(c);
+        if (currentTab === "Relations") setupRelationMap();
         renderThumbs();
       }
 
@@ -1679,6 +2075,7 @@
       }
 
       function closeModal() {
+        activeEditorMode = null;
         modal.classList.remove("open");
       }
 
@@ -1741,6 +2138,420 @@
                 .join("")}</div>`
             : `<p>No relations yet.</p>`,
         );
+      }
+
+      function blankCharacter() {
+        return {
+          name: "New Character",
+          title: "",
+          nicknames: "",
+          age: "",
+          category: "Other",
+          gender: "",
+          species: "Human",
+          height: "",
+          bodyType: "",
+          weight: "",
+          occupation: "",
+          eyeColor: "",
+          hairColor: "",
+          hairStyle: "",
+          skinColor: "",
+          markings: "",
+          features: "",
+          theme: {
+            accent: "#7ecbff",
+            accent2: "#d9e5ff",
+            accent3: "#12364b",
+          },
+          outfit: {
+            shirt: "",
+            pants: "",
+            shoes: "",
+            hat: "",
+            outerwear: "",
+          },
+          accessories: "",
+          weapons: "",
+          description: "",
+          personality: "",
+          fightingStyle: "",
+          speechStyle: "",
+          strengths: "",
+          weaknesses: "",
+          likes: "",
+          dislikes: "",
+          fears: "",
+          hobbies: "",
+          stats: { power: 5, speed: 5, defense: 5, magic: 5, resolve: 5 },
+          photos: [],
+          relations: [],
+        };
+      }
+
+      function formInput(label, id, value, wide = false, multiline = false, type = "text") {
+        const control = multiline
+          ? `<textarea id="${id}">${formValue(value)}</textarea>`
+          : `<input id="${id}" type="${type}" value="${formValue(value)}" />`;
+        return `
+          <div class="form-field ${wide ? "wide" : ""}">
+            <label for="${id}">${label}</label>
+            ${control}
+          </div>
+        `;
+      }
+
+      function formSelect(label, id, value, options, wide = false) {
+        return `
+          <div class="form-field ${wide ? "wide" : ""}">
+            <label for="${id}">${label}</label>
+            <select id="${id}">
+              ${options.map((option) => `<option value="${htmlEscape(option)}" ${String(value ?? "") === String(option) ? "selected" : ""}>${htmlEscape(option)}</option>`).join("")}
+            </select>
+          </div>
+        `;
+      }
+
+      function statSelect(label, id, value) {
+        return formSelect(label, id, hasValue(value) ? value : "-", ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+      }
+
+      function relationsToText(character) {
+        return (character.relations || [])
+          .map((r) => [r.with, r.type, r.note, r.history].map((part) => part || "").join(" | "))
+          .join("\n");
+      }
+
+      function relationEditor(source) {
+        const relations = source.relations || [];
+        const byName = new Map(relations.map((relation) => [relation.with, relation]));
+        const others = characters.filter((character) => character.name !== source.name);
+        if (!others.length) return `<p class="empty">Add another character to create relations.</p>`;
+        return `
+          <div class="relation-editor">
+            ${others
+              .map((other) => {
+                const relation = byName.get(other.name);
+                const active = !!relation;
+                return `
+                  <div class="relation-edit-card ${active ? "active" : ""}" data-relation-target="${htmlEscape(other.name)}">
+                    <div class="relation-edit-head">
+                      <b>${htmlEscape(other.name)}</b>
+                      <label class="toggle">
+                        <input type="checkbox" class="relation-toggle" ${active ? "checked" : ""} onchange="toggleRelationEditor(this)" />
+                        Relation
+                      </label>
+                    </div>
+                    <div class="relation-edit-fields">
+                      ${formInput("Relation Tag", `relationType-${initials(other.name)}`, relation?.type || "", true)}
+                      ${formInput("Note", `relationNote-${initials(other.name)}`, relation?.note || "", true, true)}
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      }
+
+      function openCharacterForm(mode) {
+        const editing = mode === "edit";
+        const source = editing ? currentCharacter() : blankCharacter();
+        const title = editing ? `Edit ${source.name}` : "Add Character";
+        activeEditorMode = mode;
+        openModal(
+          title,
+          `
+            ${
+              editing
+                ? `<div class="editor-nav">
+                    <button class="btn" onclick="switchEditorCharacter(-1)">&larr; Previous</button>
+                    <b>${htmlEscape(source.name)}</b>
+                    <button class="btn" onclick="switchEditorCharacter(1)">Next &rarr;</button>
+                  </div>`
+                : ""
+            }
+            <div class="form-grid">
+              ${formInput("Name", "charName", source.name, false)}
+              <div class="form-field wide">
+                <label for="charPhotoFile">Add Photo</label>
+                <div class="photo-tools">
+                  <input id="charPhotoFile" type="file" accept="image/*" onchange="addPhotoFile(this)" />
+                  <textarea id="charPhotos">${formValue((source.photos || []).join(", "))}</textarea>
+                </div>
+              </div>
+              ${formInput("Title", "charTitle", source.title)}
+              ${formInput("Nicknames", "charNicknames", source.nicknames)}
+              ${formInput("Species", "charSpecies", source.species)}
+              ${formInput("Category", "charCategory", source.category || "Other")}
+              ${formInput("Occupation", "charOccupation", source.occupation)}
+              ${formInput("Gender", "charGender", source.gender)}
+              ${formInput("Age", "charAge", source.age)}
+              ${formInput("Height", "charHeight", source.height)}
+              ${formInput("Body Type", "charBodyType", source.bodyType)}
+              ${formInput("Weight", "charWeight", source.weight)}
+              ${formInput("Description", "charDescription", source.description, true, true)}
+              ${formInput("Personality Tags", "charPersonality", source.personality, true)}
+              ${formInput("Fighting Style", "charFightingStyle", source.fightingStyle, true, true)}
+              ${formInput("Speech Style", "charSpeechStyle", source.speechStyle, true, true)}
+              ${formInput("Eyes", "charEyeColor", source.eyeColor)}
+              ${formInput("Hair Color", "charHairColor", source.hairColor)}
+              ${formInput("Hair Style", "charHairStyle", source.hairStyle, true)}
+              ${formInput("Skin / Fur / Scale", "charSkinColor", source.skinColor, true)}
+              ${formInput("Markings", "charMarkings", source.markings, true)}
+              ${formInput("Features", "charFeatures", source.features, true)}
+              ${formInput("Shirt / Top", "charShirt", source.outfit?.shirt)}
+              ${formInput("Pants / Bottoms", "charPants", source.outfit?.pants)}
+              ${formInput("Shoes", "charShoes", source.outfit?.shoes)}
+              ${formInput("Hat", "charHat", source.outfit?.hat)}
+              ${formInput("Outerwear", "charOuterwear", source.outfit?.outerwear, true)}
+              ${formInput("Accessories", "charAccessories", source.accessories, true)}
+              ${formInput("Weapons", "charWeapons", source.weapons, true)}
+              ${formInput("Strengths", "charStrengths", source.strengths, true)}
+              ${formInput("Weaknesses", "charWeaknesses", source.weaknesses, true)}
+              ${formInput("Likes", "charLikes", source.likes)}
+              ${formInput("Dislikes", "charDislikes", source.dislikes)}
+              ${formInput("Fears", "charFears", source.fears)}
+              ${formInput("Hobbies", "charHobbies", source.hobbies)}
+              ${formInput("Primary Color", "charAccent", source.theme?.accent, false, false, "color")}
+              ${formInput("Secondary Color", "charAccent2", source.theme?.accent2, false, false, "color")}
+              ${formInput("Backdrop Color", "charAccent3", source.theme?.accent3, false, false, "color")}
+              ${statSelect("Power", "statPower", source.stats?.power)}
+              ${statSelect("Speed", "statSpeed", source.stats?.speed)}
+              ${statSelect("Defense", "statDefense", source.stats?.defense)}
+              ${statSelect("Magic", "statMagic", source.stats?.magic)}
+              ${statSelect("Resolve", "statResolve", source.stats?.resolve)}
+              <div class="form-field wide">
+                <label>Relations</label>
+                ${relationEditor(source)}
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="form-actions-group">
+                ${editing ? `<button class="btn danger" onclick="deleteCharacterFromEditor('${escapeQuotes(source.name)}')">Delete</button>` : ""}
+              </div>
+              <div class="form-actions-group">
+                <button class="btn" onclick="cancelCharacterEditor()">Cancel</button>
+                <button class="btn primary" onclick="saveCharacterFromForm('${mode}', '${escapeQuotes(source.name)}')">Done</button>
+              </div>
+            </div>
+          `,
+        );
+      }
+
+      function value(id) {
+        return $(id)?.value.trim() || "";
+      }
+
+      function statValue(id) {
+        const raw = value(id);
+        if (raw === "-") return "-";
+        return Math.max(0, Math.min(10, Number(raw) || 0));
+      }
+
+      function parseRelations(text) {
+        return text
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            const [withName, type, note, history] = line.split("|").map((part) => part.trim());
+            return {
+              with: withName || "",
+              type: type || "Related",
+              note: note || "",
+              history: history || "",
+            };
+          })
+          .filter((relation) => relation.with);
+      }
+
+      function collectRelationsFromEditor() {
+        return [...document.querySelectorAll(".relation-edit-card")]
+          .map((card) => {
+            const enabled = card.querySelector(".relation-toggle")?.checked;
+            if (!enabled) return null;
+            const fields = card.querySelectorAll("input:not(.relation-toggle), textarea");
+            const type = fields[0]?.value.trim() || "Related";
+            const note = fields[1]?.value.trim() || "";
+            return {
+              with: card.dataset.relationTarget,
+              type,
+              note,
+              history: "",
+            };
+          })
+          .filter(Boolean);
+      }
+
+      function validateCharacterForm() {
+        const input = $("charName");
+        const field = input?.closest(".form-field");
+        field?.classList.remove("error");
+        if (value("charName")) return true;
+        field?.classList.add("error");
+        input?.scrollIntoView({ behavior: "smooth", block: "center" });
+        input?.focus();
+        return false;
+      }
+
+      function toggleRelationEditor(input) {
+        input.closest(".relation-edit-card")?.classList.toggle("active", input.checked);
+      }
+
+      function addPhotoFile(input) {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const photos = $("charPhotos");
+          const existing = photos.value.trim();
+          photos.value = existing ? `${existing}, ${reader.result}` : reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function cancelCharacterEditor() {
+        activeEditorMode = null;
+        closeModal();
+      }
+
+      function switchEditorCharacter(step) {
+        if (activeEditorMode !== "edit") return;
+        nextCharacter(step);
+        openCharacterForm("edit");
+      }
+
+      function saveCharacterFromForm(mode, oldName) {
+        if (!validateCharacterForm()) return;
+        const name = value("charName");
+        const character = {
+          name,
+          title: value("charTitle"),
+          nicknames: value("charNicknames"),
+          age: value("charAge"),
+          category: value("charCategory") || "Other",
+          gender: value("charGender"),
+          species: value("charSpecies") || "Unknown",
+          height: value("charHeight"),
+          bodyType: value("charBodyType"),
+          weight: value("charWeight"),
+          occupation: value("charOccupation"),
+          eyeColor: value("charEyeColor"),
+          hairColor: value("charHairColor"),
+          hairStyle: value("charHairStyle"),
+          skinColor: value("charSkinColor"),
+          markings: value("charMarkings"),
+          features: value("charFeatures"),
+          theme: {
+            accent: value("charAccent") || "#7ecbff",
+            accent2: value("charAccent2") || "#d9e5ff",
+            accent3: value("charAccent3") || "#12364b",
+          },
+          outfit: {
+            shirt: value("charShirt"),
+            pants: value("charPants"),
+            shoes: value("charShoes"),
+            hat: value("charHat"),
+            outerwear: value("charOuterwear"),
+          },
+          accessories: value("charAccessories"),
+          weapons: value("charWeapons"),
+          description: value("charDescription"),
+          personality: value("charPersonality"),
+          fightingStyle: value("charFightingStyle"),
+          speechStyle: value("charSpeechStyle"),
+          strengths: value("charStrengths"),
+          weaknesses: value("charWeaknesses"),
+          likes: value("charLikes"),
+          dislikes: value("charDislikes"),
+          fears: value("charFears"),
+          hobbies: value("charHobbies"),
+          stats: {
+            power: statValue("statPower"),
+            speed: statValue("statSpeed"),
+            defense: statValue("statDefense"),
+            magic: statValue("statMagic"),
+            resolve: statValue("statResolve"),
+          },
+          photos: value("charPhotos")
+            .split(",")
+            .map((photo) => photo.trim())
+            .filter(Boolean),
+          relations: collectRelationsFromEditor(),
+        };
+
+        if (mode === "edit") {
+          const index = characters.findIndex((c) => c.name === oldName);
+          if (index >= 0) characters[index] = character;
+          if (oldName !== name) {
+            characters.forEach((c) => {
+              (c.relations || []).forEach((relation) => {
+                if (relation.with === oldName) relation.with = name;
+              });
+            });
+            if (relationPositions[oldName]) {
+              relationPositions[name] = relationPositions[oldName];
+              delete relationPositions[oldName];
+              saveRelationPositions();
+            }
+          }
+        } else {
+          characters.push(character);
+        }
+
+        saveCharacters();
+        activeEditorMode = null;
+        closeModal();
+        activeFilter = "All";
+        $("search").value = "";
+        filteredIndexes = characters.map((_, i) => i);
+        currentIndex = Math.max(0, characters.findIndex((c) => c.name === name));
+        currentPhoto = 0;
+        render();
+      }
+
+      function deleteCharacterFromEditor(name) {
+        if (characters.length <= 1) {
+          openModal("Cannot Delete", "<p>Keep at least one character in the codex.</p>");
+          return;
+        }
+        confirmDeleteCharacter(name);
+      }
+
+      function deleteCurrentCharacter() {
+        if (characters.length <= 1) {
+          openModal("Cannot Delete", "<p>Keep at least one character in the codex.</p>");
+          return;
+        }
+        const character = currentCharacter();
+        openModal(
+          `Delete ${character.name}`,
+          `
+            <p>This removes ${htmlEscape(character.name)} from the browser-saved roster and clears references to them from other relations.</p>
+            <div class="form-actions">
+              <button class="btn" onclick="closeModal()">Cancel</button>
+              <button class="btn danger" onclick="confirmDeleteCharacter('${escapeQuotes(character.name)}')">Delete Character</button>
+            </div>
+          `,
+        );
+      }
+
+      function confirmDeleteCharacter(name) {
+        characters = characters.filter((c) => c.name !== name);
+        characters.forEach((c) => {
+          c.relations = (c.relations || []).filter((relation) => relation.with !== name);
+        });
+        delete relationPositions[name];
+        saveCharacters();
+        saveRelationPositions();
+        activeEditorMode = null;
+        closeModal();
+        currentIndex = Math.min(currentIndex, characters.length - 1);
+        currentPhoto = 0;
+        activeFilter = "All";
+        $("search").value = "";
+        render();
       }
 
       function editHelpModal() {
@@ -1828,8 +2639,8 @@
       setupImageGestures();
       renderFilters();
 
-      $("prevBtn").onclick = () => nextCharacter(-1);
-      $("nextBtn").onclick = () => nextCharacter(1);
+      $("prevBtn").onclick = () => (activeEditorMode === "edit" ? switchEditorCharacter(-1) : nextCharacter(-1));
+      $("nextBtn").onclick = () => (activeEditorMode === "edit" ? switchEditorCharacter(1) : nextCharacter(1));
       $("randomBtn").onclick = () => {
         currentIndex = Math.floor(Math.random() * filteredIndexes.length);
         currentPhoto = 0;
@@ -1839,17 +2650,17 @@
         applySearch(true);
         render();
       };
+      $("addCharacterBtn").onclick = () => openCharacterForm("add");
+      $("editCharacterBtn").onclick = () => openCharacterForm("edit");
       $("allCharactersBtn").onclick = allCharactersModal;
-      $("relationsBtn").onclick = relationsModal;
-      $("editHelpBtn").onclick = editHelpModal;
       $("closeModal").onclick = closeModal;
       modal.onclick = (e) => {
         if (e.target === modal) closeModal();
       };
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight") nextCharacter(1);
-        if (e.key === "ArrowLeft") nextCharacter(-1);
+        if (e.key === "ArrowRight") activeEditorMode === "edit" ? switchEditorCharacter(1) : nextCharacter(1);
+        if (e.key === "ArrowLeft") activeEditorMode === "edit" ? switchEditorCharacter(-1) : nextCharacter(-1);
         if (e.key === "Escape") closeModal();
       });
 
@@ -1893,6 +2704,14 @@
       window.goToCharacter = goToCharacter;
       window.openModal = openModal;
       window.openRelation = openRelation;
+      window.openCharacterForm = openCharacterForm;
+      window.saveCharacterFromForm = saveCharacterFromForm;
+      window.confirmDeleteCharacter = confirmDeleteCharacter;
+      window.deleteCharacterFromEditor = deleteCharacterFromEditor;
+      window.switchEditorCharacter = switchEditorCharacter;
+      window.cancelCharacterEditor = cancelCharacterEditor;
+      window.toggleRelationEditor = toggleRelationEditor;
+      window.addPhotoFile = addPhotoFile;
       window.closeModal = closeModal;
 
       render();
