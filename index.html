@@ -1,0 +1,1901 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Character Codex</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap");
+
+      :root {
+        --bg: #080a0d;
+        --surface: rgba(13, 17, 23, 0.78);
+        --surface-strong: rgba(19, 24, 32, 0.94);
+        --line: rgba(255, 255, 255, 0.12);
+        --text: #f6f2ea;
+        --muted: #b7b0a3;
+        --soft: rgba(255, 255, 255, 0.075);
+        --accent: #88d8ff;
+        --accent-2: #dbefff;
+        --accent-3: #2b6e8f;
+        --danger: #ff6c54;
+        --shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        background:
+          linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.18)),
+          var(--backdrop, linear-gradient(135deg, #101821, #25150f));
+        background-size: cover;
+        background-position: center;
+        filter: blur(30px) saturate(1.15);
+        transform: scale(1.08);
+        opacity: 0.46;
+        z-index: -2;
+      }
+
+      body::after {
+        background:
+          linear-gradient(180deg, rgba(8, 10, 13, 0.1), #080a0d 72%),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 0,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px,
+            transparent 86px
+          );
+        z-index: -1;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      .app {
+        width: min(1500px, 100%);
+        margin: 0 auto;
+        padding: 18px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(1.7rem, 3vw, 3rem);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .brand p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        max-width: 720px;
+        line-height: 1.45;
+      }
+
+      .actions,
+      .filters,
+      .tabs,
+      .chips,
+      .thumbs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .actions {
+        justify-content: flex-end;
+      }
+
+      .btn,
+      .tab,
+      .filter,
+      .thumb {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.065);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease,
+          background 0.16s ease,
+          color 0.16s ease;
+      }
+
+      .btn:hover,
+      .tab:hover,
+      .filter:hover,
+      .thumb:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--accent) 58%, white 12%);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .btn {
+        min-height: 40px;
+        padding: 9px 12px;
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        color: #071016;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        border-color: transparent;
+      }
+
+      .btn.icon {
+        width: 42px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        font-size: 1.1rem;
+      }
+
+      .search-row {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .searchbar {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: 10px 13px;
+        outline: none;
+      }
+
+      .searchbar:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
+      }
+
+      .filter {
+        padding: 9px 11px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .filter.active {
+        color: #071016;
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(420px, 0.88fr) minmax(0, 1.12fr);
+        gap: 16px;
+        min-height: calc(100vh - 148px);
+      }
+
+      .hero,
+      .codex {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero {
+        position: sticky;
+        top: 18px;
+        height: max(560px, calc(100vh - 174px));
+        min-height: 0;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto auto;
+        overflow: hidden;
+        border-radius: var(--radius);
+      }
+
+      .photo-wrap {
+        position: relative;
+        min-height: 0;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 38%),
+          linear-gradient(135deg, color-mix(in srgb, var(--accent-3) 58%, #080a0d), #090a0d);
+      }
+
+      .photo-wrap.zoomed {
+        cursor: grabbing;
+      }
+
+      .photo-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.78)),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 45%);
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .image-stage {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .photo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: none;
+        transform-origin: center center;
+        will-change: transform;
+        pointer-events: none;
+      }
+
+      .photo-wrap img.active {
+        display: block;
+      }
+
+      .photo-placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 26px;
+        text-align: center;
+        z-index: 1;
+      }
+
+      .placeholder-mark {
+        width: min(52%, 320px);
+        aspect-ratio: 1;
+        border: 2px solid color-mix(in srgb, var(--accent) 52%, transparent);
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.13), transparent),
+          color-mix(in srgb, var(--accent-3) 42%, transparent);
+        display: grid;
+        place-items: center;
+        box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.32);
+        clip-path: polygon(50% 0, 94% 24%, 94% 76%, 50% 100%, 6% 76%, 6% 24%);
+        opacity: 0.72;
+        transform: translateY(-16%);
+      }
+
+      .placeholder-mark span {
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(4rem, 11vw, 8rem);
+        font-weight: 800;
+        color: var(--accent-2);
+        text-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+        opacity: 0.82;
+      }
+
+      .photo-overlay {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 74px;
+        z-index: 4;
+      }
+
+      .kicker {
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .photo-overlay h2 {
+        margin: 6px 0 8px;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: clamp(2.6rem, 5.8vw, 5.8rem);
+        line-height: 0.86;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .subtitle span {
+        background: rgba(0, 0, 0, 0.38);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 6px 8px;
+      }
+
+      .photo-tabs,
+      .image-controls {
+        position: absolute;
+        z-index: 5;
+        display: flex;
+        gap: 8px;
+      }
+
+      .photo-tabs {
+        left: 18px;
+        bottom: 18px;
+      }
+
+      .image-controls {
+        top: 14px;
+        right: 14px;
+      }
+
+      .image-controls .btn {
+        background: rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(10px);
+      }
+
+      .dot {
+        width: 38px;
+        height: 5px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.36);
+        cursor: pointer;
+      }
+
+      .dot.active {
+        background: var(--accent);
+      }
+
+      .stat-strip {
+        padding: 12px;
+        background: var(--surface-strong);
+        border-top: 1px solid var(--line);
+      }
+
+      .chip {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .nav-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.22);
+      }
+
+      .nav-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-row .btn:first-child {
+        text-align: left;
+      }
+
+      .nav-row .btn:last-child {
+        text-align: right;
+      }
+
+      .codex {
+        border-radius: var(--radius);
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .tabs {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .tab {
+        padding: 10px 12px;
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .tab.active {
+        color: #071016;
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      .tab-panel {
+        display: none;
+        padding: 18px;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      .section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .section,
+      details,
+      .relationship-card,
+      .mini-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.055);
+      }
+
+      .section {
+        padding: 16px;
+      }
+
+      .section.wide {
+        grid-column: 1 / -1;
+      }
+
+      .section h3,
+      summary {
+        margin: 0 0 12px;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 0;
+      }
+
+      .section p,
+      .section li,
+      .details-body {
+        color: var(--muted);
+        line-height: 1.62;
+      }
+
+      .section p {
+        margin: 0;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .field {
+        min-height: 74px;
+        padding: 12px;
+        border-left: 2px solid color-mix(in srgb, var(--accent) 72%, transparent);
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .field b {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--accent);
+        font-size: 0.76rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .field span {
+        color: var(--text);
+        line-height: 1.45;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        padding: 8px 10px;
+        border-radius: var(--radius);
+        background: color-mix(in srgb, var(--accent) 16%, rgba(255, 255, 255, 0.07));
+        border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+        font-weight: 800;
+      }
+
+      .bars {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 34px;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .bar-row b,
+      .bar-row span {
+        font-size: 0.86rem;
+      }
+
+      .bar-track {
+        height: 10px;
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.24);
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        width: calc(var(--value) * 10%);
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+
+      details {
+        overflow: hidden;
+      }
+
+      details + details {
+        margin-top: 10px;
+      }
+
+      summary {
+        list-style: none;
+        cursor: pointer;
+        margin: 0;
+        padding: 14px 15px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary::after {
+        content: "+";
+        color: var(--accent);
+      }
+
+      details[open] summary::after {
+        content: "-";
+      }
+
+      .details-body {
+        padding: 0 15px 15px;
+      }
+
+      .relationship-graph {
+        min-height: 260px;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        position: relative;
+      }
+
+      .graph-inner {
+        width: min(620px, 100%);
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .node,
+      .edge {
+        text-align: center;
+      }
+
+      .node {
+        min-height: 88px;
+        display: grid;
+        place-items: center;
+        padding: 12px;
+        border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+        background: rgba(0, 0, 0, 0.22);
+        font-family: Outfit, Inter, sans-serif;
+        font-weight: 800;
+      }
+
+      .node.active {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #071016;
+      }
+
+      .edge {
+        color: var(--accent);
+        font-weight: 900;
+      }
+
+      .relationship-card,
+      .mini-card {
+        padding: 14px;
+        cursor: pointer;
+      }
+
+      .relationship-card {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+        background: color-mix(in srgb, var(--accent-3) 42%, rgba(255, 255, 255, 0.06));
+        font-family: Outfit, Inter, sans-serif;
+        font-weight: 800;
+        color: var(--accent-2);
+      }
+
+      .relationship-card b,
+      .mini-card b {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .relationship-card small,
+      .mini-card small {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .thumbs {
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .thumb {
+        width: 82px;
+        min-height: 82px;
+        padding: 7px;
+        display: grid;
+        gap: 5px;
+        justify-items: center;
+        color: var(--muted);
+      }
+
+      .thumb.active {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 15%, rgba(255, 255, 255, 0.07));
+        color: var(--text);
+      }
+
+      .thumb .avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.82rem;
+      }
+
+      .thumb span {
+        max-width: 100%;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.15;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+
+      .empty {
+        color: var(--muted);
+        padding: 22px;
+        text-align: center;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 30;
+        padding: 18px;
+      }
+
+      .modal.open {
+        display: grid;
+      }
+
+      .modal-card {
+        width: min(760px, 100%);
+        max-height: 86vh;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+
+      .modal h3 {
+        margin: 0;
+        font-family: Outfit, Inter, sans-serif;
+        font-size: 1.55rem;
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 16px 0;
+      }
+
+      @media (max-width: 980px) {
+        .topbar,
+        .search-row,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .actions,
+        .filters {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          position: relative;
+          top: auto;
+          height: 78vh;
+          min-height: 560px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .app {
+          padding: 12px;
+        }
+
+        .section-grid,
+        .field-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          height: 72vh;
+          min-height: 500px;
+        }
+
+        .photo-overlay {
+          left: 12px;
+          right: 12px;
+          bottom: 88px;
+        }
+
+        .nav-row {
+          grid-template-columns: 1fr;
+        }
+
+        .graph-inner {
+          grid-template-columns: 1fr;
+        }
+
+        .edge::before,
+        .edge::after {
+          content: "|";
+          display: block;
+          color: var(--line);
+        }
+
+        .relationship-card {
+          grid-template-columns: 48px 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Character Codex</h1>
+          <p>
+            A visual reference guide for portraits, lore, abilities, outfits,
+            and relationships.
+          </p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="allCharactersBtn">Roster</button>
+          <button class="btn" id="relationsBtn">Relations</button>
+          <button class="btn primary" id="editHelpBtn">Edit Guide</button>
+        </div>
+      </header>
+
+      <div class="search-row">
+        <input
+          class="searchbar"
+          id="search"
+          placeholder="Search characters, species, fighting styles, outfits, weapons..."
+        />
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <main class="layout" id="viewer">
+        <aside class="hero">
+          <div class="photo-wrap" id="photoWrap"></div>
+          <div class="stat-strip">
+            <div class="chips" id="statChips"></div>
+          </div>
+          <div class="nav-row">
+            <button class="btn" id="prevBtn" aria-label="Previous character"></button>
+            <button class="btn primary" id="randomBtn">Random</button>
+            <button class="btn" id="nextBtn" aria-label="Next character"></button>
+          </div>
+        </aside>
+
+        <section class="codex">
+          <nav class="tabs" id="tabs"></nav>
+          <div id="tabPanels"></div>
+          <div class="thumbs" id="thumbs"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3 id="modalTitle"></h3>
+          <button class="btn" id="closeModal">Close</button>
+        </div>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <script>
+      /*
+      HOW TO ADD YOUR OWN CHARACTERS:
+      1. Duplicate one character object below.
+      2. Change the text values.
+      3. Put image files in the same folder as this HTML, or in an images folder.
+         Example: photos: ["images/my-character.png", "images/my-character-alt.jpg"]
+      4. For relations, use the exact name of another character.
+      */
+
+      const characters = [
+        {
+          name: "Kael Nightshade",
+          title: "Frost Fang",
+          nicknames: "Kael, Frost Fang",
+          age: "23",
+          gender: "Male",
+          species: "Human-Wolf Hybrid",
+          height: "6'1\"",
+          bodyType: "Lean, athletic",
+          weight: "Optional",
+          occupation: "Wandering blade-for-hire",
+          eyeColor: "Ice blue",
+          hairColor: "Black with silver tips",
+          hairStyle: "Messy, shoulder-length, partially covering one eye",
+          skinColor: "Pale skin with gray fur on ears and tail",
+          markings: "Scar over left eye; faint silver markings on shoulders",
+          features: "Wolf ears, fluffy tail, sharp canines, narrow pupils",
+          theme: {
+            accent: "#8fdcff",
+            accent2: "#e7f7ff",
+            accent3: "#12364b",
+          },
+          outfit: {
+            shirt: "Black hoodie with torn cuffs",
+            pants: "Dark cargo pants with utility straps",
+            shoes: "Heavy combat boots",
+            hat: "None",
+            outerwear: "Dark leather jacket",
+          },
+          accessories:
+            "Silver pendant, fingerless gloves, hidden dagger sheathes",
+          weapons: "Twin daggers named Frost and Fang",
+          description:
+            "A quiet, intimidating hybrid with sharp eyes and a guarded posture. He looks dangerous at first glance, but his body language softens around people he trusts.",
+          personality:
+            "Protective, sarcastic, observant, loyal, slow to trust.",
+          fightingStyle:
+            "Fast assassin-style combat focused on dodging, mobility, stealth, and precise strikes.",
+          speechStyle:
+            "Relaxed and dry. Uses short sentences, sarcasm, and rarely raises his voice.",
+          strengths: "Speed, stealth, reading opponents, protecting allies",
+          weaknesses: "Poor teamwork with strangers, avoids asking for help",
+          likes: "Cold weather, quiet rooftops, loyal friends",
+          dislikes: "Crowds, betrayal, being touched without warning",
+          fears: "Losing control of his instincts",
+          hobbies: "Knife maintenance, night walks, sketching maps",
+          stats: { power: 6, speed: 10, defense: 5, magic: 2, resolve: 8 },
+          photos: [
+            "images/kael-main.png",
+            "images/kael-outfit.png",
+            "images/kael-expression.png",
+          ],
+          relations: [
+            {
+              with: "Mira Solwyn",
+              type: "Trusted Ally",
+              note: "Mira is one of the few people Kael fully listens to.",
+              history:
+                "Their trust grew during a winter escape where Mira healed Kael after he stayed behind to slow pursuers.",
+            },
+            {
+              with: "Riven Ashlock",
+              type: "Rival",
+              note: "Their fights are intense, but there is respect beneath the hostility.",
+              history:
+                "Kael and Riven test each other whenever tension runs high, turning conflict into a strange form of honesty.",
+            },
+          ],
+        },
+        {
+          name: "Mira Solwyn",
+          title: "Sunthread",
+          nicknames: "Mira, Sunthread",
+          age: "21",
+          gender: "Female",
+          species: "Elf",
+          height: "5'7\"",
+          bodyType: "Slim, graceful",
+          weight: "Optional",
+          occupation: "Healer and charm-maker",
+          eyeColor: "Amber gold",
+          hairColor: "Warm brown",
+          hairStyle: "Long braid with loose curls around her face",
+          skinColor: "Deep tan with golden undertones",
+          markings: "Small glowing freckles across cheeks and shoulders",
+          features:
+            "Long pointed ears, warm smile, soft golden aura when casting",
+          theme: {
+            accent: "#f2d26b",
+            accent2: "#b8e06a",
+            accent3: "#314421",
+          },
+          outfit: {
+            shirt: "Cream blouse with embroidered sleeves",
+            pants: "High-waisted brown trousers",
+            shoes: "Soft leather boots",
+            hat: "Wide-brim travel hat with ribbon",
+            outerwear: "Green traveling cloak",
+          },
+          accessories: "Charm bracelet, satchel of herbs, moonstone earrings",
+          weapons: "Light staff; defensive charm seals",
+          description:
+            "A bright, calming presence with a practical travel outfit and gentle confidence. She often looks harmless until her magic flares.",
+          personality: "Kind, clever, stubborn, nurturing, quietly brave.",
+          fightingStyle:
+            "Defensive support fighter who uses barriers, healing, misdirection, and light magic.",
+          speechStyle:
+            "Warm and polite, but becomes firm and commanding in emergencies.",
+          strengths: "Healing, emotional intelligence, defensive magic",
+          weaknesses: "Overextends herself, avoids direct violence",
+          likes: "Tea, gardens, handmade gifts",
+          dislikes: "Cruelty, needless fighting, wasting supplies",
+          fears: "Failing to save someone",
+          hobbies: "Herbalism, sewing charms, journaling",
+          stats: { power: 4, speed: 6, defense: 8, magic: 10, resolve: 9 },
+          photos: ["images/mira-main.png", "images/mira-magic.png"],
+          relations: [
+            {
+              with: "Kael Nightshade",
+              type: "Trusted Ally",
+              note: "She sees through Kael's cold act and treats him gently.",
+              history:
+                "Mira earned Kael's loyalty by giving him space, practical help, and no pity.",
+            },
+            {
+              with: "Riven Ashlock",
+              type: "Uneasy Friend",
+              note: "She believes Riven can change, even when he doubts it.",
+              history:
+                "Their friendship is built from arguments, patch-up work, and Mira refusing to reduce Riven to their worst moments.",
+            },
+          ],
+        },
+        {
+          name: "Riven Ashlock",
+          title: "Ashlock",
+          nicknames: "Riv, Ash",
+          age: "25",
+          gender: "Nonbinary",
+          species: "Demon-Touched Human",
+          height: "5'11\"",
+          bodyType: "Compact, muscular",
+          weight: "Optional",
+          occupation: "Pit fighter turned mercenary",
+          eyeColor: "Red-orange",
+          hairColor: "White",
+          hairStyle: "Short undercut with messy top",
+          skinColor: "Brown skin with ember-like cracks along arms",
+          markings: "Burn-like glowing lines on forearms and neck",
+          features: "Small black horns, pointed nails, smoke-like shadow aura",
+          theme: {
+            accent: "#ff7058",
+            accent2: "#ffc15e",
+            accent3: "#4a1b16",
+          },
+          outfit: {
+            shirt: "Sleeveless black top",
+            pants: "Reinforced fighting pants",
+            shoes: "Steel-toed boots",
+            hat: "None",
+            outerwear: "Short red battle coat",
+          },
+          accessories: "Chain belt, ear cuffs, arm wraps",
+          weapons: "Heavy chain blade",
+          description:
+            "A fierce, sharp-tongued fighter with a bold silhouette and controlled aggression. Their glowing markings make them look like they are burning from within.",
+          personality:
+            "Bold, impatient, loyal once earned, competitive, secretly sentimental.",
+          fightingStyle:
+            "Close-to-mid-range brawler using chain blade swings, grapples, and overwhelming pressure.",
+          speechStyle:
+            "Blunt, teasing, loud when excited. Uses nicknames often.",
+          strengths: "Power, endurance, intimidation, improvisation",
+          weaknesses: "Temper, reckless risks, hates retreating",
+          likes: "Sparring, spicy food, loud music",
+          dislikes: "Cowardice, lectures, being underestimated",
+          fears: "Becoming the monster people expect them to be",
+          hobbies: "Arm wrestling, repairing weapons, collecting coins",
+          stats: { power: 10, speed: 7, defense: 7, magic: 5, resolve: 8 },
+          photos: ["images/riven-main.png", "images/riven-combat.png"],
+          relations: [
+            {
+              with: "Kael Nightshade",
+              type: "Rival",
+              note: "They challenge each other constantly, sometimes for fun and sometimes not.",
+              history:
+                "The rivalry began in a bad first fight and stayed because neither of them likes backing down.",
+            },
+            {
+              with: "Mira Solwyn",
+              type: "Uneasy Friend",
+              note: "Riven acts annoyed by Mira's kindness but protects her fiercely.",
+              history:
+                "Mira's faith bothers Riven because it asks them to imagine a future that is not just survival.",
+            },
+          ],
+        },
+      ];
+
+      let currentIndex = 0;
+      let currentPhoto = 0;
+      let currentTab = "Overview";
+      let activeFilter = "All";
+      let filteredIndexes = characters.map((_, i) => i);
+
+      let imageScale = 1;
+      let imagePanX = 0;
+      let imagePanY = 0;
+      const activePointers = new Map();
+      let lastPinchDistance = 0;
+      let lastDragPoint = null;
+
+      const tabs = ["Overview", "Appearance", "Combat", "Personality", "Lore", "Relations"];
+      const $ = (id) => document.getElementById(id);
+      const modal = $("modal");
+
+      function safe(value) {
+        return value && String(value).trim() ? value : "-";
+      }
+
+      function currentCharacter() {
+        return characters[filteredIndexes[currentIndex]] || characters[0];
+      }
+
+      function initials(name) {
+        return safe(name)
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+      }
+
+      function splitList(value) {
+        return safe(value)
+          .split(",")
+          .map((item) => item.trim().replace(/\.$/, ""))
+          .filter(Boolean);
+      }
+
+      function iconFor(label) {
+        const icons = {
+          Species: "DNA",
+          Occupation: "Blade",
+          Height: "Ruler",
+          Age: "Age",
+          Gender: "ID",
+          Body: "Build",
+        };
+        return icons[label] || "Info";
+      }
+
+      function escapeQuotes(str) {
+        return String(str ?? "")
+          .replace(/\\/g, "\\\\")
+          .replace(/'/g, "&#39;")
+          .replace(/\n/g, " ");
+      }
+
+      function setTheme(character) {
+        const theme = character.theme || {};
+        document.documentElement.style.setProperty("--accent", theme.accent || "#88d8ff");
+        document.documentElement.style.setProperty("--accent-2", theme.accent2 || "#dbefff");
+        document.documentElement.style.setProperty("--accent-3", theme.accent3 || "#2b6e8f");
+      }
+
+      function setBackdrop(src, character) {
+        if (src) {
+          document.body.style.setProperty("--backdrop", `url("${src}")`);
+          return;
+        }
+        const theme = character.theme || {};
+        document.body.style.setProperty(
+          "--backdrop",
+          `linear-gradient(135deg, ${theme.accent3 || "#14202b"}, #080a0d 62%, ${theme.accent || "#88d8ff"})`,
+        );
+      }
+
+      function field(label, value) {
+        return `<div class="field"><b>${label}</b><span>${safe(value)}</span></div>`;
+      }
+
+      function chips(character) {
+        return [
+          ["Species", character.species],
+          ["Occupation", character.occupation],
+          ["Height", character.height],
+          ["Age", character.age],
+        ]
+          .map(([label, value]) => `<span class="chip">${iconFor(label)} ${safe(value)}</span>`)
+          .join("");
+      }
+
+      function clampImagePan() {
+        const wrap = $("photoWrap");
+        const maxX = (wrap.clientWidth * Math.max(imageScale - 1, 0)) / 2;
+        const maxY = (wrap.clientHeight * Math.max(imageScale - 1, 0)) / 2;
+        imagePanX = Math.max(-maxX, Math.min(maxX, imagePanX));
+        imagePanY = Math.max(-maxY, Math.min(maxY, imagePanY));
+      }
+
+      function applyImageTransform() {
+        clampImagePan();
+        const img = document.querySelector("#photoWrap img.active");
+        if (!img) return;
+        img.style.transform = `translate(${imagePanX}px, ${imagePanY}px) scale(${imageScale})`;
+        $("photoWrap").classList.toggle("zoomed", imageScale > 1.01);
+      }
+
+      function resetImageZoom() {
+        imageScale = 1;
+        imagePanX = 0;
+        imagePanY = 0;
+        activePointers.clear();
+        lastPinchDistance = 0;
+        lastDragPoint = null;
+        applyImageTransform();
+      }
+
+      function zoomImageBy(multiplier, centerX = 0, centerY = 0) {
+        const oldScale = imageScale;
+        const nextScale = Math.max(1, Math.min(5, imageScale * multiplier));
+        if (nextScale === oldScale) return;
+        imageScale = nextScale;
+        if (imageScale <= 1.01) {
+          imageScale = 1;
+          imagePanX = 0;
+          imagePanY = 0;
+        } else {
+          imagePanX = centerX - (centerX - imagePanX) * (imageScale / oldScale);
+          imagePanY = centerY - (centerY - imagePanY) * (imageScale / oldScale);
+        }
+        applyImageTransform();
+      }
+
+      function distanceBetweenPointers() {
+        const pts = [...activePointers.values()];
+        if (pts.length < 2) return 0;
+        return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      }
+
+      function midpointBetweenPointers() {
+        const pts = [...activePointers.values()];
+        return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+      }
+
+      function renderPhotos(character) {
+        const wrap = $("photoWrap");
+        wrap.innerHTML = "";
+        resetImageZoom();
+
+        const stage = document.createElement("div");
+        stage.className = "image-stage";
+        wrap.appendChild(stage);
+
+        const photos = character.photos || [];
+        let activeSrc = photos[currentPhoto] || "";
+        setBackdrop(activeSrc, character);
+
+        if (!photos.length) {
+          stage.innerHTML = placeholder(character);
+        } else {
+          photos.forEach((src, i) => {
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = `${character.name} reference ${i + 1}`;
+            img.className = i === currentPhoto ? "active" : "";
+            img.onload = () => {
+              if (i === currentPhoto) setBackdrop(src, character);
+            };
+            img.onerror = () => {
+              if (i !== currentPhoto) return;
+              setBackdrop("", character);
+              stage.innerHTML = placeholder(character);
+            };
+            stage.appendChild(img);
+          });
+        }
+
+        const overlay = document.createElement("div");
+        overlay.className = "photo-overlay";
+        overlay.innerHTML = `
+          <div class="kicker">${safe(character.title)} / ${safe(character.occupation)}</div>
+          <h2>${safe(character.name)}</h2>
+          <div class="subtitle">
+            <span>${safe(character.species)}</span>
+            <span>${safe(character.gender)}</span>
+            <span>${safe(character.height)}</span>
+          </div>
+        `;
+        wrap.appendChild(overlay);
+
+        const controls = document.createElement("div");
+        controls.className = "image-controls";
+        controls.innerHTML = `<button class="btn icon" type="button" id="zoomOutBtn" title="Zoom out">-</button><button class="btn" type="button" id="zoomResetBtn">Reset</button><button class="btn icon" type="button" id="zoomInBtn" title="Zoom in">+</button>`;
+        wrap.appendChild(controls);
+        $("zoomOutBtn").onclick = (e) => {
+          e.stopPropagation();
+          zoomImageBy(0.85);
+        };
+        $("zoomInBtn").onclick = (e) => {
+          e.stopPropagation();
+          zoomImageBy(1.18);
+        };
+        $("zoomResetBtn").onclick = (e) => {
+          e.stopPropagation();
+          resetImageZoom();
+        };
+
+        if (photos.length > 1) {
+          const photoTabs = document.createElement("div");
+          photoTabs.className = "photo-tabs";
+          photos.forEach((_, i) => {
+            const dot = document.createElement("button");
+            dot.className = `dot ${i === currentPhoto ? "active" : ""}`;
+            dot.ariaLabel = `Photo ${i + 1}`;
+            dot.onclick = () => {
+              currentPhoto = i;
+              render();
+            };
+            photoTabs.appendChild(dot);
+          });
+          wrap.appendChild(photoTabs);
+        }
+      }
+
+      function placeholder(character) {
+        return `
+          <div class="photo-placeholder">
+            <div class="placeholder-mark"><span>${initials(character.name)}</span></div>
+          </div>
+        `;
+      }
+
+      function renderTabs() {
+        $("tabs").innerHTML = tabs
+          .map(
+            (tab) =>
+              `<button class="tab ${tab === currentTab ? "active" : ""}" onclick="setTab('${tab}')">${tab}</button>`,
+          )
+          .join("");
+      }
+
+      function renderPanels(character) {
+        const panels = {
+          Overview: overviewPanel(character),
+          Appearance: appearancePanel(character),
+          Combat: combatPanel(character),
+          Personality: personalityPanel(character),
+          Lore: lorePanel(character),
+          Relations: relationsPanel(character),
+        };
+
+        $("tabPanels").innerHTML = tabs
+          .map(
+            (tab) =>
+              `<section class="tab-panel ${tab === currentTab ? "active" : ""}" data-tab="${tab}">${panels[tab]}</section>`,
+          )
+          .join("");
+      }
+
+      function overviewPanel(c) {
+        return `
+          <div class="section-grid">
+            <div class="section wide">
+              <h3>Codex Entry</h3>
+              <p>${safe(c.description)}</p>
+            </div>
+            <div class="section">
+              <h3>Identity</h3>
+              <div class="field-grid">
+                ${field("Name", c.name)}
+                ${field("Title", c.title || c.nicknames)}
+                ${field("Species", c.species)}
+                ${field("Occupation", c.occupation)}
+                ${field("Age", c.age)}
+                ${field("Gender", c.gender)}
+              </div>
+            </div>
+            <div class="section">
+              <h3>At a Glance</h3>
+              <div class="tag-cloud">
+                ${splitList(c.personality).map((tag) => `<span class="tag">${tag}</span>`).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function appearancePanel(c) {
+        return `
+          <details open>
+            <summary>Physical Appearance</summary>
+            <div class="details-body">
+              <div class="field-grid">
+                ${field("Eye Color", c.eyeColor)}
+                ${field("Hair Color", c.hairColor)}
+                ${field("Hair Style", c.hairStyle)}
+                ${field("Skin / Fur / Scale Color", c.skinColor)}
+                ${field("Markings", c.markings)}
+                ${field("Features", c.features)}
+              </div>
+            </div>
+          </details>
+          <details open>
+            <summary>Outfit and Gear</summary>
+            <div class="details-body">
+              <div class="field-grid">
+                ${field("Shirt / Top", c.outfit?.shirt)}
+                ${field("Pants / Bottoms", c.outfit?.pants)}
+                ${field("Shoes", c.outfit?.shoes)}
+                ${field("Hat / Headwear", c.outfit?.hat)}
+                ${field("Outerwear", c.outfit?.outerwear)}
+                ${field("Accessories", c.accessories)}
+              </div>
+            </div>
+          </details>
+        `;
+      }
+
+      function combatPanel(c) {
+        const stats = c.stats || {};
+        return `
+          <div class="section-grid">
+            <div class="section wide">
+              <h3>Combat Style</h3>
+              <p>${safe(c.fightingStyle)}</p>
+            </div>
+            <div class="section">
+              <h3>RPG Profile</h3>
+              <div class="bars">
+                ${Object.entries(stats)
+                  .map(
+                    ([label, value]) => `
+                    <div class="bar-row">
+                      <b>${label[0].toUpperCase() + label.slice(1)}</b>
+                      <div class="bar-track"><div class="bar-fill" style="--value:${value}"></div></div>
+                      <span>${value}/10</span>
+                    </div>`,
+                  )
+                  .join("")}
+              </div>
+            </div>
+            <div class="section">
+              <h3>Arsenal</h3>
+              <div class="field-grid">
+                ${field("Weapons", c.weapons)}
+                ${field("Strengths", c.strengths)}
+                ${field("Weaknesses", c.weaknesses)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function personalityPanel(c) {
+        return `
+          <div class="section-grid">
+            <div class="section wide">
+              <h3>Personality Tags</h3>
+              <div class="tag-cloud">
+                ${splitList(c.personality).map((tag) => `<span class="tag">${tag}</span>`).join("")}
+              </div>
+            </div>
+            <div class="section">
+              <h3>Voice</h3>
+              <p>${safe(c.speechStyle)}</p>
+            </div>
+            <div class="section">
+              <h3>Inner Life</h3>
+              <div class="field-grid">
+                ${field("Likes", c.likes)}
+                ${field("Dislikes", c.dislikes)}
+                ${field("Fears", c.fears)}
+                ${field("Hobbies", c.hobbies)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function lorePanel(c) {
+        return `
+          <details open>
+            <summary>Lore Summary</summary>
+            <div class="details-body">${safe(c.description)}</div>
+          </details>
+          <details open>
+            <summary>Motivation and Conflict</summary>
+            <div class="details-body">
+              <p><b>Strengths:</b> ${safe(c.strengths)}</p>
+              <p><b>Weaknesses:</b> ${safe(c.weaknesses)}</p>
+              <p><b>Fear:</b> ${safe(c.fears)}</p>
+            </div>
+          </details>
+          <details>
+            <summary>Reference Notes</summary>
+            <div class="details-body">
+              Keep visual notes, timeline beats, outfit variants, and future story hooks here as the roster grows.
+            </div>
+          </details>
+        `;
+      }
+
+      function relationsPanel(c) {
+        const relations = c.relations || [];
+        if (!relations.length) return `<p class="empty">No relations listed yet.</p>`;
+        return `
+          <div class="section relationship-graph">
+            <div class="graph-inner">
+              ${relations
+                .map(
+                  (r) => `
+                  <div class="node">${safe(r.with)}</div>
+                  <div class="edge">${safe(r.type)}</div>
+                  <div class="node active">${safe(c.name)}</div>`,
+                )
+                .join("")}
+            </div>
+          </div>
+          <br>
+          <div class="cards">
+            ${relations
+              .map((r) => {
+                const other = characters.find((x) => x.name === r.with);
+                return `
+                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(c.name)}', '${escapeQuotes(r.with)}')">
+                    <div class="avatar">${initials(r.with)}</div>
+                    <div>
+                      <b>${safe(r.with)} / ${safe(r.type)}</b>
+                      <small>${safe(r.note)}</small>
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      }
+
+      function renderFilters() {
+        const categories = ["All", "Humans", "Elves", "Hybrids", "Demons"];
+        $("filters").innerHTML = categories
+          .map(
+            (category) =>
+              `<button class="filter ${category === activeFilter ? "active" : ""}" onclick="setFilter('${escapeQuotes(category)}')">${category}</button>`,
+          )
+          .join("");
+      }
+
+      function characterCategoryMatches(character, filter) {
+        const species = character.species.toLowerCase();
+        if (filter === "All") return true;
+        if (filter === "Humans") return species.includes("human");
+        if (filter === "Elves") return species.includes("elf");
+        if (filter === "Hybrids") return species.includes("hybrid");
+        if (filter === "Demons") return species.includes("demon");
+        return true;
+      }
+
+      function renderThumbs() {
+        $("thumbs").innerHTML = characters
+          .map((c, absoluteIndex) => {
+            const filteredIndex = filteredIndexes.indexOf(absoluteIndex);
+            const active = filteredIndex === currentIndex;
+            const disabled = filteredIndex < 0;
+            return `
+              <button class="thumb ${active ? "active" : ""}" ${disabled ? "style='opacity:.38'" : ""} onclick="goToCharacter('${escapeQuotes(c.name)}')">
+                <span class="avatar">${initials(c.name)}</span>
+                <span>${c.name.split(" ")[0]}</span>
+              </button>
+            `;
+          })
+          .join("");
+      }
+
+      function render() {
+        applySearch(false);
+        if (!filteredIndexes.length) {
+          $("tabPanels").innerHTML = `<section class="tab-panel active"><p class="empty">No characters match your search.</p></section>`;
+          $("statChips").innerHTML = "";
+          $("thumbs").innerHTML = "";
+          return;
+        }
+
+        currentIndex = Math.min(currentIndex, filteredIndexes.length - 1);
+        const c = currentCharacter();
+        currentPhoto = Math.min(currentPhoto, Math.max((c.photos || []).length - 1, 0));
+        setTheme(c);
+        renderPhotos(c);
+        $("statChips").innerHTML = chips(c);
+        renderFilters();
+
+        const prev = characters[filteredIndexes[(currentIndex - 1 + filteredIndexes.length) % filteredIndexes.length]];
+        const next = characters[filteredIndexes[(currentIndex + 1) % filteredIndexes.length]];
+        $("prevBtn").innerHTML = `<span class="nav-name">&larr; ${safe(prev?.name)}</span>`;
+        $("nextBtn").innerHTML = `<span class="nav-name">${safe(next?.name)} &rarr;</span>`;
+
+        renderTabs();
+        renderPanels(c);
+        renderThumbs();
+      }
+
+      function setTab(tab) {
+        currentTab = tab;
+        render();
+      }
+
+      function setFilter(filter) {
+        activeFilter = filter;
+        currentIndex = 0;
+        currentPhoto = 0;
+        render();
+      }
+
+      function applySearch(reset = true) {
+        const q = $("search").value.toLowerCase().trim();
+        filteredIndexes = characters
+          .map((c, i) => ({ c, i }))
+          .filter(({ c }) => {
+            const matchesSearch = !q || JSON.stringify(c).toLowerCase().includes(q);
+            const matchesFilter = characterCategoryMatches(c, activeFilter);
+            return matchesSearch && matchesFilter;
+          })
+          .map((x) => x.i);
+        if (reset) {
+          currentIndex = 0;
+          currentPhoto = 0;
+        }
+      }
+
+      function openModal(title, body) {
+        $("modalTitle").textContent = title;
+        $("modalBody").innerHTML = body;
+        modal.classList.add("open");
+      }
+
+      function openRelation(from, to) {
+        const c = characters.find((x) => x.name === from);
+        const relation = c?.relations?.find((r) => r.with === to);
+        const other = characters.find((x) => x.name === to);
+        openModal(
+          `${from} -> ${to}`,
+          `
+            <div class="relationship-card" style="cursor:default">
+              <div class="avatar">${initials(to)}</div>
+              <div>
+                <b>${safe(relation?.type)}</b>
+                <small>${safe(relation?.note)}</small>
+              </div>
+            </div>
+            <hr>
+            <p><b>History:</b> ${safe(relation?.history || "Add a history field to expand this relationship.")}</p>
+            ${other ? `<p><b>${to}:</b> ${safe(other.description)}</p><button class="btn primary" onclick="goToCharacter('${escapeQuotes(to)}'); closeModal();">Jump to ${to}</button>` : ""}
+          `,
+        );
+      }
+
+      function closeModal() {
+        modal.classList.remove("open");
+      }
+
+      function goToCharacter(name) {
+        const absolute = characters.findIndex((c) => c.name === name);
+        const filtered = filteredIndexes.indexOf(absolute);
+        if (filtered >= 0) currentIndex = filtered;
+        else {
+          activeFilter = "All";
+          $("search").value = "";
+          filteredIndexes = characters.map((_, i) => i);
+          currentIndex = absolute;
+        }
+        currentPhoto = 0;
+        renderFilters();
+        render();
+      }
+
+      function nextCharacter(step = 1) {
+        if (!filteredIndexes.length) return;
+        currentIndex =
+          (currentIndex + step + filteredIndexes.length) % filteredIndexes.length;
+        currentPhoto = 0;
+        render();
+      }
+
+      function allCharactersModal() {
+        openModal(
+          "Character Roster",
+          `<div class="cards">${characters
+            .map(
+              (c) => `
+                <div class="mini-card" onclick="goToCharacter('${escapeQuotes(c.name)}'); closeModal();">
+                  <b>${c.name}</b>
+                  <small>${safe(c.species)} / ${safe(c.occupation)}</small>
+                </div>`,
+            )
+            .join("")}</div>`,
+        );
+      }
+
+      function relationsModal() {
+        const rows = characters.flatMap((c) =>
+          (c.relations || []).map((r) => ({ from: c.name, ...r })),
+        );
+        openModal(
+          "Relations",
+          rows.length
+            ? `<div class="cards">${rows
+                .map(
+                  (r) => `
+                    <div class="relationship-card" onclick="openRelation('${escapeQuotes(r.from)}', '${escapeQuotes(r.with)}')">
+                      <div class="avatar">${initials(r.with)}</div>
+                      <div>
+                        <b>${r.from} -> ${r.with}</b>
+                        <small>${safe(r.type)}. ${safe(r.note)}</small>
+                      </div>
+                    </div>`,
+                )
+                .join("")}</div>`
+            : `<p>No relations yet.</p>`,
+        );
+      }
+
+      function editHelpModal() {
+        openModal(
+          "Edit Guide",
+          `
+            <details open><summary>Add characters</summary><div class="details-body">Find <b>const characters = [</b> in the HTML. Duplicate a character block, then change the values.</div></details><br>
+            <details open><summary>Add photos</summary><div class="details-body">Put image files next to this HTML or inside an <b>images</b> folder. Then edit the character's <b>photos</b> list, like <code>["images/name-main.png"]</code>.</div></details><br>
+            <details open><summary>Change colors</summary><div class="details-body">Edit each character's <b>theme</b> values for accent, secondary accent, and dark backdrop color.</div></details><br>
+            <details><summary>Add relations</summary><div class="details-body">Inside a character, edit <b>relations</b>. Use <b>with</b>, <b>type</b>, <b>note</b>, and optional <b>history</b>.</div></details>
+          `,
+        );
+      }
+
+      function setupImageGestures() {
+        const wrap = $("photoWrap");
+
+        wrap.addEventListener("pointerdown", (e) => {
+          if (e.target.closest?.(".photo-tabs, .image-controls")) return;
+          wrap.setPointerCapture(e.pointerId);
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size === 2) {
+            lastPinchDistance = distanceBetweenPointers();
+            lastDragPoint = null;
+          } else if (imageScale > 1.01) {
+            lastDragPoint = { x: e.clientX, y: e.clientY };
+          }
+        });
+
+        wrap.addEventListener("pointermove", (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size >= 2) {
+            e.preventDefault();
+            const nextDistance = distanceBetweenPointers();
+            if (lastPinchDistance) {
+              const mid = midpointBetweenPointers();
+              const rect = wrap.getBoundingClientRect();
+              zoomImageBy(
+                nextDistance / lastPinchDistance,
+                mid.x - rect.left - rect.width / 2,
+                mid.y - rect.top - rect.height / 2,
+              );
+            }
+            lastPinchDistance = nextDistance;
+            return;
+          }
+
+          if (imageScale > 1.01 && lastDragPoint) {
+            e.preventDefault();
+            imagePanX += e.clientX - lastDragPoint.x;
+            imagePanY += e.clientY - lastDragPoint.y;
+            lastDragPoint = { x: e.clientX, y: e.clientY };
+            applyImageTransform();
+          }
+        });
+
+        function endPointer(e) {
+          activePointers.delete(e.pointerId);
+          lastPinchDistance =
+            activePointers.size >= 2 ? distanceBetweenPointers() : 0;
+          lastDragPoint = null;
+        }
+
+        wrap.addEventListener("pointerup", endPointer);
+        wrap.addEventListener("pointercancel", endPointer);
+        wrap.addEventListener("lostpointercapture", endPointer);
+
+        wrap.addEventListener(
+          "wheel",
+          (e) => {
+            if (!e.ctrlKey && !e.metaKey) return;
+            e.preventDefault();
+            const rect = wrap.getBoundingClientRect();
+            const centerX = e.clientX - rect.left - rect.width / 2;
+            const centerY = e.clientY - rect.top - rect.height / 2;
+            zoomImageBy(e.deltaY < 0 ? 1.12 : 0.88, centerX, centerY);
+          },
+          { passive: false },
+        );
+      }
+
+      setupImageGestures();
+      renderFilters();
+
+      $("prevBtn").onclick = () => nextCharacter(-1);
+      $("nextBtn").onclick = () => nextCharacter(1);
+      $("randomBtn").onclick = () => {
+        currentIndex = Math.floor(Math.random() * filteredIndexes.length);
+        currentPhoto = 0;
+        render();
+      };
+      $("search").oninput = () => {
+        applySearch(true);
+        render();
+      };
+      $("allCharactersBtn").onclick = allCharactersModal;
+      $("relationsBtn").onclick = relationsModal;
+      $("editHelpBtn").onclick = editHelpModal;
+      $("closeModal").onclick = closeModal;
+      modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextCharacter(1);
+        if (e.key === "ArrowLeft") nextCharacter(-1);
+        if (e.key === "Escape") closeModal();
+      });
+
+      let touchStartX = 0;
+      document.addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        },
+        { passive: true },
+      );
+      document.addEventListener(
+        "touchend",
+        (e) => {
+          const diff = e.changedTouches[0].screenX - touchStartX;
+          if (Math.abs(diff) > 70) nextCharacter(diff < 0 ? 1 : -1);
+        },
+        { passive: true },
+      );
+
+      let wheelCooldown = false;
+      document.addEventListener(
+        "wheel",
+        (e) => {
+          if (e.target.closest?.("#photoWrap")) return;
+          if (
+            Math.abs(e.deltaX) > Math.abs(e.deltaY) &&
+            Math.abs(e.deltaX) > 40 &&
+            !wheelCooldown
+          ) {
+            nextCharacter(e.deltaX > 0 ? 1 : -1);
+            wheelCooldown = true;
+            setTimeout(() => (wheelCooldown = false), 550);
+          }
+        },
+        { passive: true },
+      );
+
+      window.setTab = setTab;
+      window.setFilter = setFilter;
+      window.goToCharacter = goToCharacter;
+      window.openModal = openModal;
+      window.openRelation = openRelation;
+      window.closeModal = closeModal;
+
+      render();
+    </script>
+  </body>
+</html>
