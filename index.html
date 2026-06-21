@@ -824,8 +824,8 @@
       }
 
       .roster-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 12px;
       }
 
@@ -846,8 +846,8 @@
       }
 
       .roster-slot {
-        flex: 0 1 230px;
-        min-width: 190px;
+        min-width: 0;
+        height: 230px;
       }
 
       .collection-toolbar {
@@ -863,12 +863,14 @@
 
       .roster-card {
         width: 100%;
-        min-height: 230px;
+        height: 230px;
         padding: 0;
         overflow: hidden;
         text-align: left;
         color: var(--text);
         touch-action: pan-y;
+        display: grid;
+        grid-template-rows: 150px 1fr;
       }
 
       .roster-card.dragging {
@@ -905,19 +907,31 @@
       }
 
       .roster-card-copy {
+        min-height: 0;
         display: grid;
+        grid-template-rows: auto 1fr;
         gap: 5px;
         padding: 12px;
+        overflow: hidden;
       }
 
       .roster-card-copy b {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         font-family: Outfit, Inter, sans-serif;
         font-size: 1.05rem;
       }
 
       .roster-card-copy small {
+        min-width: 0;
+        overflow: hidden;
         color: var(--muted);
         line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
       }
 
       .location-grid {
@@ -3857,6 +3871,9 @@
 
       let draggedCharacterName = "";
       let suppressRosterClick = false;
+      let rosterAutoScrollFrame = null;
+      let rosterAutoScrollSpeed = 0;
+      let rosterAutoScrollTarget = null;
 
       function openRosterCharacter(event, absoluteIndex) {
         if (suppressRosterClick) {
@@ -3864,6 +3881,61 @@
           return;
         }
         goToCharacterByIndex(absoluteIndex);
+      }
+
+      function rosterScrollContainer() {
+        return (
+          document.querySelector(".workspace") || document.scrollingElement
+        );
+      }
+
+      function startRosterAutoScroll(clientY) {
+        const container = rosterScrollContainer();
+        if (!container) return;
+
+        const rect =
+          container === document.scrollingElement
+            ? { top: 0, bottom: window.innerHeight }
+            : container.getBoundingClientRect();
+
+        const edgeSize = 96;
+        const maxSpeed = 24;
+
+        if (clientY < rect.top + edgeSize) {
+          const strength = 1 - (clientY - rect.top) / edgeSize;
+          rosterAutoScrollSpeed = -Math.ceil(maxSpeed * strength);
+        } else if (clientY > rect.bottom - edgeSize) {
+          const strength = 1 - (rect.bottom - clientY) / edgeSize;
+          rosterAutoScrollSpeed = Math.ceil(maxSpeed * strength);
+        } else {
+          rosterAutoScrollSpeed = 0;
+        }
+
+        rosterAutoScrollTarget = container;
+
+        if (rosterAutoScrollFrame) return;
+
+        const step = () => {
+          if (!rosterAutoScrollSpeed || !draggedCharacterName) {
+            stopRosterAutoScroll();
+            return;
+          }
+
+          rosterAutoScrollTarget.scrollBy(0, rosterAutoScrollSpeed);
+          rosterAutoScrollFrame = requestAnimationFrame(step);
+        };
+
+        rosterAutoScrollFrame = requestAnimationFrame(step);
+      }
+
+      function stopRosterAutoScroll() {
+        rosterAutoScrollSpeed = 0;
+        rosterAutoScrollTarget = null;
+
+        if (rosterAutoScrollFrame) {
+          cancelAnimationFrame(rosterAutoScrollFrame);
+          rosterAutoScrollFrame = null;
+        }
       }
 
       function clearRosterDropGaps() {
@@ -3901,34 +3973,71 @@
 
         if (!slots.length) return null;
 
-        const gridRect = grid.getBoundingClientRect();
-        const firstSlot = slots[0];
-        const lastSlot = slots[slots.length - 1];
-        const firstRect = firstSlot.getBoundingClientRect();
-        const lastRect = lastSlot.getBoundingClientRect();
+        const rows = [];
+        const rowTolerance = 18;
+
+        slots.forEach((slot) => {
+          const rect = slot.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+
+          let row = rows.find(
+            (existingRow) =>
+              Math.abs(existingRow.centerY - centerY) <= rowTolerance,
+          );
+
+          if (!row) {
+            row = {
+              centerY,
+              slots: [],
+            };
+            rows.push(row);
+          }
+
+          row.slots.push({ slot, rect });
+        });
+
+        rows.forEach((row) => {
+          row.slots.sort((a, b) => a.rect.left - b.rect.left);
+        });
+
+        rows.sort((a, b) => a.centerY - b.centerY);
+
+        const nearestRow = rows.reduce((best, row) => {
+          if (!best) return row;
+          return Math.abs(row.centerY - clientY) <
+            Math.abs(best.centerY - clientY)
+            ? row
+            : best;
+        }, null);
+
+        if (!nearestRow?.slots.length) return null;
+
+        const first = nearestRow.slots[0];
+        const last = nearestRow.slots[nearestRow.slots.length - 1];
 
         const edgePad = 90;
+        const rowTop = Math.min(
+          ...nearestRow.slots.map((item) => item.rect.top),
+        );
+        const rowBottom = Math.max(
+          ...nearestRow.slots.map((item) => item.rect.bottom),
+        );
 
-        const nearStart =
-          clientY < firstRect.top + edgePad ||
-          clientX < firstRect.left + edgePad;
+        const pointerIsOnThisRow =
+          clientY >= rowTop - edgePad && clientY <= rowBottom + edgePad;
 
-        const nearEnd =
-          clientY > lastRect.bottom - edgePad ||
-          clientX > lastRect.right - edgePad ||
-          clientY > gridRect.bottom - edgePad ||
-          clientX > gridRect.right - edgePad;
+        if (!pointerIsOnThisRow) return null;
 
-        if (nearStart) {
+        if (clientX <= first.rect.left + edgePad) {
           return {
-            targetName: firstSlot.dataset.character,
+            targetName: first.slot.dataset.character,
             before: true,
           };
         }
 
-        if (nearEnd) {
+        if (clientX >= last.rect.right - edgePad) {
           return {
-            targetName: lastSlot.dataset.character,
+            targetName: last.slot.dataset.character,
             before: false,
           };
         }
@@ -4020,6 +4129,7 @@
           card.addEventListener("dragend", () => {
             card.classList.remove("dragging");
             draggedCharacterName = "";
+            stopRosterAutoScroll();
             clearRosterDropGaps();
             setTimeout(() => {
               suppressRosterClick = false;
@@ -4030,6 +4140,7 @@
         document.querySelectorAll(".roster-grid").forEach((grid) => {
           grid.addEventListener("dragover", (event) => {
             if (!draggedCharacterName) return;
+            startRosterAutoScroll(event.clientY);
 
             const placement = getRosterEndPlacement(
               grid,
@@ -4074,6 +4185,7 @@
 
           slot.addEventListener("drop", (event) => {
             event.preventDefault();
+            stopRosterAutoScroll();
           });
         });
 
@@ -4138,16 +4250,14 @@
               );
             }
 
-            const edge = 70;
-            if (event.clientY < edge) window.scrollBy(0, -22);
-            if (event.clientY > window.innerHeight - edge)
-              window.scrollBy(0, 22);
+            startRosterAutoScroll(event.clientY);
           });
 
           const finish = () => {
             clearTimeout(pressTimer);
             active = false;
             draggedCharacterName = "";
+            stopRosterAutoScroll();
             card.classList.remove("dragging");
             clearRosterDropGaps();
 
