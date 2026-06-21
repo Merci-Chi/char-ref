@@ -243,11 +243,11 @@
         width: 100%;
         max-width: 360px;
         justify-self: center;
-        height: max(690px, calc(100vh - 150px));
+        height: max(760px, calc(100vh - 118px));
         min-height: 0;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(0, 1fr) auto auto;
+        grid-template-rows: minmax(0, 1fr) auto;
         overflow: hidden;
         border-radius: var(--radius);
       }
@@ -305,7 +305,7 @@
       .photo-wrap img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
         display: none;
         transform-origin: center center;
         will-change: transform;
@@ -354,7 +354,8 @@
         position: absolute;
         left: 18px;
         right: 18px;
-        bottom: 74px;
+        top: 24px;
+        bottom: auto;
         z-index: 4;
       }
 
@@ -367,27 +368,23 @@
       }
 
       .photo-overlay h2 {
-        margin: 6px 0 8px;
+        margin: 0 0 8px;
         font-family: Outfit, Inter, sans-serif;
-        font-size: clamp(2.6rem, 5.8vw, 5.8rem);
-        line-height: 0.86;
+        font-size: clamp(2.2rem, 5vw, 4.8rem);
+        line-height: 0.9;
         letter-spacing: 0;
         text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
       }
 
-      .subtitle {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+      .hero-short {
+        max-width: 27ch;
         color: var(--text);
         font-weight: 800;
-      }
-
-      .subtitle span {
+        line-height: 1.35;
         background: rgba(0, 0, 0, 0.38);
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        padding: 6px 8px;
+        padding: 8px 10px;
       }
 
       .photo-tabs,
@@ -415,7 +412,7 @@
 
       .dot {
         width: 38px;
-        height: 5px;
+        height: 3px;
         border: 0;
         background: rgba(255, 255, 255, 0.36);
         cursor: pointer;
@@ -451,7 +448,7 @@
         width: 100%;
         max-width: 100%;
         display: grid;
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         gap: 10px;
         align-items: center;
         padding: 12px;
@@ -460,6 +457,7 @@
       }
 
       .nav-name {
+        display: block;
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -676,6 +674,22 @@
         overflow: hidden;
       }
 
+      .map-tools {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+      }
+
+      .map-canvas {
+        position: absolute;
+        inset: 0;
+        transform: scale(var(--map-zoom, 1));
+        transform-origin: center center;
+      }
+
       .map-lines {
         position: absolute;
         inset: 0;
@@ -881,11 +895,72 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 12px;
+        position: sticky;
+        top: -18px;
+        z-index: 10;
+        padding: 8px 0;
+        background: var(--surface-strong);
       }
 
       .photo-tools {
         display: grid;
         gap: 8px;
+      }
+
+      .photo-preview {
+        width: min(180px, 100%);
+        aspect-ratio: 9 / 16;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.05);
+        object-fit: cover;
+        display: none;
+      }
+
+      .photo-preview[src] {
+        display: block;
+      }
+
+      .editor-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 12px;
+        position: sticky;
+        top: 42px;
+        z-index: 9;
+        padding: 8px 0;
+        background: var(--surface-strong);
+      }
+
+      .editor-tab-panel {
+        display: none;
+      }
+
+      .editor-tab-panel.active {
+        display: block;
+      }
+
+      .theme-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .theme-swatch {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        box-shadow:
+          inset 0 0 16px rgba(255, 255, 255, 0.28),
+          0 0 18px rgba(0, 0, 0, 0.24);
+      }
+
+      .theme-swatch.active {
+        outline: 3px solid var(--accent-2);
+        outline-offset: 3px;
       }
 
       .relation-editor {
@@ -1063,7 +1138,8 @@
         .photo-overlay {
           left: 12px;
           right: 12px;
-          bottom: 88px;
+          top: 18px;
+          bottom: auto;
         }
 
         .nav-row {
@@ -1103,6 +1179,7 @@
             <button class="btn" id="editCharacterBtn">Edit</button>
           </div>
           <button class="btn" id="allCharactersBtn">Roster</button>
+          <button class="btn" id="relationsBtn">Relations</button>
         </div>
       </header>
 
@@ -1118,9 +1195,6 @@
       <main class="layout" id="viewer">
         <aside class="hero">
           <div class="photo-wrap" id="photoWrap"></div>
-          <div class="stat-strip">
-            <div class="chips" id="statChips"></div>
-          </div>
           <div class="nav-row">
             <button class="btn" id="prevBtn" aria-label="Previous character"></button>
             <button class="btn primary" id="randomBtn">Random</button>
@@ -1162,7 +1236,7 @@
           title: "Frost Fang",
           nicknames: "Kael, Frost Fang",
           age: "23",
-          category: "Other",
+          category: "",
           gender: "Male",
           species: "Human-Wolf Hybrid",
           height: "6'1\"",
@@ -1180,6 +1254,7 @@
             accent2: "#d9e5ff",
             accent3: "#12364b",
           },
+          themeName: "Light Blue",
           outfit: {
             shirt: "Black hoodie with torn cuffs",
             pants: "Dark cargo pants with utility straps",
@@ -1190,6 +1265,7 @@
           accessories:
             "Silver pendant, fingerless gloves, hidden dagger sheathes",
           weapons: "Twin daggers named Frost and Fang",
+          shortDescription: "Guarded hybrid blade with a cold stare.",
           description:
             "A quiet, intimidating hybrid with sharp eyes and a guarded posture. He looks dangerous at first glance, but his body language softens around people he trusts.",
           personality:
@@ -1232,7 +1308,7 @@
           title: "Sunthread",
           nicknames: "Mira, Sunthread",
           age: "21",
-          category: "Other",
+          category: "",
           gender: "Female",
           species: "Elf",
           height: "5'7\"",
@@ -1251,6 +1327,7 @@
             accent2: "#8fd39a",
             accent3: "#314421",
           },
+          themeName: "Yellow",
           outfit: {
             shirt: "Cream blouse with embroidered sleeves",
             pants: "High-waisted brown trousers",
@@ -1260,6 +1337,7 @@
           },
           accessories: "Charm bracelet, satchel of herbs, moonstone earrings",
           weapons: "Light staff; defensive charm seals",
+          shortDescription: "Warm healer with stubborn golden magic.",
           description:
             "A bright, calming presence with a practical travel outfit and gentle confidence. She often looks harmless until her magic flares.",
           personality: "Kind, clever, stubborn, nurturing, quietly brave.",
@@ -1297,7 +1375,7 @@
           title: "Ashlock",
           nicknames: "Riv, Ash",
           age: "25",
-          category: "Other",
+          category: "",
           gender: "Nonbinary",
           species: "Demon-Touched Human",
           height: "5'11\"",
@@ -1315,6 +1393,7 @@
             accent2: "#ff4d6d",
             accent3: "#4a1b16",
           },
+          themeName: "Orange",
           outfit: {
             shirt: "Sleeveless black top",
             pants: "Reinforced fighting pants",
@@ -1324,6 +1403,7 @@
           },
           accessories: "Chain belt, ear cuffs, arm wraps",
           weapons: "Heavy chain blade",
+          shortDescription: "Fiery mercenary with a dangerous grin.",
           description:
             "A fierce, sharp-tongued fighter with a bold silhouette and controlled aggression. Their glowing markings make them look like they are burning from within.",
           personality:
@@ -1359,8 +1439,26 @@
         },
       ];
 
-      let characters = loadCharacters();
+      const tabs = ["Overview", "Appearance", "Combat", "Personality", "Lore", "Relations"];
+      const $ = (id) => document.getElementById(id);
+      const modal = $("modal");
+      const characterStorageKey = "characterCodexCharacters";
+      const relationPositionStorageKey = "characterCodexRelationPositionsV2";
+      const categoryOptions = ["", "One", "None", "Other", "NPC"];
+      const themePresets = [
+        { name: "Red", accent: "#ff5d68", accent2: "#ffd0d5", accent3: "#4a1119" },
+        { name: "Orange", accent: "#ff8a42", accent2: "#ffd0a1", accent3: "#47220f" },
+        { name: "Yellow", accent: "#f6d65f", accent2: "#fff1a8", accent3: "#3c3514" },
+        { name: "Green", accent: "#67d98a", accent2: "#c6f6d2", accent3: "#173d28" },
+        { name: "Light Blue", accent: "#7ecbff", accent2: "#d9e5ff", accent3: "#12364b" },
+        { name: "Blue", accent: "#5f93ff", accent2: "#cbd8ff", accent3: "#14275a" },
+        { name: "Purple", accent: "#b17cff", accent2: "#e4d1ff", accent3: "#2c1b4c" },
+        { name: "Pink", accent: "#ff85c7", accent2: "#ffd6eb", accent3: "#4a1836" },
+        { name: "White", accent: "#f4f1e8", accent2: "#ffffff", accent3: "#383936" },
+        { name: "Light Brown", accent: "#caa06a", accent2: "#ead8bd", accent3: "#3a281c" },
+      ];
 
+      let characters = loadCharacters();
       let currentIndex = 0;
       let currentPhoto = 0;
       let currentTab = "Overview";
@@ -1368,6 +1466,7 @@
       let filteredIndexes = characters.map((_, i) => i);
       let relationPositions = loadRelationPositions();
       let activeEditorMode = null;
+      let relationMapZoom = 1;
 
       let imageScale = 1;
       let imagePanX = 0;
@@ -1376,20 +1475,16 @@
       let lastPinchDistance = 0;
       let lastDragPoint = null;
 
-      const tabs = ["Overview", "Appearance", "Combat", "Personality", "Lore", "Relations"];
-      const $ = (id) => document.getElementById(id);
-      const modal = $("modal");
-      const characterStorageKey = "characterCodexCharacters";
-      const relationPositionStorageKey = "characterCodexRelationPositionsV2";
-
       function loadCharacters() {
         try {
           const saved = localStorage.getItem("characterCodexCharacters");
-          if (!saved) return structuredClone(defaultCharacters);
+          if (!saved) return structuredClone(defaultCharacters).map(normalizeCharacter);
           const parsed = JSON.parse(saved);
-          return Array.isArray(parsed) && parsed.length ? parsed : structuredClone(defaultCharacters);
+          return Array.isArray(parsed) && parsed.length
+            ? parsed.map(normalizeCharacter)
+            : structuredClone(defaultCharacters).map(normalizeCharacter);
         } catch {
-          return structuredClone(defaultCharacters);
+          return structuredClone(defaultCharacters).map(normalizeCharacter);
         }
       }
 
@@ -1409,12 +1504,48 @@
         localStorage.setItem(relationPositionStorageKey, JSON.stringify(relationPositions));
       }
 
+      function normalizeCharacter(character) {
+        const normalized = { ...blankCharacter(), ...character };
+        normalized.outfit = { ...blankCharacter().outfit, ...(character.outfit || {}) };
+        normalized.stats = { ...blankCharacter().stats, ...(character.stats || {}) };
+        normalized.photos = (character.photos || []).filter(Boolean).slice(0, 1);
+        normalized.relations = character.relations || [];
+        normalized.category = categoryOptions.includes(character.category) ? character.category : "";
+        if (
+          ["Kael Nightshade", "Mira Solwyn", "Riven Ashlock"].includes(character.name) &&
+          character.category === "Other"
+        ) {
+          normalized.category = "";
+        }
+        normalized.themeName = character.themeName || nearestThemeName(character.theme);
+        normalized.theme = themeByName(normalized.themeName);
+        return normalized;
+      }
+
+      function themeByName(name) {
+        return { ...(themePresets.find((theme) => theme.name === name) || themePresets[4]) };
+      }
+
+      function nearestThemeName(theme = {}) {
+        if (!theme?.accent) return "Light Blue";
+        const match = themePresets.find((preset) => preset.accent.toLowerCase() === String(theme.accent).toLowerCase());
+        return match?.name || "Light Blue";
+      }
+
       function safe(value) {
         return value && String(value).trim() ? value : "-";
       }
 
       function hasValue(value) {
-        return value !== undefined && value !== null && String(value).trim() !== "" && String(value).trim() !== "-";
+        const normalized = String(value ?? "").trim();
+        return normalized !== "" && normalized !== "-" && normalized.toLowerCase() !== "optional";
+      }
+
+      function shortText(character) {
+        if (hasValue(character.shortDescription)) return character.shortDescription;
+        if (!hasValue(character.description)) return "";
+        const firstSentence = String(character.description).split(/(?<=[.!?])\s+/)[0];
+        return firstSentence.length > 92 ? `${firstSentence.slice(0, 89).trim()}...` : firstSentence;
       }
 
       function htmlEscape(value) {
@@ -1471,7 +1602,7 @@
       }
 
       function setTheme(character) {
-        const theme = character.theme || {};
+        const theme = character.themeName ? themeByName(character.themeName) : character.theme || {};
         document.documentElement.style.setProperty("--accent", theme.accent || "#88d8ff");
         document.documentElement.style.setProperty("--accent-2", theme.accent2 || "#dbefff");
         document.documentElement.style.setProperty("--accent-3", theme.accent3 || "#2b6e8f");
@@ -1482,7 +1613,7 @@
           document.body.style.setProperty("--backdrop", `url("${src}")`);
           return;
         }
-        const theme = character.theme || {};
+        const theme = character.themeName ? themeByName(character.themeName) : character.theme || {};
         document.body.style.setProperty(
           "--backdrop",
           `linear-gradient(135deg, ${theme.accent3 || "#14202b"}, #080a0d 62%, ${theme.accent || "#88d8ff"})`,
@@ -1563,12 +1694,13 @@
         const wrap = $("photoWrap");
         wrap.innerHTML = "";
         resetImageZoom();
+        currentPhoto = 0;
 
         const stage = document.createElement("div");
         stage.className = "image-stage";
         wrap.appendChild(stage);
 
-        const photos = character.photos || [];
+        const photos = (character.photos || []).slice(0, 1);
         let activeSrc = photos[currentPhoto] || "";
         setBackdrop(activeSrc, character);
 
@@ -1594,12 +1726,10 @@
 
         const overlay = document.createElement("div");
         overlay.className = "photo-overlay";
-        const kickerParts = [character.title, character.occupation].filter(hasValue);
-        const subtitleParts = [character.species, character.gender, character.height].filter(hasValue);
+        const shortDescription = shortText(character);
         overlay.innerHTML = `
-          ${kickerParts.length ? `<div class="kicker">${kickerParts.map(htmlEscape).join(" / ")}</div>` : ""}
           <h2>${safe(character.name)}</h2>
-          ${subtitleParts.length ? `<div class="subtitle">${subtitleParts.map((part) => `<span>${htmlEscape(part)}</span>`).join("")}</div>` : ""}
+          ${hasValue(shortDescription) ? `<div class="hero-short">${htmlEscape(shortDescription)}</div>` : ""}
         `;
         wrap.appendChild(overlay);
 
@@ -1620,21 +1750,10 @@
           resetImageZoom();
         };
 
-        if (photos.length > 1) {
-          const photoTabs = document.createElement("div");
-          photoTabs.className = "photo-tabs";
-          photos.forEach((_, i) => {
-            const dot = document.createElement("button");
-            dot.className = `dot ${i === currentPhoto ? "active" : ""}`;
-            dot.ariaLabel = `Photo ${i + 1}`;
-            dot.onclick = () => {
-              currentPhoto = i;
-              render();
-            };
-            photoTabs.appendChild(dot);
-          });
+        const photoTabs = document.createElement("div");
+        photoTabs.className = "photo-tabs";
+        photoTabs.innerHTML = `<span class="dot active" aria-hidden="true"></span><span class="dot active" aria-hidden="true"></span>`;
           wrap.appendChild(photoTabs);
-        }
       }
 
       function placeholder(character) {
@@ -1695,11 +1814,14 @@
           ["Occupation", c.occupation],
           ["Age", c.age],
           ["Gender", c.gender],
+          ["Height", c.height],
+          ["Weight", c.weight],
         ]);
         const tags = splitList(c.personality);
         return `
           <div class="section-grid">
-            ${sectionBlock("Codex Entry", hasValue(c.description) ? `<p>${htmlEscape(c.description)}</p>` : "", true)}
+            ${sectionBlock("Short Description", hasValue(shortText(c)) ? `<p>${htmlEscape(shortText(c))}</p>` : "", true)}
+            ${sectionBlock("Description", hasValue(c.description) ? `<p>${htmlEscape(c.description)}</p>` : "", true)}
             ${sectionBlock("Identity", identity)}
             ${sectionBlock("At a Glance", tags.length ? `<div class="tag-cloud">${tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("")}</div>` : "")}
           </div>
@@ -1797,29 +1919,38 @@
       }
 
       function relationsPanel(c) {
-        const relations = allRelations();
+        const relations = c.relations || [];
         if (!characters.length) return `<p class="empty">No characters listed yet.</p>`;
         return `
           <div class="section relationship-graph">
             <div class="map-stage" id="relationMap">
-              <svg class="map-lines" id="relationLines" aria-hidden="true"></svg>
-              ${characters.map((character) => mapNode(character, character.name === c.name)).join("")}
+              <div class="map-tools">
+                <button class="btn icon" type="button" onclick="zoomRelationMap(-1)">-</button>
+                <button class="btn" type="button" onclick="resetRelationMapZoom()">Reset</button>
+                <button class="btn icon" type="button" onclick="zoomRelationMap(1)">+</button>
+              </div>
+              <div class="map-canvas" id="relationMapCanvas">
+                <svg class="map-lines" id="relationLines" aria-hidden="true"></svg>
+                ${characters.map((character) => mapNode(character, character.name === c.name)).join("")}
+              </div>
             </div>
           </div>
           <br>
           <div class="cards">
-            ${relations
+            ${relations.length
+              ? relations
               .map(
                 (r) => `
-                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(r.from)}', '${escapeQuotes(r.with)}')">
+                  <div class="relationship-card" onclick="openRelation('${escapeQuotes(c.name)}', '${escapeQuotes(r.with)}')">
                     <div class="avatar" style="background:${characterColor(r.with)}">${initials(r.with)}</div>
                     <div>
-                      <b>${safe(r.from)} -> ${safe(r.with)}</b>
+                      <b>${safe(c.name)} -> ${safe(r.with)}</b>
                       <small><span class="relation-type" style="background:${relationColor(r.type)}">${safe(r.type)}</span> ${safe(r.note)}</small>
                     </div>
                   </div>`,
               )
-              .join("")}
+              .join("")
+              : `<p class="empty">No relations for this character yet.</p>`}
           </div>
         `;
       }
@@ -1830,9 +1961,10 @@
         );
       }
 
-      function mapRelations() {
+      function mapRelations(activeName = null) {
         const seen = new Set();
         return allRelations().filter((relation) => {
+          if (activeName && relation.from !== activeName && relation.with !== activeName) return false;
           const key = [relation.from, relation.with].sort().join("::");
           if (seen.has(key)) return false;
           seen.add(key);
@@ -1842,7 +1974,7 @@
 
       function characterColor(name) {
         const character = characters.find((c) => c.name === name);
-        return character?.theme?.accent || "#8fdcff";
+        return character?.themeName ? themeByName(character.themeName).accent : character?.theme?.accent || "#8fdcff";
       }
 
       function relationColor(type = "") {
@@ -1867,7 +1999,7 @@
           >
             <span>${initials(character.name)}</span>
             <small>${htmlEscape(character.name.split(" ")[0])}</small>
-            <span class="map-tooltip"><b>${htmlEscape(character.name)}</b><br>${htmlEscape(character.description)}</span>
+            <span class="map-tooltip"><b>${htmlEscape(character.name)}</b><br>${htmlEscape(shortText(character))}</span>
           </button>
         `;
       }
@@ -1886,11 +2018,13 @@
       function setupRelationMap() {
         const map = $("relationMap");
         const svg = $("relationLines");
+        const canvas = $("relationMapCanvas");
         if (!map || !svg) return;
+        if (canvas) canvas.style.setProperty("--map-zoom", relationMapZoom);
 
         function drawLines() {
-          const mapRect = map.getBoundingClientRect();
-          svg.innerHTML = mapRelations()
+          const mapRect = (canvas || map).getBoundingClientRect();
+          svg.innerHTML = mapRelations(currentCharacter().name)
             .map((relation) => {
               const fromNode = map.querySelector(`[data-character="${cssEscape(relation.from)}"]`);
               const toNode = map.querySelector(`[data-character="${cssEscape(relation.with)}"]`);
@@ -1953,6 +2087,22 @@
         window.addEventListener("resize", drawLines, { once: true });
       }
 
+      function applyRelationMapZoom() {
+        const canvas = $("relationMapCanvas");
+        if (!canvas) return;
+        canvas.style.setProperty("--map-zoom", relationMapZoom);
+      }
+
+      function zoomRelationMap(direction) {
+        relationMapZoom = Math.max(0.55, Math.min(2.2, relationMapZoom + direction * 0.15));
+        applyRelationMapZoom();
+      }
+
+      function resetRelationMapZoom() {
+        relationMapZoom = 1;
+        applyRelationMapZoom();
+      }
+
       function cssEscape(value) {
         if (window.CSS?.escape) return CSS.escape(value);
         return String(value).replace(/"/g, '\\"');
@@ -1993,7 +2143,6 @@
         applySearch(false);
         if (!filteredIndexes.length) {
           $("tabPanels").innerHTML = `<section class="tab-panel active"><p class="empty">No characters match your search.</p></section>`;
-          $("statChips").innerHTML = "";
           $("thumbs").innerHTML = "";
           return;
         }
@@ -2003,15 +2152,12 @@
         currentPhoto = Math.min(currentPhoto, Math.max((c.photos || []).length - 1, 0));
         setTheme(c);
         renderPhotos(c);
-        const chipHtml = chips(c);
-        $("statChips").innerHTML = chipHtml;
-        $("statChips").closest(".stat-strip").style.display = chipHtml ? "" : "none";
         renderFilters();
 
         const prev = characters[filteredIndexes[(currentIndex - 1 + filteredIndexes.length) % filteredIndexes.length]];
         const next = characters[filteredIndexes[(currentIndex + 1) % filteredIndexes.length]];
-        $("prevBtn").innerHTML = `<span class="nav-name">&larr; ${safe(prev?.name)}</span>`;
-        $("nextBtn").innerHTML = `<span class="nav-name">${safe(next?.name)} &rarr;</span>`;
+        $("prevBtn").innerHTML = `<span class="nav-name">&larr; ${safe(prev?.name).split(" ")[0]}</span>`;
+        $("nextBtn").innerHTML = `<span class="nav-name">${safe(next?.name).split(" ")[0]} &rarr;</span>`;
 
         renderTabs();
         renderPanels(c);
@@ -2146,7 +2292,7 @@
           title: "",
           nicknames: "",
           age: "",
-          category: "Other",
+          category: "",
           gender: "",
           species: "Human",
           height: "",
@@ -2164,6 +2310,7 @@
             accent2: "#d9e5ff",
             accent3: "#12364b",
           },
+          themeName: "Light Blue",
           outfit: {
             shirt: "",
             pants: "",
@@ -2173,6 +2320,7 @@
           },
           accessories: "",
           weapons: "",
+          shortDescription: "",
           description: "",
           personality: "",
           fightingStyle: "",
@@ -2189,10 +2337,10 @@
         };
       }
 
-      function formInput(label, id, value, wide = false, multiline = false, type = "text") {
+      function formInput(label, id, value, wide = false, multiline = false, type = "text", placeholder = "") {
         const control = multiline
-          ? `<textarea id="${id}">${formValue(value)}</textarea>`
-          : `<input id="${id}" type="${type}" value="${formValue(value)}" />`;
+          ? `<textarea id="${id}" placeholder="${htmlEscape(placeholder)}">${formValue(value)}</textarea>`
+          : `<input id="${id}" type="${type}" value="${formValue(value)}" placeholder="${htmlEscape(placeholder)}" />`;
         return `
           <div class="form-field ${wide ? "wide" : ""}">
             <label for="${id}">${label}</label>
@@ -2214,6 +2362,61 @@
 
       function statSelect(label, id, value) {
         return formSelect(label, id, hasValue(value) ? value : "-", ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+      }
+
+      function categorySelect(value) {
+        return `
+          <div class="form-field">
+            <label for="charCategory">Category</label>
+            <select id="charCategory">
+              <option value="" ${!value ? "selected" : ""}>All</option>
+              ${categoryOptions
+                .filter(Boolean)
+                .map((option) => `<option value="${option}" ${value === option ? "selected" : ""}>${option}</option>`)
+                .join("")}
+            </select>
+          </div>
+        `;
+      }
+
+      function themeEditor(source) {
+        const selected = source.themeName || nearestThemeName(source.theme);
+        return `
+          <div class="form-field wide">
+            <label>Color Theme</label>
+            <input type="hidden" id="charThemeName" value="${htmlEscape(selected)}" />
+            <div class="theme-swatches">
+              ${themePresets
+                .map(
+                  (theme) => `
+                    <button
+                      type="button"
+                      class="theme-swatch ${theme.name === selected ? "active" : ""}"
+                      title="${htmlEscape(theme.name)}"
+                      aria-label="${htmlEscape(theme.name)}"
+                      style="background: radial-gradient(circle at 30% 25%, ${theme.accent2}, ${theme.accent} 48%, ${theme.accent3});"
+                      onclick="selectTheme('${escapeQuotes(theme.name)}')"
+                    ></button>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function editorTabs() {
+        return `
+          <div class="editor-tabs">
+            ${tabs
+              .map((tab, index) => `<button type="button" class="tab ${index === 0 ? "active" : ""}" onclick="setEditorTab('${tab}')">${tab}</button>`)
+              .join("")}
+          </div>
+        `;
+      }
+
+      function editorPanel(name, body, active = false) {
+        return `<section class="editor-tab-panel ${active ? "active" : ""}" data-editor-tab="${name}"><div class="form-grid">${body}</div></section>`;
       }
 
       function relationsToText(character) {
@@ -2243,8 +2446,8 @@
                       </label>
                     </div>
                     <div class="relation-edit-fields">
-                      ${formInput("Relation Tag", `relationType-${initials(other.name)}`, relation?.type || "", true)}
-                      ${formInput("Note", `relationNote-${initials(other.name)}`, relation?.note || "", true, true)}
+                      ${formInput("Relation Tag", `relationType-${initials(other.name)}`, relation?.type || "", true, false, "text", "Trusted Ally")}
+                      ${formInput("Note", `relationNote-${initials(other.name)}`, relation?.note || "", true, true, "text", "Optional note about this relationship")}
                     </div>
                   </div>
                 `;
@@ -2271,61 +2474,91 @@
                   </div>`
                 : ""
             }
-            <div class="form-grid">
-              ${formInput("Name", "charName", source.name, false)}
-              <div class="form-field wide">
-                <label for="charPhotoFile">Add Photo</label>
-                <div class="photo-tools">
-                  <input id="charPhotoFile" type="file" accept="image/*" onchange="addPhotoFile(this)" />
-                  <textarea id="charPhotos">${formValue((source.photos || []).join(", "))}</textarea>
+            ${editorTabs()}
+            ${editorPanel(
+              "Overview",
+              `
+                ${formInput("Name", "charName", source.name, false)}
+                <div class="form-field wide">
+                  <label for="charPhotoFile">Photo</label>
+                  <div class="photo-tools">
+                    <img class="photo-preview" id="photoPreview" ${source.photos?.[0] ? `src="${htmlEscape(source.photos[0])}"` : ""} alt="" />
+                    <input id="charPhotoFile" type="file" accept="image/*" onchange="addPhotoFile(this)" />
+                    <input id="charPhotos" placeholder="images/character-main.png" value="${formValue((source.photos || []).slice(0, 1).join(""))}" />
+                  </div>
                 </div>
-              </div>
-              ${formInput("Title", "charTitle", source.title)}
-              ${formInput("Nicknames", "charNicknames", source.nicknames)}
-              ${formInput("Species", "charSpecies", source.species)}
-              ${formInput("Category", "charCategory", source.category || "Other")}
-              ${formInput("Occupation", "charOccupation", source.occupation)}
-              ${formInput("Gender", "charGender", source.gender)}
-              ${formInput("Age", "charAge", source.age)}
-              ${formInput("Height", "charHeight", source.height)}
-              ${formInput("Body Type", "charBodyType", source.bodyType)}
-              ${formInput("Weight", "charWeight", source.weight)}
-              ${formInput("Description", "charDescription", source.description, true, true)}
-              ${formInput("Personality Tags", "charPersonality", source.personality, true)}
-              ${formInput("Fighting Style", "charFightingStyle", source.fightingStyle, true, true)}
-              ${formInput("Speech Style", "charSpeechStyle", source.speechStyle, true, true)}
-              ${formInput("Eyes", "charEyeColor", source.eyeColor)}
-              ${formInput("Hair Color", "charHairColor", source.hairColor)}
-              ${formInput("Hair Style", "charHairStyle", source.hairStyle, true)}
-              ${formInput("Skin / Fur / Scale", "charSkinColor", source.skinColor, true)}
-              ${formInput("Markings", "charMarkings", source.markings, true)}
-              ${formInput("Features", "charFeatures", source.features, true)}
-              ${formInput("Shirt / Top", "charShirt", source.outfit?.shirt)}
-              ${formInput("Pants / Bottoms", "charPants", source.outfit?.pants)}
-              ${formInput("Shoes", "charShoes", source.outfit?.shoes)}
-              ${formInput("Hat", "charHat", source.outfit?.hat)}
-              ${formInput("Outerwear", "charOuterwear", source.outfit?.outerwear, true)}
-              ${formInput("Accessories", "charAccessories", source.accessories, true)}
-              ${formInput("Weapons", "charWeapons", source.weapons, true)}
-              ${formInput("Strengths", "charStrengths", source.strengths, true)}
-              ${formInput("Weaknesses", "charWeaknesses", source.weaknesses, true)}
-              ${formInput("Likes", "charLikes", source.likes)}
-              ${formInput("Dislikes", "charDislikes", source.dislikes)}
-              ${formInput("Fears", "charFears", source.fears)}
-              ${formInput("Hobbies", "charHobbies", source.hobbies)}
-              ${formInput("Primary Color", "charAccent", source.theme?.accent, false, false, "color")}
-              ${formInput("Secondary Color", "charAccent2", source.theme?.accent2, false, false, "color")}
-              ${formInput("Backdrop Color", "charAccent3", source.theme?.accent3, false, false, "color")}
-              ${statSelect("Power", "statPower", source.stats?.power)}
-              ${statSelect("Speed", "statSpeed", source.stats?.speed)}
-              ${statSelect("Defense", "statDefense", source.stats?.defense)}
-              ${statSelect("Magic", "statMagic", source.stats?.magic)}
-              ${statSelect("Resolve", "statResolve", source.stats?.resolve)}
-              <div class="form-field wide">
-                <label>Relations</label>
-                ${relationEditor(source)}
-              </div>
-            </div>
+                ${categorySelect(source.category || "")}
+                ${themeEditor(source)}
+                ${formInput("Title", "charTitle", source.title)}
+                ${formInput("Nicknames", "charNicknames", source.nicknames)}
+                ${formInput("Species", "charSpecies", source.species)}
+                ${formInput("Occupation", "charOccupation", source.occupation)}
+                ${formInput("Gender", "charGender", source.gender)}
+                ${formInput("Age", "charAge", source.age)}
+                ${formInput("Height", "charHeight", source.height)}
+                ${formInput("Weight", "charWeight", source.weight)}
+                ${formInput("Short Description", "charShortDescription", source.shortDescription, true, false, "text", "Quiet wolf-hybrid blade-for-hire.")}
+              `,
+              true,
+            )}
+            ${editorPanel(
+              "Appearance",
+              `
+                ${formInput("Body Type", "charBodyType", source.bodyType)}
+                ${formInput("Eyes", "charEyeColor", source.eyeColor)}
+                ${formInput("Hair Color", "charHairColor", source.hairColor)}
+                ${formInput("Hair Style", "charHairStyle", source.hairStyle, true)}
+                ${formInput("Skin / Fur / Scale", "charSkinColor", source.skinColor, true)}
+                ${formInput("Markings", "charMarkings", source.markings, true)}
+                ${formInput("Features", "charFeatures", source.features, true)}
+                ${formInput("Shirt / Top", "charShirt", source.outfit?.shirt)}
+                ${formInput("Pants / Bottoms", "charPants", source.outfit?.pants)}
+                ${formInput("Shoes", "charShoes", source.outfit?.shoes)}
+                ${formInput("Hat", "charHat", source.outfit?.hat)}
+                ${formInput("Outerwear", "charOuterwear", source.outfit?.outerwear, true)}
+                ${formInput("Accessories", "charAccessories", source.accessories, true)}
+              `,
+            )}
+            ${editorPanel(
+              "Combat",
+              `
+                ${statSelect("Power", "statPower", source.stats?.power)}
+                ${statSelect("Speed", "statSpeed", source.stats?.speed)}
+                ${statSelect("Defense", "statDefense", source.stats?.defense)}
+                ${statSelect("Magic", "statMagic", source.stats?.magic)}
+                ${statSelect("Resolve", "statResolve", source.stats?.resolve)}
+                ${formInput("Fighting Style", "charFightingStyle", source.fightingStyle, true, true, "text", "Fast, defensive, reckless, tactical...")}
+                ${formInput("Weapons", "charWeapons", source.weapons, true)}
+                ${formInput("Strengths", "charStrengths", source.strengths, true)}
+                ${formInput("Weaknesses", "charWeaknesses", source.weaknesses, true)}
+              `,
+            )}
+            ${editorPanel(
+              "Personality",
+              `
+                ${formInput("Personality Tags", "charPersonality", source.personality, true, false, "text", "Red, Blue, Orange, Yellow")}
+                ${formInput("Speech Style", "charSpeechStyle", source.speechStyle, true, true, "text", "Short, formal, sarcastic, soft-spoken...")}
+                ${formInput("Likes", "charLikes", source.likes)}
+                ${formInput("Dislikes", "charDislikes", source.dislikes)}
+                ${formInput("Fears", "charFears", source.fears)}
+                ${formInput("Hobbies", "charHobbies", source.hobbies)}
+              `,
+            )}
+            ${editorPanel(
+              "Lore",
+              `
+                ${formInput("Description", "charDescription", source.description, true, true, "text", "Longer character description.")}
+              `,
+            )}
+            ${editorPanel(
+              "Relations",
+              `
+                <div class="form-field wide">
+                  <label>Relations</label>
+                  ${relationEditor(source)}
+                </div>
+              `,
+            )}
             <div class="form-actions">
               <div class="form-actions-group">
                 ${editing ? `<button class="btn danger" onclick="deleteCharacterFromEditor('${escapeQuotes(source.name)}')">Delete</button>` : ""}
@@ -2399,14 +2632,32 @@
         input.closest(".relation-edit-card")?.classList.toggle("active", input.checked);
       }
 
+      function setEditorTab(tab) {
+        document.querySelectorAll(".editor-tabs .tab").forEach((button) => {
+          button.classList.toggle("active", button.textContent.trim() === tab);
+        });
+        document.querySelectorAll(".editor-tab-panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.editorTab === tab);
+        });
+      }
+
+      function selectTheme(name) {
+        const selected = themeByName(name);
+        $("charThemeName").value = selected.name;
+        document.querySelectorAll(".theme-swatch").forEach((button) => {
+          button.classList.toggle("active", button.getAttribute("aria-label") === selected.name);
+        });
+      }
+
       function addPhotoFile(input) {
         const file = input.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
           const photos = $("charPhotos");
-          const existing = photos.value.trim();
-          photos.value = existing ? `${existing}, ${reader.result}` : reader.result;
+          photos.value = reader.result;
+          const preview = $("photoPreview");
+          if (preview) preview.src = reader.result;
         };
         reader.readAsDataURL(file);
       }
@@ -2430,7 +2681,7 @@
           title: value("charTitle"),
           nicknames: value("charNicknames"),
           age: value("charAge"),
-          category: value("charCategory") || "Other",
+          category: value("charCategory"),
           gender: value("charGender"),
           species: value("charSpecies") || "Unknown",
           height: value("charHeight"),
@@ -2443,11 +2694,8 @@
           skinColor: value("charSkinColor"),
           markings: value("charMarkings"),
           features: value("charFeatures"),
-          theme: {
-            accent: value("charAccent") || "#7ecbff",
-            accent2: value("charAccent2") || "#d9e5ff",
-            accent3: value("charAccent3") || "#12364b",
-          },
+          themeName: value("charThemeName") || "Light Blue",
+          theme: themeByName(value("charThemeName") || "Light Blue"),
           outfit: {
             shirt: value("charShirt"),
             pants: value("charPants"),
@@ -2457,6 +2705,7 @@
           },
           accessories: value("charAccessories"),
           weapons: value("charWeapons"),
+          shortDescription: value("charShortDescription"),
           description: value("charDescription"),
           personality: value("charPersonality"),
           fightingStyle: value("charFightingStyle"),
@@ -2474,10 +2723,7 @@
             magic: statValue("statMagic"),
             resolve: statValue("statResolve"),
           },
-          photos: value("charPhotos")
-            .split(",")
-            .map((photo) => photo.trim())
-            .filter(Boolean),
+          photos: value("charPhotos") ? [value("charPhotos")] : [],
           relations: collectRelationsFromEditor(),
         };
 
@@ -2653,6 +2899,7 @@
       $("addCharacterBtn").onclick = () => openCharacterForm("add");
       $("editCharacterBtn").onclick = () => openCharacterForm("edit");
       $("allCharactersBtn").onclick = allCharactersModal;
+      $("relationsBtn").onclick = () => setTab("Relations");
       $("closeModal").onclick = closeModal;
       modal.onclick = (e) => {
         if (e.target === modal) closeModal();
@@ -2711,7 +2958,11 @@
       window.switchEditorCharacter = switchEditorCharacter;
       window.cancelCharacterEditor = cancelCharacterEditor;
       window.toggleRelationEditor = toggleRelationEditor;
+      window.setEditorTab = setEditorTab;
+      window.selectTheme = selectTheme;
       window.addPhotoFile = addPhotoFile;
+      window.zoomRelationMap = zoomRelationMap;
+      window.resetRelationMapZoom = resetRelationMapZoom;
       window.closeModal = closeModal;
 
       render();
