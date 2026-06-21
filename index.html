@@ -886,29 +886,6 @@
         right: -34px;
       }
 
-      .roster-card {
-        display: grid;
-        gap: 8px;
-      }
-
-      .roster-open {
-        display: grid;
-        width: 100%;
-        padding: 0;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .roster-move-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        padding: 0 10px 10px;
-      }
-
       .collection-toolbar {
         display: flex;
         justify-content: space-between;
@@ -1683,6 +1660,49 @@
         line-height: 1.5;
       }
 
+      .photo-option-dialog {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: none;
+        place-items: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.76);
+      }
+
+      .photo-option-dialog.open {
+        display: grid;
+      }
+
+      .photo-option-card {
+        width: min(480px, 100%);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .photo-option-card h3 {
+        margin: 0 0 8px;
+      }
+
+      .photo-option-card p {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .photo-option-buttons {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .photo-option-buttons .btn {
+        width: 100%;
+        text-align: left;
+      }
+
       .modal-card {
         width: min(760px, 100%);
         max-height: 86vh;
@@ -1885,7 +1905,23 @@
         </div>
       </div>
     </div>
-
+    <div
+      class="photo-option-dialog"
+      id="photoOptionDialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photoOptionTitle"
+    >
+      <div class="photo-option-card">
+        <h3 id="photoOptionTitle"></h3>
+        <p id="photoOptionMessage"></p>
+        <div class="photo-option-buttons">
+          <button class="btn primary" id="photoOptionWithPhotos"></button>
+          <button class="btn" id="photoOptionWithoutPhotos"></button>
+          <button class="btn danger" id="photoOptionCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
     <script>
       /*
       HOW TO ADD YOUR OWN CHARACTERS:
@@ -2209,6 +2245,7 @@
       let relationMapZoom = 1;
       let pendingImportCharacters = [];
       let decisionAction = null;
+      let photoOptionAction = null;
       let relationMapResizeObserver = null;
 
       let imageScale = 1;
@@ -3608,6 +3645,7 @@
             <button class="btn primary" type="button" onclick="randomFilteredCharacter()">Random</button>
           </div>
           ${rosterGroupsMarkup()}`;
+        setupRosterReordering();
       }
 
       function rosterGroupsMarkup() {
@@ -3668,29 +3706,16 @@
       function rosterCard(character, absoluteIndex) {
         const photo = character.photos?.[0];
         const color = characterColor(character.name);
-
         return `
-            <article class="mini-card roster-card" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}" style="--card-color:${color}">
-              <button class="roster-open" type="button" onclick="goToCharacterByIndex(${absoluteIndex})">
-                <span class="roster-portrait">
-                  ${
-                    photo
-                      ? `<img src="${htmlEscape(photo)}" alt="" data-initials="${htmlEscape(initials(character.name))}" onerror="handleRosterImageError(this)">`
-                      : `<span class="roster-initials">${htmlEscape(initials(character.name))}</span>`
-                  }
-                </span>
-                <span class="roster-card-copy">
-                  <b>${htmlEscape(character.name)}</b>
-                  <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
-                </span>
-              </button>
-
-              <div class="roster-move-actions">
-                <button class="btn" type="button" onclick="moveCharacterByName('${jsString(character.name)}', -1)">↑</button>
-                <button class="btn" type="button" onclick="moveCharacterByName('${jsString(character.name)}', 1)">↓</button>
-              </div>
-            </article>
-          `;
+          <button class="mini-card roster-card" type="button" draggable="true" data-character="${htmlEscape(character.name)}" data-category="${htmlEscape(character.category || "")}" style="--card-color:${color}" onclick="openRosterCharacter(event, ${absoluteIndex})">
+            <span class="roster-portrait">
+              ${photo ? `<img src="${htmlEscape(photo)}" alt="" data-initials="${htmlEscape(initials(character.name))}" onerror="handleRosterImageError(this)">` : `<span class="roster-initials">${htmlEscape(initials(character.name))}</span>`}
+            </span>
+            <span class="roster-card-copy">
+              <b>${htmlEscape(character.name)}</b>
+              <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
+            </span>
+          </button>`;
       }
 
       function renderRelationsView() {
@@ -3719,14 +3744,6 @@
               ? `<div class="location-grid">${locations.map((location, index) => locationCard(location, index)).join("")}</div>`
               : `<p class="empty">No locations yet.</p>`
           }`;
-      }
-
-      function jsString(value) {
-        return String(value || "")
-          .replace(/\\/g, "\\\\")
-          .replace(/'/g, "\\'")
-          .replace(/\n/g, "\\n")
-          .replace(/\r/g, "\\r");
       }
 
       function locationCard(location, index) {
@@ -3893,60 +3910,64 @@
           });
       }
 
-      function showRosterDropGap(slot, clientX) {
+      function showRosterDropGap(slot, clientX, clientY = null) {
         clearRosterDropGaps();
+
         if (!slot || slot.dataset.character === draggedCharacterName)
           return null;
-        const source = characters.find(
-          (character) => character.name === draggedCharacterName,
-        );
-        if (
-          !source ||
-          (source.category || "") !== (slot.dataset.category || "")
-        )
-          return null;
-        const before =
-          clientX <
-          slot.getBoundingClientRect().left +
-            slot.getBoundingClientRect().width / 2;
+
+        const rect = slot.getBoundingClientRect();
+
+        // Works better for wrapped rows: if the pointer is clearly above/below
+        // the middle, use vertical position; otherwise use left/right.
+        let before;
+        if (clientY !== null) {
+          const verticalMiddle = rect.top + rect.height / 2;
+          const horizontalMiddle = rect.left + rect.width / 2;
+
+          before =
+            Math.abs(clientY - verticalMiddle) > rect.height * 0.18
+              ? clientY < verticalMiddle
+              : clientX < horizontalMiddle;
+        } else {
+          before = clientX < rect.left + rect.width / 2;
+        }
+
         slot.classList.add(before ? "drop-before" : "drop-after");
         return { targetName: slot.dataset.character, before };
       }
 
-      function moveCharacterByName(name, direction) {
-        const index = characters.findIndex(
-          (character) => character.name === name,
+      function reorderCharacter(sourceName, targetName, before) {
+        if (!sourceName || !targetName || sourceName === targetName) return;
+
+        const sourceIndex = characters.findIndex(
+          (character) => character.name === sourceName,
         );
-        if (index < 0) return;
+        const targetIndex = characters.findIndex(
+          (character) => character.name === targetName,
+        );
 
-        const character = characters[index];
-        const category = character.category || "";
+        if (sourceIndex < 0 || targetIndex < 0) return;
 
-        const sameCategoryIndexes = characters
-          .map((item, itemIndex) => ({ item, itemIndex }))
-          .filter(({ item }) => (item.category || "") === category)
-          .map(({ itemIndex }) => itemIndex);
+        const [source] = characters.splice(sourceIndex, 1);
 
-        const position = sameCategoryIndexes.indexOf(index);
-        const targetPosition = position + direction;
+        let insertIndex = characters.findIndex(
+          (character) => character.name === targetName,
+        );
 
-        if (
-          targetPosition < 0 ||
-          targetPosition >= sameCategoryIndexes.length
-        ) {
-          return;
-        }
+        if (!before) insertIndex += 1;
 
-        const targetIndex = sameCategoryIndexes[targetPosition];
-
-        characters.splice(index, 1);
-
-        const adjustedTargetIndex =
-          targetIndex > index ? targetIndex - 1 : targetIndex;
-        characters.splice(adjustedTargetIndex, 0, character);
+        characters.splice(insertIndex, 0, source);
 
         saveCharacters();
+        applySearch(false);
+
+        suppressRosterClick = true;
         render();
+
+        setTimeout(() => {
+          suppressRosterClick = false;
+        }, 0);
       }
 
       function setupRosterReordering() {
@@ -3970,14 +3991,14 @@
 
         document.querySelectorAll(".roster-slot").forEach((slot) => {
           slot.addEventListener("dragover", (event) => {
-            const gap = showRosterDropGap(slot, event.clientX);
+            const gap = showRosterDropGap(slot, event.clientX, event.clientY);
             if (!gap) return;
             event.preventDefault();
             event.dataTransfer.dropEffect = "move";
           });
           slot.addEventListener("drop", (event) => {
             event.preventDefault();
-            const gap = showRosterDropGap(slot, event.clientX);
+            const gap = showRosterDropGap(slot, event.clientX, event.clientY);
             if (gap)
               reorderCharacter(
                 draggedCharacterName,
@@ -4025,7 +4046,11 @@
             const target = document
               .elementFromPoint(event.clientX, event.clientY)
               ?.closest(".roster-slot");
-            pendingGap = showRosterDropGap(target, event.clientX);
+            pendingGap = showRosterDropGap(
+              target,
+              event.clientX,
+              event.clientY,
+            );
             const edge = 70;
             if (event.clientY < edge) window.scrollBy(0, -22);
             if (event.clientY > window.innerHeight - edge)
@@ -4284,20 +4309,43 @@
       function exportSelectedCharacters() {
         const selected = selectedExportCharacters();
         if (!selected.length) return;
+
+        showPhotoOption({
+          title: "Export Photos?",
+          message:
+            "Choose whether this export should include character photos. Exports with photos can be much larger.",
+          withPhotosLabel: "Export with photos",
+          withoutPhotosLabel: "Export without photos",
+          onChoice: (includePhotos) => {
+            performExportSelectedCharacters(selected, includePhotos);
+          },
+        });
+      }
+
+      function performExportSelectedCharacters(selected, includePhotos) {
+        const exportCharacters = cloneCharactersForPhotoOption(
+          selected,
+          includePhotos,
+        );
+
         const payload = {
           version: 2,
           exportedAt: new Date().toISOString(),
-          characters: selected,
+          includesPhotos: includePhotos,
+          characters: exportCharacters,
         };
+
         const blob = new Blob([JSON.stringify(payload, null, 2)], {
           type: "application/json",
         });
+
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download =
-          selected.length === 1
-            ? `${selected[0].name.replace(/\s+/g, "-").toLowerCase()}.json`
-            : "character-codex-export.json";
+          exportCharacters.length === 1
+            ? `${exportCharacters[0].name.replace(/\s+/g, "-").toLowerCase()}${includePhotos ? "" : "-no-photos"}.json`
+            : `character-codex-export${includePhotos ? "" : "-no-photos"}.json`;
+
         document.body.appendChild(link);
         link.click();
         URL.revokeObjectURL(link.href);
@@ -4384,20 +4432,40 @@
       }
 
       function importSelectedCharacters() {
-        const selected = [
-          ...document.querySelectorAll(".import-character-check:checked"),
-        ]
+        const selected = selectedImportCharacters();
+        if (!selected.length) return;
+
+        showPhotoOption({
+          title: "Import Photos?",
+          message:
+            "Choose whether to keep photos from this import. Importing without photos can avoid local storage size problems.",
+          withPhotosLabel: "Import with photos",
+          withoutPhotosLabel: "Import without photos",
+          onChoice: (includePhotos) => {
+            performImportSelectedCharacters(selected, includePhotos);
+          },
+        });
+      }
+
+      function selectedImportCharacters() {
+        return [...document.querySelectorAll(".import-character-check:checked")]
           .map((input) => pendingImportCharacters[Number(input.value)])
           .filter(Boolean);
-        if (!selected.length) return;
+      }
+
+      function performImportSelectedCharacters(selected, includePhotos) {
+        selected = cloneCharactersForPhotoOption(selected, includePhotos).map(
+          normalizeCharacter,
+        );
 
         if (selected.length === 1) {
           const character = selected[0];
           const existing = findCharacterByName(character.name);
           const action = existing ? "updated" : "added";
+
           showDecision(
             "Verify Import",
-            `${character.name} will be ${action}.`,
+            `${character.name} will be ${action}${includePhotos ? " with photos" : " without photos"}.`,
             existing ? "Update" : "Add",
             () => {
               upsertCharacter(character);
@@ -4410,17 +4478,21 @@
         const occupiedNames = new Set(
           characters.map((character) => character.name.trim().toLowerCase()),
         );
+
         const additions = [];
+
         selected.forEach((character) => {
           const key = character.name.trim().toLowerCase();
           if (!key || occupiedNames.has(key)) return;
           occupiedNames.add(key);
           additions.push(character);
         });
+
         const skipped = selected.length - additions.length;
+
         const summary = [
           additions.length
-            ? `${additions.length} character${additions.length === 1 ? "" : "s"} will be added.`
+            ? `${additions.length} character${additions.length === 1 ? "" : "s"} will be added ${includePhotos ? "with photos" : "without photos"}.`
             : "No new characters will be added.",
           skipped
             ? `${skipped} same-name character${skipped === 1 ? "" : "s"} will be skipped; batch imports never update existing characters.`
@@ -4428,6 +4500,7 @@
         ]
           .filter(Boolean)
           .join(" ");
+
         showDecision(
           "Verify Batch Import",
           summary,
@@ -4465,10 +4538,6 @@
           "Import Successful",
           `<p>${importedCount} character${importedCount === 1 ? "" : "s"} imported successfully and saved to local storage.</p>`,
         );
-      }
-
-      function importCharacters() {
-        prepareImportCharacters();
       }
 
       function blankCharacter() {
@@ -5352,7 +5421,6 @@
         wrap.addEventListener("pointerup", endPointer);
         wrap.addEventListener("pointercancel", endPointer);
         wrap.addEventListener("lostpointercapture", endPointer);
-
         wrap.addEventListener(
           "wheel",
           (e) => {
@@ -5491,6 +5559,19 @@
       $("settingsBtn").onclick = settingsModal;
       $("closeModal").onclick = closeModal;
       $("decisionCancel").onclick = closeDecision;
+      $("photoOptionWithPhotos").addEventListener("click", () => {
+        const action = photoOptionAction;
+        closePhotoOption();
+        if (action) action(true);
+      });
+
+      $("photoOptionWithoutPhotos").addEventListener("click", () => {
+        const action = photoOptionAction;
+        closePhotoOption();
+        if (action) action(false);
+      });
+
+      $("photoOptionCancel").addEventListener("click", closePhotoOption);
       $("decisionConfirm").onclick = () => {
         const action = decisionAction;
         closeDecision();
