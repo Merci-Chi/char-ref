@@ -909,8 +909,7 @@
       .roster-card-copy {
         min-height: 0;
         display: grid;
-        grid-template-rows: auto 1fr;
-        gap: 5px;
+        align-items: center;
         padding: 12px;
         overflow: hidden;
       }
@@ -922,16 +921,6 @@
         white-space: nowrap;
         font-family: Outfit, Inter, sans-serif;
         font-size: 1.05rem;
-      }
-
-      .roster-card-copy small {
-        min-width: 0;
-        overflow: hidden;
-        color: var(--muted);
-        line-height: 1.35;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
       }
 
       .location-grid {
@@ -3691,7 +3680,6 @@
             </span>
             <span class="roster-card-copy">
               <b>${htmlEscape(character.name)}</b>
-              <small>${htmlEscape(shortText(character) || character.species || "-")}</small>
             </span>
           </button>`;
       }
