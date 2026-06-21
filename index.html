@@ -4207,12 +4207,31 @@
       function prepareImportCharacters() {
         const file = $("importFile")?.files?.[0];
         if (!file) return;
+
         const reader = new FileReader();
+
         reader.onload = () => {
           try {
             const parsed = JSON.parse(reader.result);
-            const incoming = Array.isArray(parsed) ? parsed : parsed.characters;
-            if (!Array.isArray(incoming) || !incoming.length) return;
+
+            let incoming = [];
+
+            if (Array.isArray(parsed)) {
+              incoming = parsed;
+            } else if (Array.isArray(parsed.characters)) {
+              incoming = parsed.characters;
+            } else if (parsed && typeof parsed === "object" && parsed.name) {
+              incoming = [parsed];
+            }
+
+            if (!incoming.length) {
+              openModal(
+                "Import Failed",
+                "<p>That JSON is valid, but it does not contain any characters. Import either an array, an object with a <code>characters</code> array, or a single character object with a <code>name</code>.</p>",
+              );
+              return;
+            }
+
             pendingImportCharacters = incoming.map(normalizeCharacter);
             renderImportPreview();
           } catch {
@@ -4222,6 +4241,7 @@
             );
           }
         };
+
         reader.readAsText(file);
       }
 
