@@ -4306,6 +4306,38 @@
         return indexes.map((index) => characters[index]).filter(Boolean);
       }
 
+      function cloneCharactersForPhotoOption(list, includePhotos) {
+        return list.map((character) => {
+          const clone = structuredClone(character);
+          if (!includePhotos) {
+            clone.photos = [];
+          }
+          return clone;
+        });
+      }
+
+      function showPhotoOption({
+        title,
+        message,
+        withPhotosLabel,
+        withoutPhotosLabel,
+        onChoice,
+      }) {
+        photoOptionAction = onChoice;
+
+        $("photoOptionTitle").textContent = title;
+        $("photoOptionMessage").textContent = message;
+        $("photoOptionWithPhotos").textContent = withPhotosLabel;
+        $("photoOptionWithoutPhotos").textContent = withoutPhotosLabel;
+
+        $("photoOptionDialog").classList.add("open");
+      }
+
+      function closePhotoOption() {
+        $("photoOptionDialog").classList.remove("open");
+        photoOptionAction = null;
+      }
+
       function exportSelectedCharacters() {
         const selected = selectedExportCharacters();
         if (!selected.length) return;
@@ -5643,7 +5675,7 @@
       window.settingsModal = settingsModal;
       window.setExportChecks = setExportChecks;
       window.exportSelectedCharacters = exportSelectedCharacters;
-      window.importCharacters = importCharacters;
+      window.importCharacters = prepareImportCharacters;
       window.prepareImportCharacters = prepareImportCharacters;
       window.setImportChecks = setImportChecks;
       window.importSelectedCharacters = importSelectedCharacters;
