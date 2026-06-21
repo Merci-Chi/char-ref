@@ -4335,7 +4335,7 @@
             existing ? "Update" : "Add",
             () => {
               upsertCharacter(character);
-              finishCharacterImport();
+              finishCharacterImport(1);
             },
           );
           return;
@@ -4369,19 +4369,26 @@
           () => {
             if (!additions.length) return;
             characters.push(...additions);
-            finishCharacterImport();
+            finishCharacterImport(additions.length);
           },
         );
       }
 
-      function finishCharacterImport() {
+      function finishCharacterImport(importedCount = 1) {
         saveCharacters();
+
         filteredIndexes = characters.map((_, i) => i);
         currentIndex = 0;
         activeFilters = new Set(["All"]);
         viewMode = "roster";
+
         closeModal();
         render();
+
+        openModal(
+          "Import Successful",
+          `<p>${importedCount} character${importedCount === 1 ? "" : "s"} imported successfully and saved to local storage.</p>`,
+        );
       }
 
       function importCharacters() {
