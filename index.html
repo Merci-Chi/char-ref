@@ -37,6 +37,7 @@
       body {
         margin: 0;
         min-height: 100vh;
+        overflow: hidden;
         background: var(--bg);
         color: var(--text);
         font-family:
@@ -95,6 +96,7 @@
 
       .app {
         width: min(1500px, 100%);
+        height: 100vh;
         margin: 0 auto;
         padding: 18px;
       }
@@ -239,12 +241,18 @@
         display: grid;
         grid-template-columns: minmax(360px, 33vw) minmax(0, 1fr);
         gap: 16px;
-        min-height: calc(100vh - 36px);
-        align-items: start;
+        height: calc(100vh - 36px);
+        min-height: 0;
+        align-items: stretch;
       }
 
       .workspace {
         min-width: 0;
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        padding-right: 4px;
       }
 
       .hero,
@@ -256,17 +264,21 @@
       }
 
       .hero {
-        position: sticky;
-        top: 18px;
+        position: relative;
+        top: auto;
         width: 100%;
         max-width: none;
         justify-self: stretch;
-        height: calc(100vh - 36px);
+        height: 100%;
+        max-width: 848px;
         min-height: 0;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(0, 1fr) auto;
-        overflow: hidden;
+        grid-template-rows: auto auto;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
         border-radius: var(--radius);
       }
 
@@ -274,6 +286,9 @@
         position: relative;
         width: 100%;
         max-width: 100%;
+        aspect-ratio: 848 / 1264;
+        max-height: 1264px;
+        flex: 0 0 auto;
         min-height: 0;
         overflow: hidden;
         display: grid;
@@ -281,7 +296,7 @@
         touch-action: none;
         user-select: none;
         cursor: grab;
-        background: color-mix(in srgb, var(--accent-3) 55%, #080a0d);
+        background: #ffffff;
       }
 
       .photo-wrap.zoomed {
@@ -289,27 +304,11 @@
       }
 
       .photo-wrap::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.035),
-          transparent 42%
-        );
-        pointer-events: none;
-        z-index: 1;
+        content: none;
       }
 
       .photo-wrap::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.78)),
-          linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 45%);
-        pointer-events: none;
-        z-index: 2;
+        content: none;
       }
 
       .image-stage {
@@ -323,7 +322,7 @@
       .photo-wrap img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: none;
         transform-origin: center center;
         will-change: transform;
@@ -605,6 +604,125 @@
         );
         border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
         font-weight: 800;
+      }
+
+      .palette-display {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .palette-display-group {
+        display: grid;
+        align-content: start;
+        gap: 6px;
+      }
+
+      .palette-display-group h4 {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.78rem;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .palette-row {
+        display: grid;
+        grid-template-columns: minmax(56px, 78px) 1fr;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .palette-row-label {
+        color: var(--text);
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+
+      .palette-squares {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .palette-square {
+        width: 24px;
+        height: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+      }
+
+      .palette-square.empty {
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        box-shadow: none;
+      }
+
+      .palette-editor {
+        grid-column: 1 / -1;
+        display: grid;
+        gap: 14px;
+        padding-top: 4px;
+      }
+
+      .palette-editor-group {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .palette-editor-group h4 {
+        margin: 0;
+        color: var(--accent);
+      }
+
+      .palette-editor-row {
+        display: grid;
+        grid-template-columns: minmax(90px, 120px) repeat(3, minmax(112px, 1fr));
+        gap: 8px;
+        align-items: center;
+      }
+
+      .palette-color-entry {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 38px;
+        gap: 5px;
+      }
+
+      .palette-color-entry input[type="text"] {
+        width: 100%;
+        min-height: 40px;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        padding: 9px 10px;
+        outline: none;
+        text-transform: uppercase;
+      }
+
+      .palette-color-entry input[type="color"] {
+        width: 38px;
+        height: 40px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.07);
+        cursor: pointer;
+      }
+
+      .palette-color-entry.invalid input[type="text"] {
+        border-color: var(--danger);
       }
 
       .bars {
@@ -1197,11 +1315,11 @@
 
       .photo-preview {
         width: min(180px, 100%);
-        aspect-ratio: 9 / 16;
+        aspect-ratio: 848 / 1264;
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.05);
-        object-fit: cover;
+        background: #ffffff;
+        object-fit: contain;
         display: none;
       }
 
@@ -1266,6 +1384,20 @@
         border-radius: var(--radius);
         background: rgba(255, 255, 255, 0.04);
         padding: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.16s ease,
+          background 0.16s ease;
+      }
+
+      .settings-row:hover,
+      .settings-row:has(input:checked) {
+        border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
+        background: color-mix(
+          in srgb,
+          var(--accent) 10%,
+          rgba(255, 255, 255, 0.04)
+        );
       }
 
       .settings-row label {
@@ -1275,8 +1407,59 @@
         font-weight: 800;
       }
 
-      .settings-row input {
-        accent-color: var(--accent);
+      .selection-control {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 30px;
+      }
+
+      .selection-control input[type="checkbox"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .selection-circle {
+        width: 25px;
+        height: 25px;
+        flex: 0 0 25px;
+        display: grid;
+        place-items: center;
+        border: 2px solid color-mix(in srgb, var(--muted) 58%, transparent);
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.2);
+        color: #071016;
+        transition:
+          border-color 0.16s ease,
+          background 0.16s ease,
+          box-shadow 0.16s ease;
+      }
+
+      .selection-circle::after {
+        content: "✓";
+        font-size: 0.88rem;
+        font-weight: 900;
+        line-height: 1;
+        opacity: 0;
+        transform: scale(0.6);
+        transition:
+          opacity 0.14s ease,
+          transform 0.14s ease;
+      }
+
+      .selection-control input:checked + .selection-circle {
+        border-color: var(--accent);
+        background: var(--accent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 46%, transparent);
+      }
+
+      .selection-control input:checked + .selection-circle::after {
+        opacity: 1;
+        transform: scale(1);
       }
 
       .relation-editor {
@@ -1289,6 +1472,23 @@
         border-radius: var(--radius);
         background: rgba(255, 255, 255, 0.04);
         padding: 12px;
+        cursor: pointer;
+        transition:
+          border-color 0.16s ease,
+          background 0.16s ease;
+      }
+
+      .relation-edit-card:hover,
+      .relation-edit-card.active {
+        border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
+      }
+
+      .relation-edit-card.active {
+        background: color-mix(
+          in srgb,
+          var(--accent) 8%,
+          rgba(255, 255, 255, 0.04)
+        );
       }
 
       .relation-edit-head {
@@ -1306,17 +1506,12 @@
         color: var(--muted);
       }
 
-      .toggle input {
-        width: 44px;
-        height: 24px;
-        accent-color: var(--accent);
-      }
-
       .relation-edit-fields {
         display: none;
         grid-template-columns: 1fr;
         gap: 8px;
         margin-top: 10px;
+        cursor: default;
       }
 
       .relation-edit-card.active .relation-edit-fields {
@@ -1497,6 +1692,14 @@
       }
 
       @media (max-width: 980px) {
+        body {
+          overflow-y: auto;
+        }
+
+        .app {
+          height: auto;
+        }
+
         .topbar,
         .search-row,
         .layout {
@@ -1511,8 +1714,16 @@
         .hero {
           position: relative;
           top: auto;
-          height: 78vh;
-          min-height: 560px;
+          height: calc(100vh - 24px);
+          min-height: 0;
+        }
+
+        .layout {
+          height: auto;
+        }
+
+        .workspace {
+          height: calc(100vh - 24px);
         }
       }
 
@@ -1527,8 +1738,8 @@
         }
 
         .hero {
-          height: 72vh;
-          min-height: 500px;
+          height: calc(100vh - 24px);
+          min-height: 0;
         }
 
         .photo-overlay {
@@ -1555,6 +1766,14 @@
 
         .relationship-card {
           grid-template-columns: 48px 1fr;
+        }
+
+        .palette-editor-row {
+          grid-template-columns: 1fr;
+        }
+
+        .palette-color-entry {
+          grid-template-columns: minmax(0, 1fr) 44px;
         }
 
         .relationship-graph.large {
@@ -1871,9 +2090,26 @@
       const modal = $("modal");
       const decisionDialog = $("decisionDialog");
       const characterStorageKey = "characterCodexCharacters";
+      const selectedCharacterStorageKey = "characterCodexSelectedCharacter";
       const locationStorageKey = "characterCodexLocations";
       const relationPositionStorageKey = "characterCodexRelationPositionsV2";
       const categoryOptions = ["", "One", "None", "NPC", "Other"];
+      const physicalPaletteFields = [
+        ["eyeColor", "Eyes"],
+        ["hairColor", "Hair"],
+        ["skinColor", "Skin"],
+        ["markings", "Markings"],
+        ["features", "Features"],
+      ];
+      const outfitPaletteFields = [
+        ["shirt", "Shirt"],
+        ["pants", "Pants"],
+        ["shoes", "Shoes"],
+        ["hat", "Hat"],
+        ["outerwear", "Outerwear"],
+        ["accent", "Accent"],
+        ["accessories", "Accessories"],
+      ];
       const themePresets = [
         {
           name: "Red",
@@ -1939,7 +2175,7 @@
 
       let characters = loadCharacters();
       let locations = loadLocations();
-      let currentIndex = 0;
+      let currentIndex = loadSelectedCharacterIndex();
       let currentPhoto = 0;
       let currentTab = "Overview";
       let activeFilters = new Set(["All"]);
@@ -1961,6 +2197,7 @@
       const mapPointers = new Map();
       let lastMapPinchDistance = 0;
       let lastMapPinchMidpoint = null;
+      let mapGestureStartZoom = 1;
 
       function loadCharacters() {
         try {
@@ -1978,6 +2215,25 @@
 
       function saveCharacters() {
         localStorage.setItem(characterStorageKey, JSON.stringify(characters));
+      }
+
+      function loadSelectedCharacterIndex() {
+        try {
+          const selectedName = localStorage.getItem(
+            selectedCharacterStorageKey,
+          );
+          const index = characters.findIndex(
+            (character) => character.name === selectedName,
+          );
+          return index >= 0 ? index : 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      function saveSelectedCharacter(character) {
+        if (!character?.name) return;
+        localStorage.setItem(selectedCharacterStorageKey, character.name);
       }
 
       function loadLocations() {
@@ -2040,6 +2296,54 @@
         );
       }
 
+      function blankColorPalette() {
+        return {
+          physical: Object.fromEntries(
+            physicalPaletteFields.map(([key]) => [key, []]),
+          ),
+          outfit: Object.fromEntries(
+            outfitPaletteFields.map(([key]) => [key, []]),
+          ),
+        };
+      }
+
+      function normalizeHexColor(value) {
+        const raw = String(value || "").trim();
+        if (/^#[0-9a-f]{6}$/i.test(raw)) return raw.toUpperCase();
+        if (/^#[0-9a-f]{3}$/i.test(raw)) {
+          return `#${raw
+            .slice(1)
+            .split("")
+            .map((part) => part + part)
+            .join("")}`.toUpperCase();
+        }
+        return "";
+      }
+
+      function normalizePaletteList(value) {
+        const values = Array.isArray(value)
+          ? value
+          : typeof value === "string"
+            ? value.split(/[ ,]+/)
+            : [];
+        return [
+          ...new Set(values.map(normalizeHexColor).filter(Boolean)),
+        ].slice(0, 3);
+      }
+
+      function normalizeColorPalette(value = {}) {
+        const normalized = blankColorPalette();
+        const physical = value.physical || {};
+        const outfit = value.outfit || {};
+        physicalPaletteFields.forEach(([key]) => {
+          normalized.physical[key] = normalizePaletteList(physical[key]);
+        });
+        outfitPaletteFields.forEach(([key]) => {
+          normalized.outfit[key] = normalizePaletteList(outfit[key]);
+        });
+        return normalized;
+      }
+
       function normalizeCharacter(character) {
         const normalized = { ...blankCharacter(), ...character };
         normalized.outfit = {
@@ -2050,6 +2354,9 @@
           ...blankCharacter().stats,
           ...(character.stats || {}),
         };
+        normalized.colorPalette = normalizeColorPalette(
+          character.colorPalette || character.palette || {},
+        );
         normalized.photos = (character.photos || [])
           .filter(Boolean)
           .slice(0, 1);
@@ -2096,7 +2403,7 @@
       function themeByName(name) {
         return {
           ...(themePresets.find((theme) => theme.name === name) ||
-            themePresets[4]),
+            themePresets.find((theme) => theme.name === "White")),
         };
       }
 
@@ -2106,7 +2413,7 @@
             "Kael Nightshade": "Light Blue",
             "Mira Solwyn": "Yellow",
             "Riven Ashlock": "Orange",
-          }[name] || "Light Blue"
+          }[name] || "White"
         );
       }
 
@@ -2181,14 +2488,14 @@
       }
 
       function nearestThemeName(theme = {}) {
-        if (!theme?.accent) return "Light Blue";
+        if (!theme?.accent) return "White";
         const exact = themePresets.find(
           (preset) =>
             preset.accent.toLowerCase() === String(theme.accent).toLowerCase(),
         );
         if (exact) return exact.name;
         const source = hexToRgb(theme.accent);
-        if (!source) return "Light Blue";
+        if (!source) return "White";
         return (
           themePresets
             .map((preset) => {
@@ -2204,7 +2511,7 @@
                   : Infinity,
               };
             })
-            .sort((a, b) => a.distance - b.distance)[0]?.name || "Light Blue"
+            .sort((a, b) => a.distance - b.distance)[0]?.name || "White"
         );
       }
 
@@ -2511,6 +2818,43 @@
         return `<details ${open ? "open" : ""}><summary>${title}</summary><div class="details-body">${hasValue(body) ? body : "-"}</div></details>`;
       }
 
+      function paletteSquares(colors) {
+        const normalized = normalizePaletteList(colors);
+        if (!normalized.length)
+          return `<span class="palette-square empty" title="No color">-</span>`;
+        return normalized
+          .map(
+            (color) =>
+              `<span class="palette-square" style="background:${color}" title="${color}" aria-label="${color}"></span>`,
+          )
+          .join("");
+      }
+
+      function paletteDisplayGroup(title, fields, values) {
+        return `
+          <div class="palette-display-group">
+            <h4>${title}</h4>
+            ${fields
+              .map(
+                ([key, label]) => `
+                  <div class="palette-row">
+                    <span class="palette-row-label">${label}</span>
+                    <div class="palette-squares">${paletteSquares(values?.[key])}</div>
+                  </div>`,
+              )
+              .join("")}
+          </div>`;
+      }
+
+      function colorPaletteDisplay(character) {
+        const palette = normalizeColorPalette(character.colorPalette);
+        return `
+          <div class="palette-display">
+            ${paletteDisplayGroup("Physical Palette", physicalPaletteFields, palette.physical)}
+            ${paletteDisplayGroup("Outfit Palette", outfitPaletteFields, palette.outfit)}
+          </div>`;
+      }
+
       function overviewPanel(c) {
         const identity = fieldGrid([
           ["Name", c.name],
@@ -2528,7 +2872,7 @@
             ${sectionBlock("Short Description", hasValue(shortText(c)) ? `<p>${htmlEscape(shortText(c))}</p>` : "", true)}
             ${sectionBlock("Description", hasValue(c.description) ? `<p>${htmlEscape(c.description)}</p>` : "", true)}
             ${sectionBlock("Identity", identity)}
-            ${sectionBlock("At a Glance", `<div class="tag-cloud">${tags.length ? tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("") : `<span class="tag">-</span>`}</div>`)}
+            ${sectionBlock("At a Glance", `<div class="tag-cloud">${tags.length ? tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("") : `<span class="tag">-</span>`}</div>${colorPaletteDisplay(c)}`)}
           </div>
         `;
       }
@@ -2567,6 +2911,7 @@
         ].map((key) => [key, hasValue(stats[key]) ? stats[key] : "-"]);
         const arsenal = fieldGrid([
           ["Weapons", c.weapons],
+          ["Powers", c.powers],
           ["Strengths", c.strengths],
           ["Weaknesses", c.weaknesses],
         ]);
@@ -2604,8 +2949,7 @@
         return `
           <div class="section-grid">
             ${sectionBlock("Personality Tags", `<div class="tag-cloud">${tags.length ? tags.map((tag) => `<span class="tag">${htmlEscape(tag)}</span>`).join("") : `<span class="tag">-</span>`}</div>`, true)}
-            ${sectionBlock("Voice", hasValue(c.speechStyle) ? `<p>${htmlEscape(c.speechStyle)}</p>` : "")}
-            ${sectionBlock("Inner Life", innerLife)}
+            ${sectionBlock("Inner Life", innerLife, true)}
           </div>
         `;
       }
@@ -2635,7 +2979,7 @@
               <button class="btn" type="button" onclick="resetRelationMapZoom()">Reset</button>
               <button class="btn icon" type="button" onclick="zoomRelationMap(1)" title="Zoom in">+</button>
             </div>
-            <div class="map-stage" id="relationMap">
+            <div class="map-stage" id="relationMap" tabindex="0" aria-label="Relations map">
               <div class="map-world" id="relationMapWorld">
                 <div class="map-canvas" id="relationMapCanvas">
                   <svg class="map-lines" id="relationLines"></svg>
@@ -2750,11 +3094,11 @@
       function getNodePosition(name) {
         if (relationPositions[name]) return relationPositions[name];
         const index = characters.findIndex((c) => c.name === name);
-        const count = Math.max(characters.length, 1);
-        const angle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
+        const angle = -Math.PI / 2 + index * 2.3999632297;
+        const radius = Math.min(12, 4 + Math.sqrt(index + 1) * 2.2);
         return {
-          x: 50 + Math.cos(angle) * 30,
-          y: 50 + Math.sin(angle) * 30,
+          x: 50 + Math.cos(angle) * radius,
+          y: 50 + Math.sin(angle) * radius,
         };
       }
 
@@ -2764,6 +3108,9 @@
         const canvas = $("relationMapCanvas");
         const tooltip = $("relationLineTooltip");
         if (!map || !svg) return;
+        mapPointers.clear();
+        lastMapPinchDistance = 0;
+        lastMapPinchMidpoint = null;
         applyRelationMapZoom();
 
         function drawLines() {
@@ -3138,6 +3485,7 @@
 
         currentIndex = Math.min(currentIndex, filteredIndexes.length - 1);
         const c = currentCharacter();
+        saveSelectedCharacter(c);
         currentPhoto = Math.min(
           currentPhoto,
           Math.max((c.photos || []).length - 1, 0),
@@ -3786,10 +4134,11 @@
               ${characters
                 .map(
                   (character, index) => `
-                    <div class="settings-row">
-                      <label>
+                    <div class="settings-row" onclick="toggleSelectionRow(event, this)">
+                      <label class="selection-control">
                         <input type="checkbox" class="export-character-check" value="${index}" />
-                        ${htmlEscape(character.name)}
+                        <span class="selection-circle" aria-hidden="true"></span>
+                        <span>${htmlEscape(character.name)}</span>
                       </label>
                       <small>${htmlEscape(character.category || "All")}</small>
                     </div>
@@ -3836,7 +4185,7 @@
         const selected = selectedExportCharacters();
         if (!selected.length) return;
         const payload = {
-          version: 1,
+          version: 2,
           exportedAt: new Date().toISOString(),
           characters: selected,
         };
@@ -3885,10 +4234,11 @@
               .map((character, index) => {
                 const existing = findCharacterByName(character.name);
                 return `
-                  <div class="settings-row">
-                    <label>
+                  <div class="settings-row" onclick="toggleSelectionRow(event, this)">
+                    <label class="selection-control">
                       <input type="checkbox" class="import-character-check" value="${index}" />
-                      ${htmlEscape(character.name)}
+                      <span class="selection-circle" aria-hidden="true"></span>
+                      <span>${htmlEscape(character.name)}</span>
                     </label>
                     <small>${existing ? "Update" : "Add"}</small>
                   </div>`;
@@ -3970,11 +4320,11 @@
           markings: "",
           features: "",
           theme: {
-            accent: "#7ecbff",
-            accent2: "#d9e5ff",
-            accent3: "#12364b",
+            accent: "#f4f1e8",
+            accent2: "#ffffff",
+            accent3: "#383936",
           },
-          themeName: "Light Blue",
+          themeName: "White",
           outfit: {
             shirt: "",
             pants: "",
@@ -3982,8 +4332,10 @@
             hat: "",
             outerwear: "",
           },
+          colorPalette: blankColorPalette(),
           accessories: "",
           weapons: "",
+          powers: "",
           shortDescription: "",
           description: "",
           personality: "",
@@ -4093,6 +4445,121 @@
         `;
       }
 
+      function paletteColorEntry(group, key, index, color) {
+        const normalized = normalizeHexColor(color);
+        const textId = `palette-${group}-${key}-${index}`;
+        const pickerId = `${textId}-picker`;
+        return `
+          <div class="palette-color-entry">
+            <input
+              id="${textId}"
+              class="palette-hex-input"
+              type="text"
+              inputmode="text"
+              maxlength="7"
+              placeholder="#000000"
+              value="${normalized}"
+              data-picker-id="${pickerId}"
+              aria-label="${key} color ${index + 1} hex"
+              oninput="syncPaletteText(this)"
+            />
+            <input
+              id="${pickerId}"
+              type="color"
+              value="${normalized || "#000000"}"
+              data-text-id="${textId}"
+              aria-label="Choose ${key} color ${index + 1}"
+              title="Open computer color picker"
+              oninput="syncPalettePicker(this)"
+            />
+          </div>`;
+      }
+
+      function paletteEditorGroup(title, group, fields, values) {
+        return `
+          <div class="palette-editor-group">
+            <h4>${title}</h4>
+            ${fields
+              .map(
+                ([key, label]) => `
+                  <div class="palette-editor-row">
+                    <span class="palette-row-label">${label}</span>
+                    ${[0, 1, 2]
+                      .map((index) =>
+                        paletteColorEntry(
+                          group,
+                          key,
+                          index,
+                          values?.[key]?.[index] || "",
+                        ),
+                      )
+                      .join("")}
+                  </div>`,
+              )
+              .join("")}
+          </div>`;
+      }
+
+      function colorPaletteEditor(source) {
+        const palette = normalizeColorPalette(source.colorPalette);
+        return `
+          <div class="palette-editor">
+            ${paletteEditorGroup("Physical Color Palette", "physical", physicalPaletteFields, palette.physical)}
+            ${paletteEditorGroup("Outfit Color Palette", "outfit", outfitPaletteFields, palette.outfit)}
+          </div>`;
+      }
+
+      function syncPaletteText(input) {
+        const normalized = normalizeHexColor(input.value);
+        input
+          .closest(".palette-color-entry")
+          ?.classList.toggle(
+            "invalid",
+            Boolean(input.value.trim()) && !normalized,
+          );
+        const picker = $(input.dataset.pickerId);
+        if (picker && normalized) picker.value = normalized;
+      }
+
+      function syncPalettePicker(picker) {
+        const input = $(picker.dataset.textId);
+        if (!input) return;
+        input.value = picker.value.toUpperCase();
+        input.closest(".palette-color-entry")?.classList.remove("invalid");
+      }
+
+      function collectColorPaletteFromEditor() {
+        const palette = blankColorPalette();
+        let firstInvalid = null;
+        [
+          ["physical", physicalPaletteFields],
+          ["outfit", outfitPaletteFields],
+        ].forEach(([group, fields]) => {
+          fields.forEach(([key]) => {
+            const colors = [0, 1, 2]
+              .map((index) => {
+                const input = $(`palette-${group}-${key}-${index}`);
+                const raw = input?.value.trim() || "";
+                const normalized = normalizeHexColor(raw);
+                const invalid = Boolean(raw) && !normalized;
+                input
+                  ?.closest(".palette-color-entry")
+                  ?.classList.toggle("invalid", invalid);
+                if (invalid && !firstInvalid) firstInvalid = input;
+                return normalized;
+              })
+              .filter(Boolean);
+            palette[group][key] = [...new Set(colors)].slice(0, 3);
+          });
+        });
+        if (firstInvalid) {
+          setEditorTab("Appearance");
+          firstInvalid.focus();
+          return null;
+        }
+        return palette;
+      }
+
       function editorTabs() {
         return `
           <div class="editor-tabs">
@@ -4140,12 +4607,13 @@
                   relation?.kind || inferRelationKind(relation?.type);
                 const relationKey = `relation-${relationIndex}`;
                 return `
-                  <div class="relation-edit-card ${active ? "active" : ""}" data-relation-target="${htmlEscape(other.name)}">
+                  <div class="relation-edit-card ${active ? "active" : ""}" data-relation-target="${htmlEscape(other.name)}" onclick="toggleRelationCard(event, this)">
                     <div class="relation-edit-head">
                       <b>${htmlEscape(other.name)}</b>
-                      <label class="toggle">
+                      <label class="toggle selection-control">
                         <input type="checkbox" class="relation-toggle" ${active ? "checked" : ""} onchange="toggleRelationEditor(this)" />
-                        Relation
+                        <span class="selection-circle" aria-hidden="true"></span>
+                        <span>Relation</span>
                       </label>
                     </div>
                     <div class="relation-edit-fields">
@@ -4234,6 +4702,7 @@
                 ${formInput("Hat", "charHat", source.outfit?.hat)}
                 ${formInput("Outerwear", "charOuterwear", source.outfit?.outerwear, true)}
                 ${formInput("Accessories", "charAccessories", source.accessories, true)}
+                ${colorPaletteEditor(source)}
               `,
             )}
             ${editorPanel(
@@ -4246,6 +4715,7 @@
                 ${statSelect("Resolve", "statResolve", source.stats?.resolve)}
                 ${formInput("Fighting Style", "charFightingStyle", source.fightingStyle, true, true, "text", "Fast, defensive, reckless, tactical...")}
                 ${formInput("Weapons", "charWeapons", source.weapons, true)}
+                ${formInput("Powers", "charPowers", source.powers, true)}
                 ${formInput("Strengths", "charStrengths", source.strengths, true)}
                 ${formInput("Weaknesses", "charWeaknesses", source.weaknesses, true)}
               `,
@@ -4254,7 +4724,6 @@
               "Personality",
               `
                 ${formInput("Personality Tags", "charPersonality", source.personality, true, false, "text", "Red, Blue, Orange, Yellow")}
-                ${formInput("Speech Style", "charSpeechStyle", source.speechStyle, true, true, "text", "Short, formal, sarcastic, soft-spoken...")}
                 ${formInput("Likes", "charLikes", source.likes)}
                 ${formInput("Dislikes", "charDislikes", source.dislikes)}
                 ${formInput("Fears", "charFears", source.fears)}
@@ -4363,6 +4832,27 @@
           ?.classList.toggle("active", input.checked);
       }
 
+      function toggleRelationCard(event, card) {
+        if (
+          event.target.closest(
+            "input, textarea, label, button, .relation-edit-fields",
+          )
+        )
+          return;
+        const input = card.querySelector(".relation-toggle");
+        if (!input) return;
+        input.checked = !input.checked;
+        toggleRelationEditor(input);
+      }
+
+      function toggleSelectionRow(event, row) {
+        if (event.target.closest("input, label, button, a")) return;
+        const input = row.querySelector('input[type="checkbox"]');
+        if (!input) return;
+        input.checked = !input.checked;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
       function setEditorTab(tab) {
         document.querySelectorAll(".editor-tabs .tab").forEach((button) => {
           button.classList.toggle("active", button.textContent.trim() === tab);
@@ -4409,6 +4899,8 @@
 
       function saveCharacterFromForm(mode, oldName) {
         if (!validateCharacterForm()) return;
+        const colorPalette = collectColorPaletteFromEditor();
+        if (!colorPalette) return;
         const name = value("charName");
         const character = {
           name,
@@ -4428,8 +4920,8 @@
           skinColor: value("charSkinColor"),
           markings: value("charMarkings"),
           features: value("charFeatures"),
-          themeName: value("charThemeName") || "Light Blue",
-          theme: themeByName(value("charThemeName") || "Light Blue"),
+          themeName: value("charThemeName") || "White",
+          theme: themeByName(value("charThemeName") || "White"),
           outfit: {
             shirt: value("charShirt"),
             pants: value("charPants"),
@@ -4437,13 +4929,14 @@
             hat: value("charHat"),
             outerwear: value("charOuterwear"),
           },
+          colorPalette,
           accessories: value("charAccessories"),
           weapons: value("charWeapons"),
+          powers: value("charPowers"),
           shortDescription: value("charShortDescription"),
           description: value("charDescription"),
           personality: value("charPersonality"),
           fightingStyle: value("charFightingStyle"),
-          speechStyle: value("charSpeechStyle"),
           strengths: value("charStrengths"),
           weaknesses: value("charWeaknesses"),
           likes: value("charLikes"),
@@ -4464,7 +4957,24 @@
         const commit = () => {
           if (mode === "edit") {
             const index = characters.findIndex((c) => c.name === oldName);
+            const previous = index >= 0 ? characters[index] : null;
+            const nextRelationTargets = new Set(
+              (character.relations || []).map((relation) => relation.with),
+            );
+            const removedRelationTargets = (previous?.relations || [])
+              .map((relation) => relation.with)
+              .filter((targetName) => !nextRelationTargets.has(targetName));
             if (index >= 0) characters[index] = character;
+            removedRelationTargets.forEach((targetName) => {
+              const target = characters.find(
+                (candidate) => candidate.name === targetName,
+              );
+              if (!target) return;
+              target.relations = (target.relations || []).filter(
+                (relation) =>
+                  relation.with !== oldName && relation.with !== name,
+              );
+            });
             if (oldName !== name) {
               characters.forEach((c) => {
                 (c.relations || []).forEach((relation) => {
@@ -4656,17 +5166,47 @@
       }
 
       function disablePageZoom() {
-        ["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => {
-          document.addEventListener(
-            eventName,
-            (event) => event.preventDefault(),
-            { passive: false },
-          );
-        });
+        document.addEventListener(
+          "gesturestart",
+          (event) => {
+            event.preventDefault();
+            if (event.target.closest?.("#relationMap")) {
+              mapGestureStartZoom = relationMapZoom;
+            }
+          },
+          { passive: false },
+        );
+        document.addEventListener(
+          "gesturechange",
+          (event) => {
+            event.preventDefault();
+            if (event.target.closest?.("#relationMap")) {
+              setRelationMapZoom(
+                mapGestureStartZoom * event.scale,
+                event.clientX,
+                event.clientY,
+              );
+            }
+          },
+          { passive: false },
+        );
+        document.addEventListener(
+          "gestureend",
+          (event) => event.preventDefault(),
+          { passive: false },
+        );
         document.addEventListener(
           "wheel",
           (event) => {
-            if (event.ctrlKey || event.metaKey) event.preventDefault();
+            if (!event.ctrlKey && !event.metaKey) return;
+            event.preventDefault();
+            if (event.target.closest?.("#relationMap")) {
+              setRelationMapZoom(
+                relationMapZoom * (event.deltaY < 0 ? 1.12 : 0.88),
+                event.clientX,
+                event.clientY,
+              );
+            }
           },
           { passive: false, capture: true },
         );
@@ -4685,6 +5225,31 @@
         document.addEventListener(
           "keydown",
           (event) => {
+            const map = $("relationMap");
+            const isFormControl = event.target.matches?.(
+              "input, textarea, select",
+            );
+            if (map && !isFormControl) {
+              if (
+                event.key === "+" ||
+                event.key === "=" ||
+                event.code === "NumpadAdd"
+              ) {
+                event.preventDefault();
+                zoomRelationMap(1);
+                return;
+              }
+              if (event.key === "-" || event.code === "NumpadSubtract") {
+                event.preventDefault();
+                zoomRelationMap(-1);
+                return;
+              }
+              if (event.key === "0" || event.code === "Numpad0") {
+                event.preventDefault();
+                resetRelationMapZoom();
+                return;
+              }
+            }
             if (
               (event.ctrlKey || event.metaKey) &&
               ["+", "-", "=", "0"].includes(event.key)
@@ -4806,8 +5371,12 @@
       window.switchEditorCharacter = switchEditorCharacter;
       window.cancelCharacterEditor = cancelCharacterEditor;
       window.toggleRelationEditor = toggleRelationEditor;
+      window.toggleRelationCard = toggleRelationCard;
+      window.toggleSelectionRow = toggleSelectionRow;
       window.setEditorTab = setEditorTab;
       window.selectTheme = selectTheme;
+      window.syncPaletteText = syncPaletteText;
+      window.syncPalettePicker = syncPalettePicker;
       window.addPhotoFile = addPhotoFile;
       window.zoomRelationMap = zoomRelationMap;
       window.resetRelationMapZoom = resetRelationMapZoom;
